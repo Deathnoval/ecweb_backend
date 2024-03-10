@@ -30,6 +30,7 @@ const userSchema =new mongoose.Schema({
         default: false,
     },
     
+    
 });
 
 userSchema.virtual('id').get(function () {
