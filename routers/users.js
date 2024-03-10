@@ -2,6 +2,7 @@ const {User}=require('../models/user');
 const express=require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 router.get(`/`, async (req,res)=> {
     const userList = await User.find();
@@ -24,12 +25,23 @@ router.get('/:id', async (req, res)=> {
 
 router.post('/login', async (req, res)=> {
     const user=await User.findOne({email: req.body.email})
+    const secret = process.env.secret;
+
     if(!user){
-        return res.status(400).send({success:false,message:'Người dùng không tồn tại',color: 'text-red-500'});
+        return res.send({success:false,message:'Người dùng không tồn tại',color: 'text-red-500'});
     }
     if(user && bcrypt.compareSync(req.body.password, user.password))
     {
-        res.status(200).send({success:true, id: user._id,name: user.ho+' '+user.ten});
+        const token=jwt.sign(
+            {
+                userId: user.id,
+            },
+            secret,
+            {
+                expiresIn: '1d'
+            }
+        )
+        res.status(200).send({success:true, id: user._id,name: user.ho+' '+user.ten,token: token});
     }
     else{
         res.status(400).send({success:false, message:'Sai mật khẩu',color: 'text-red-500'});
