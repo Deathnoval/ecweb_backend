@@ -9,7 +9,6 @@ require('dotenv/config');
 app.use(cors());
 app.options('*',cors());
 
-const api = process.env.API_URL;
 //middleware
 
 app.use(bodyParser.json());
@@ -19,6 +18,7 @@ app.use(morgan('tiny'));
 const productRouter=require('./routers/products')
 const userRouter=require('./routers/users')
 
+const api = process.env.API_URL;
 
 
 //Routers
