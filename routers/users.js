@@ -4,7 +4,7 @@ const router = express.Router();
 const bcrypt = require('bcryptjs');
 
 router.get(`/`, async (req,res)=> {
-    const userList = await User.find().select('-password');
+    const userList = await User.find();
 
     if(!userList)
     {
@@ -21,6 +21,22 @@ router.get('/:id', async (req, res)=> {
     }
     res.status(200).send(user);
 })
+
+router.post('/login', async (req, res)=> {
+    const user=await User.findOne({email: req.body.email})
+    if(!user){
+        return res.status(400).send({message:'Người dùng không tồn tại',color: 'text-red-500'});
+    }
+    if(user && bcrypt.compareSync(req.body.password, user.password))
+    {
+        res.status(200).send({id: user._id,name: user.ho+' '+user.ten});
+    }
+    else{
+        res.status(400).send({message:'Sai mật khẩu',color: 'text-red-500'});
+    }
+})
+
+
 router.post('/register', async (req, res)=> {
     let user = new User({
         ho : req.body.ho,
@@ -36,9 +52,12 @@ router.post('/register', async (req, res)=> {
     console.log(checkEmail)
     if(checkEmail)
     {
-        res.send({message: 'Email already exists',color:'text-red-500'})
+        res.send({message: 'Email đã tồn tại',color:'text-red-500'})
     }
-    else {res.send({message: 'Đã gửi email xác nhận cho bạn',color:'text-green-500'});}
+    else {
+
+        res.send({message: 'Đã gửi email xác nhận cho bạn',color:'text-green-500'});
+    }
 });
 
 router.post(`/`, async (req,res)=> {
@@ -52,13 +71,13 @@ router.post(`/`, async (req,res)=> {
         isAdmin: req.body.isAdmin,
         
     })
-    //user = await user.save();
+    user = await user.save();
 
     if(!user)
     return res.status(400).send('the user cannot be found')
 
     //res.send({message: 'Đã gửi email xác nhận cho bạn'})
-    //res.send(user);
+    res.send(user);
 });
 
 module.exports = router;
