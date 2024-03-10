@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const productSchema =mongoose.Schema({
+const userSchema =mongoose.Schema({
     ho : String,
     ten: String,
     gender: String,
@@ -10,4 +10,4 @@ const productSchema =mongoose.Schema({
     
 })
 
-exports.Product=mongoose.model('Product',productSchema,"products")
+exports.User=mongoose.model('User',userSchema,"Users")

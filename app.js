@@ -5,21 +5,23 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 
 
-//middleware
-
 
 require('dotenv/config');
 const api = process.env.API_URL;
-
-
-const productRouter=require('./routers/products')
-
+//middleware
 
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
 
+
+const productRouter=require('./routers/products')
+const userRouter=require('./routers/users')
+
+
+
 //Routers
 app.use(`${api}/products`,productRouter)
+app.use(`${api}/users`,userRouter)
 
 
 mongoose.connect(process.env.CONNECTION_STRING,{
