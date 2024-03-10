@@ -36,9 +36,9 @@ router.post('/register', async (req, res)=> {
     console.log(checkEmail)
     if(checkEmail)
     {
-        res.send({message: 'Email already exists'})
+        res.send({message: 'Email already exists',color:'text-red-500'})
     }
-    else {res.send({message: 'Đã gửi email xác nhận cho bạn'});}
+    else {res.send({message: 'Đã gửi email xác nhận cho bạn',color:'text-green-500'});}
 });
 
 router.post(`/`, async (req,res)=> {
