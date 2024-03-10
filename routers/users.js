@@ -44,7 +44,7 @@ router.post('/login', async (req, res)=> {
         res.status(200).send({success:true, id: user._id,name: user.ho+' '+user.ten,token: token});
     }
     else{
-        res.status(400).send({success:false, message:'Sai mật khẩu',color: 'text-red-500'});
+        res.send({success:false, message:'Sai mật khẩu',color: 'text-red-500'});
     }
 })
 
