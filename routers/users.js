@@ -25,14 +25,14 @@ router.get('/:id', async (req, res)=> {
 router.post('/login', async (req, res)=> {
     const user=await User.findOne({email: req.body.email})
     if(!user){
-        return res.status(400).send({message:'Người dùng không tồn tại',color: 'text-red-500'});
+        return res.status(400).send({success:false,message:'Người dùng không tồn tại',color: 'text-red-500'});
     }
     if(user && bcrypt.compareSync(req.body.password, user.password))
     {
-        res.status(200).send({id: user._id,name: user.ho+' '+user.ten});
+        res.status(200).send({success:true, id: user._id,name: user.ho+' '+user.ten});
     }
     else{
-        res.status(400).send({message:'Sai mật khẩu',color: 'text-red-500'});
+        res.status(400).send({success:false, message:'Sai mật khẩu',color: 'text-red-500'});
     }
 })
 
