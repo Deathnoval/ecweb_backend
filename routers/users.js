@@ -17,7 +17,7 @@ router.post("/", async (req, res) => {
 				.status(409)
 				.send({ message: "User with given email already Exist!" });
 
-		const salt = await bcrypt.genSalt(Number(process.env.SALT));
+		//const salt = await bcrypt.genSalt(Number(process.env.SALT));
 		const hashPassword = req.body.password//await bcrypt.hashSync(req.body.password, salt);
 
 		user = await new User({ ...req.body, password: hashPassword }).save();

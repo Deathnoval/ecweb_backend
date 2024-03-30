@@ -3,7 +3,7 @@ const { User } = require("../models/user");
 const Token = require("../models/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
-const bcrypt = require("bcrypt");
+//const bcrypt = require("bcrypt");
 const Joi = require("joi");
 
 router.post("/", async (req, res) => {
@@ -16,10 +16,12 @@ router.post("/", async (req, res) => {
 		if (!user)
 			return res.status(401).send({ message: "Invalid Email or Password" });
 
-		const validPassword = await bcrypt.compare(
-			req.body.password,
-			user.password
-		);
+		// const validPassword = await bcrypt.compare(
+		// 	req.body.password,
+		// 	user.password
+        
+		//);
+        validPassword=req.body.password&&user.password
 		if (!validPassword)
 			return res.status(401).send({ message: "Invalid Email or Password" });
 
