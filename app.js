@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 const cors= require('cors');
 
 require('dotenv/config');
-const authJwt = require('./helpers/jwt');
+//const authJwt = require('./helpers/jwt');
 
 
 app.use(cors());
@@ -16,17 +16,17 @@ app.options('*',cors());
 
 app.use(bodyParser.json());
 app.use(morgan('tiny'));
-app.use(authJwt());
+//app.use(authJwt());
 
 
-const productRouter=require('./routers/products')
+const authRoutes=require('./routers/auth')
 const userRouter=require('./routers/users')
 
 const api = process.env.API_URL;
 
 
 //Routers
-app.use(`${api}/products`,productRouter)
+app.use(`${api}/auth`,authRoutes)
 app.use(`${api}/users`,userRouter)
 
 
