@@ -3,7 +3,7 @@ const { User, validate } = require("../models/user");
 const Token = require("../models/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
-const bcrypt = require("bcrypt");
+//const bcrypt = require("bcrypt");
 
 router.post("/", async (req, res) => {
 	try {
@@ -18,7 +18,7 @@ router.post("/", async (req, res) => {
 				.send({ message: "User with given email already Exist!" });
 
 		const salt = await bcrypt.genSalt(Number(process.env.SALT));
-		const hashPassword = await bcrypt.hashSync(req.body.password, salt);
+		const hashPassword = req.body.password//await bcrypt.hashSync(req.body.password, salt);
 
 		user = await new User({ ...req.body, password: hashPassword }).save();
 
