@@ -27,7 +27,7 @@ router.post("/", async (req, res) => {
 			token: crypto.randomBytes(32).toString("hex"),
 		}).save();
 		//const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
-        const url = `http://localhost:3000/users/${user.id}/verify/${token.token}`;
+        const url = `http://localhost:3000/verify/${user.id}/verify/${token.token}`;
 		await sendEmail(user.email, "Verify Email", url);
 
 		res
