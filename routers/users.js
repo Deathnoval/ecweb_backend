@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
 	}
 });
 
-router.get("/:id/verify/:token/", async (req, res) => {
+router.post("/:id/verify/:token/", async (req, res) => {
 	try {
 		const user = await User.findOne({ _id: req.params.id });
         console.log(req.params.id);
