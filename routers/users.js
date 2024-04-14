@@ -131,7 +131,7 @@ router.get("/get_info/:token/",async function(req, res) {
 		token = req.params.token;
 		if(!token)
 		{
-			return res.json({status:200,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
 		}
 		token = await Token.findOne({
 			token: req.params.token,
@@ -143,9 +143,9 @@ router.get("/get_info/:token/",async function(req, res) {
 		console.log(user);
 
 		if(!user.address) 
-			return res.json({name:user.ho+" "+user.ten,email:user.email});
+			return res.json({success:true,name:user.ho+" "+user.ten,email:user.email});
 		else
-			return res.json({name:user.ho+" "+user.ten,email:user.email,address:user.address});
+			return res.json({success:true,name:user.ho+" "+user.ten,email:user.email,address:user.address});
 	}
 	catch(err){
 		console.log(err);
