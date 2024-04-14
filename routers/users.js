@@ -3,6 +3,7 @@ const { User, validate } = require("../models/user");
 const Token = require("../models/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
+const { status } = require("express/lib/response");
 //const bcrypt = require("bcrypt");
 
 router.post("/", async (req, res) => {
@@ -61,6 +62,68 @@ router.post("/:id/verify/:token/", async (req, res) => {
         console.log(error);
 	}
 });
+
+router.post("/forgot-password/",async function(req, res) {
+	try {
+		// const { error } = validate(req.body);
+		// if (error)
+		// 	return res.status(400).send({ message: error.details[0].message });
+
+		let user = await User.findOne({ email: req.body.email });
+		if (!user)
+			return res.json({ status: 200, message:"Email Chưa được đang ký",color: 'text-red-500' });
+		const token = await new Token({
+			userId: user._id,
+			token: crypto.randomBytes(32).toString("hex"),
+			
+		}).save();
+		//const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
+		const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
+		await sendEmail(user.email, "Verify Email", url);	
+		res.json({message:"Đã gữi Email Xác thực",color:"text-green-500"});	
+	}catch (error) {
+		console.log(error);
+		res.status(500).send({ message: "Internal Server Error" });
+	}
+});
+router.post("/:id/resetPass/:token/",async function(req, res) {
+	try {
+		const id = req.params.id;
+		console.log(id);
+		const oldUser= await User.findOne({_id: id});
+		if(!oldUser) {
+			return res.json({status: 200, message:"Không tìm thấy người dùng",color:"text-red-500"});
+		}
+		const token = await Token.findOne({
+			userId: id,
+			token: req.params.token,
+		});
+		const password = req.body.password
+		const confirmPassword = req.body.ConfirmPassword
+		if(password==confirmPassword)
+		{
+			await User.updateOne(
+				{
+					_id:id,
+				},
+				{
+					$set:{
+						password:confirmPassword,
+					},
+				}
+			);
+			await token.deleteOne();
+			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});
+			
+		}
+
+	}
+	catch (err) {
+		console.error(err);
+		res.json({status: 200,message:"Có Lỗi đã sảy ra",color: "text-red-500"});
+	}
+});
+
 
 module.exports = router;
 

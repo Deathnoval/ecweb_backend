@@ -11,9 +11,7 @@ module.exports = async (email, subject, text) => {
 				user: process.env.USER,
 				pass: process.env.PASS,
 			},
-            tls: {
-                ciphers:'SSLv3'
-            }
+
 		});
 
 		await transporter.sendMail({
@@ -26,6 +24,6 @@ module.exports = async (email, subject, text) => {
 	} catch (error) {
 		console.log("email not sent!");
 		console.log(error);
-		
+
 	}
 };
