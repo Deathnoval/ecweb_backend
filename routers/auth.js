@@ -41,7 +41,10 @@ router.post("/", async (req, res) => {
 				.send({ message: "An Email sent to your account please verify" });
 		}
 
-		const token = user.generateAuthToken().save();
+		const token = await new Token({
+			userId: user._id,
+			token: crypto.randomBytes(32).toString("hex"),
+		}).save();
 		res.status(200).send({ data: token, message: "logged in successfully", success: true });
 
 	} catch (error) {
