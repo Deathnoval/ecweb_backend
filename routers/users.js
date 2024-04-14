@@ -71,7 +71,7 @@ router.post("/forgot-password/",async function(req, res) {
 
 		let user = await User.findOne({ email: req.body.email });
 		if (!user)
-			return res.json({ status: 200, message:"Email Chưa được đang ký",color: 'text-red-500' });
+			return res.json({ status: 200, message:"Email Chưa được đăng ký",color: 'text-red-500' });
 		const token = await new Token({
 			userId: user._id,
 			token: crypto.randomBytes(32).toString("hex"),
@@ -80,10 +80,10 @@ router.post("/forgot-password/",async function(req, res) {
 		//const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
 		const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
 		await sendEmail(user.email, "Verify Email", url);	
-		res.json({message:"Đã gữi Email Xác thực",color:"text-green-500"});	
+		return res.json({message:"Đã gữi Email Xác thực",color:"text-green-500"});	
 	}catch (error) {
 		console.log(error);
-		res.status(500).send({ message: "Internal Server Error" });
+		return res.status(500).send({ message: "Internal Server Error" });
 	}
 });
 router.post("/:id/resetPass/:token/",async function(req, res) {
