@@ -152,7 +152,7 @@ router.get("/get_info/:token/",async function(req, res) {
 		return res.json({message:err,color:"text-red-500"});
 	}
 });
-router.get("/logOut/:token/",async function(req, res){
+router.post("/logOut/:token/",async function(req, res){
 	const token = await Token.findOne({token:req.params.token});
 	await token.deleteOne();
 });
