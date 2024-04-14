@@ -126,6 +126,28 @@ router.post("/:id/resetPass/:token/",async function(req, res) {
 		res.json({status: 200,message:"Có Lỗi đã sảy ra",color: "text-red-500"});
 	}
 });
+router.get("/get_info/:token/",async function(req, res) {
+	try{
+		const token = req.params.token;
+		if(!token)
+		{
+			return res.json({status:200,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		token = await Token.findOne({
+			token: req.params.token,
+		});
+		const id =token.id;
+		const user= await User.findOne({
+			_id:id,
+		});
+		if(user.address==null)
+			return res.json({name:user.ho+" "+user.ten,email:user.email});
+	}
+	catch(err){
+		console.log(err);
+		return res.json({message:err,color:"text-red-500"});
+	}
+});
 
 
 module.exports = router;
