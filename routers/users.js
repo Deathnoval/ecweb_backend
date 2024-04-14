@@ -156,6 +156,40 @@ router.post("/logOut/:token/",async function(req, res){
 	const token = await Token.findOne({token:req.params.token});
 	await token.deleteOne();
 });
+router.post("/insert_address/:token/",async function(req, res){
+	try{
+		token = req.params.token;
+		if(!token)
+		{
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		token = await Token.findOne({
+			token: req.params.token,
+		});
+		const id =token.userId;
+		const user= await User.findOne({
+			_id:id,
+		});
+		console.log(user);
+		const newAddress =req.body;
+		user.address.push(newAddress);
+		user.save();
+	}
+	catch(err)
+	{
+		console.log(err);
+		return res.json({success:false,message:err,color:"text-red-500"});
+	}
+});
+
+router.post("/delete_address/:token/",async function(req, res){
+
+
+});
+
+router.post("/update_address/:token/",async function(req, res){
+
+});
 
 
 module.exports = router;
