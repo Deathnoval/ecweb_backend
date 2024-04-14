@@ -41,7 +41,7 @@ router.post("/", async (req, res) => {
 				.send({ message: "An Email sent to your account please verify" });
 		}
 
-		const token = await new Token({
+		let token = await new Token({
 			userId: user._id,
 			token: crypto.randomBytes(32).toString("hex"),
 		}).save();
