@@ -113,8 +113,11 @@ router.post("/:id/resetPass/:token/",async function(req, res) {
 				}
 			);
 			await token.deleteOne();
-			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});
-			
+			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});	
+		}
+		else
+		{
+			return res.json({success:false,message:"Mật Khẩu không trùng",color:"text-red-500"});
 		}
 
 	}
