@@ -171,12 +171,13 @@ router.get("/get_address/:token/",async function(req, res){
 		const user= await User.findOne({
 			_id:id,
 		});
-		console.log(user);
+		//console.log(user);
+		console.log(user.address)
 
-		if(!user.address) 
-			return res.json({success:true,address:user.address});
+		if(user.address) 
+			return res.json({address:user.address});
 		else
-			return res.json({success:false,message:"Người dùng chưa co địa chĩ nhận hàng",color:"text-red-500"});
+			return res.json([]);
 	}
 	catch(err){
 		console.log(err);
@@ -207,6 +208,7 @@ router.post("/insert_address/:token/",async function(req, res){
 				user.save();
 				console.log('Address added successfully');
 				return res.json({success:true,message:"Thêm thành công",color:"text-green-500"});
+
 		
 			}
 			catch (err){
@@ -236,9 +238,14 @@ router.post("/delete_address/:token/:Address_id/",async function(req, res){
 			_id:UserId,
 		});
 		id_address=req.params.Address_id;
-		const address = await user.address.deleteOne({
-			_id:id_address,
-		})
+		try {
+			const address = await user.address.deleteOne({
+				_id:id_address,
+			}).then(res => res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}))
+		}
+		catch (err) {
+			console.log(err)
+		}
 	}
 	
 	catch (err){
