@@ -160,13 +160,14 @@ router.post("/logOut/:token/",async function(req, res){
 router.get("/get_address/:token/",async function(req, res){
 	try{
 		token = req.params.token;
+		token = await Token.findOne({
+			token: req.params.token,
+		});
 		if(!token)
 		{
 			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
 		}
-		token = await Token.findOne({
-			token: req.params.token,
-		});
+		
 		const id =token.userId;
 		const user= await User.findOne({
 			_id:id,
@@ -227,12 +228,13 @@ router.post("/insert_address/:token/",async function(req, res){
 router.post("/delete_address/:token/:Address_id/",async function(req, res){
 	try{
 		token = req.params.token;
-		if(!token){
-			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
-		}
 		token = await Token.findOne({
 			token: req.params.token,
 		});
+		if(!token){
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		
 		const UserId =token.userId;
 		const user= await User.findOne({
 			_id:UserId,
@@ -274,18 +276,24 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 			_id:UserId,
 		});
 		id_address=req.params.Address_id;
-		const address = await user.address.finOne({
-			_id:id_address,
-		})
-		const updateAddress =req.body;
-		address.updateOne(
-			{
-				name:req.body.name,
-				street:req.body.street,
-				number:req.body.number,
-				isDefault:req.body.isDefault,
-			}
+		const address = await user.address.id(
+			id_address
 		)
+		//const updateAddress =req.body;
+		try {
+			address.updateOne(
+				{
+					name:req.body.name,
+					street:req.body.street,
+					number:req.body.number,
+					isDefault:req.body.isDefault,
+				}
+			)
+			user.save().then( res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}));	
+		}
+		catch(e){
+			console.log(e);
+		}
 	}
 	catch (err){
 		console.log(err);
