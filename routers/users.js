@@ -143,10 +143,10 @@ router.get("/get_info/:token/",async function(req, res) {
 		});
 		console.log(user);
 
-		if(!user.address) 
-			return res.json({success:true,name:user.ho+" "+user.ten,email:user.email});
-		else
-			return res.json({success:true,name:user.ho+" "+user.ten,email:user.email,address:user.address});
+		
+		return res.json({success:true,name:user.ho+" "+user.ten,email:user.email});
+		
+			
 	}
 	catch(err){
 		console.log(err);
