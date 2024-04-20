@@ -175,7 +175,7 @@ router.get("/get_address/:token/",async function(req, res){
 		console.log(user.address)
 
 		if(user.address) 
-			return res.json({address:user.address});
+			return res.json(user.address);
 		else
 			return res.json([]);
 	}
@@ -234,14 +234,18 @@ router.post("/delete_address/:token/:Address_id/",async function(req, res){
 			token: req.params.token,
 		});
 		const UserId =token.userId;
+		
+
+
 		const user= await User.findOne({
 			_id:UserId,
 		});
 		id_address=req.params.Address_id;
 		try {
-			const address = await user.address.deleteOne({
-				_id:id_address,
-			}).then(res => res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}))
+			const address = user.address.findOne({id_address});
+			console.log(address);
+			await address.deleteOne();
+			user.save().then( res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}));
 		}
 		catch (err) {
 			console.log(err)
