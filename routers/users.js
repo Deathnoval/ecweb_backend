@@ -157,7 +157,7 @@ router.post("/logOut/:token/",async function(req, res){
 	const token = await Token.findOne({token:req.params.token});
 	await token.deleteOne();
 });
-router.post("/get_address/:token/",async function(req, res){
+router.get("/get_address/:token/",async function(req, res){
 	try{
 		token = req.params.token;
 		if(!token)
