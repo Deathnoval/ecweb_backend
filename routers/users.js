@@ -234,15 +234,16 @@ router.post("/delete_address/:token/:Address_id/",async function(req, res){
 			token: req.params.token,
 		});
 		const UserId =token.userId;
-		
-
-
 		const user= await User.findOne({
 			_id:UserId,
 		});
 		id_address=req.params.Address_id;
 		try {
-			const address = user.address.findOne({id_address});
+			const address = user.address.id(id_address);
+			if(!address)
+			{
+				return res.json({success: false,message:"Địa chỉ không tồn tại",color:"text-red-500"});
+			}
 			console.log(address);
 			await address.deleteOne();
 			user.save().then( res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}));
