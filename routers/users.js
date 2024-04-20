@@ -275,18 +275,23 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 		const user= await User.findOne({
 			_id:UserId,
 		});
-		id_address=req.params.Address_id;
-		const address = await user.address.id(
+		console.log(user);
+		id_address=req.params.address_id;
+		const address = user.address.id(
 			id_address
 		)
-		//const updateAddress =req.body;
+		const updateAddress =req.body;
 		try {
-			address.updateOne(
+			console.log(address);
+			await address.updateOne(
 				{
-					name:req.body.name,
-					street:req.body.street,
-					number:req.body.number,
-					isDefault:req.body.isDefault,
+					_id: id_address
+				},
+				{
+					$set:updateAddress,
+				},
+				{
+					new: true,
 				}
 			)
 			user.save().then( res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}));	
