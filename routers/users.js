@@ -4,6 +4,7 @@ const Token = require("../models/token");
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { status } = require("express/lib/response");
+const { isDeepStrictEqual } = require("util");
 //const bcrypt = require("bcrypt");
 
 router.post("/", async (req, res) => {
@@ -156,6 +157,33 @@ router.post("/logOut/:token/",async function(req, res){
 	const token = await Token.findOne({token:req.params.token});
 	await token.deleteOne();
 });
+router.post("/get_address/:token/",async function(req, res){
+	try{
+		token = req.params.token;
+		if(!token)
+		{
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		token = await Token.findOne({
+			token: req.params.token,
+		});
+		const id =token.userId;
+		const user= await User.findOne({
+			_id:id,
+		});
+		console.log(user);
+
+		if(!user.address) 
+			return res.json({success:true,address:user.address});
+		else
+			return res.json({success:false,message:"Người dùng chưa co địa chĩ nhận hàng",color:"text-red-500"});
+	}
+	catch(err){
+		console.log(err);
+		return res.json({message:err,color:"text-red-500"});
+	}
+});
+
 router.post("/insert_address/:token/",async function(req, res){
 	try{
 		token = req.params.token;
@@ -172,8 +200,20 @@ router.post("/insert_address/:token/",async function(req, res){
 		});
 		console.log(user);
 		const newAddress =req.body;
+		console.log(newAddress);
 		user.address.push(newAddress);
-		user.save();
+		try
+			{
+				user.save();
+				console.log('Address added successfully');
+				return res.json({success:true,message:"Thêm thành công",color:"text-green-500"});
+		
+			}
+			catch (err){
+				
+				console.error(err);
+				return res.json({success:false,message:"Thêm không thành công",color:"text-red-500"});
+			}
 	}
 	catch(err)
 	{
@@ -182,12 +222,63 @@ router.post("/insert_address/:token/",async function(req, res){
 	}
 });
 
-router.post("/delete_address/:token/",async function(req, res){
-
+router.post("/delete_address/:token/:Address_id/",async function(req, res){
+	try{
+		token = req.params.token;
+		if(!token){
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		token = await Token.findOne({
+			token: req.params.token,
+		});
+		const UserId =token.userId;
+		const user= await User.findOne({
+			_id:UserId,
+		});
+		id_address=req.params.Address_id;
+		const address = await user.address.deleteOne({
+			_id:id_address,
+		})
+	}
+	
+	catch (err){
+		console.log(err);
+		return res.json({success:false,message:err,color:"text-red-500"});
+	}
 
 });
 
-router.post("/update_address/:token/",async function(req, res){
+router.post("/update_address/:token/:address_id/",async function(req, res){
+	try{
+		token = req.params.token;
+		if(!token){
+			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+		}
+		token = await Token.findOne({
+			token: req.params.token,
+		});
+		const UserId =token.userId;
+		const user= await User.findOne({
+			_id:UserId,
+		});
+		id_address=req.params.Address_id;
+		const address = await user.address.finOne({
+			_id:id_address,
+		})
+		const updateAddress =req.body;
+		address.updateOne(
+			{
+				name:req.body.name,
+				street:req.body.street,
+				number:req.body.number,
+				isDefault:req.body.isDefault,
+			}
+		)
+	}
+	catch (err){
+		console.log(err);
+		return res.json({success:false,message:err,color:"text-red-500"});
+	}
 
 });
 
