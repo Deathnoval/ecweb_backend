@@ -10,10 +10,10 @@ const { isDeepStrictEqual } = require("util");
 
 async function changeDefaultAddress(userId, addressId) {
 	// Kết nối với database MongoDB
-	const connection = await mongoose.connect('mongodb://localhost:27017/yourDatabaseName');
+	// const connection = await mongoose.connect('mongodb://localhost:27017/yourDatabaseName');
   
-	// Tìm kiếm model User
-	const User = connection.model('User');
+	// // Tìm kiếm model User
+	// const User = connection.model('User');
   
 	// Tìm kiếm user với ID được cung cấp
 	const user = await User.findById(userId);
@@ -38,7 +38,7 @@ async function changeDefaultAddress(userId, addressId) {
 	
 	await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
 
-	await connection.disconnect();
+	// await connection.disconnect();
 	
   }
 
