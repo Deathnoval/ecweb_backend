@@ -239,10 +239,16 @@ router.post("/insert_address/:token/",async function(req, res){
 		console.log(user);
 		const newAddress =req.body;
 		if(req.body.isDefault==true)
-		{
-			await User.updateOne({ _id: userId,  }, { $set: { 'address.$.isDefault': false } });
-
-		}
+			{
+				for (const address of user.address) {
+					// if (address._id.toString() !== addressId) {
+					// 	console.log(address)
+					  address.isDefault = false;
+					}
+					await user.save();
+				}
+				
+			
 		console.log(newAddress);
 		user.address.push(newAddress);
 		try
@@ -323,24 +329,39 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 		}
 	
 		const addressId = req.params.address_id;
-		const updateAddress = req.body;
-	
+		
+		const updateAddress ={
+			"name": req.body.name,
+            "street": req.body.street,
+            "number": req.body.number,
+            "isDefault": req.body.isDefault
+            
+		} ;
+		
 		try {
+			if(req.body.isDefault==true)
+			{
+				for (const address of user.address) {
+					if (address._id.toString() !== addressId) {
+						console.log(address)
+					  address.isDefault = false;
+					}
+				}
+				await user.save();
+			}
+			
 		  // Update the address using the User model's updateOne method
 		  await User.updateOne(
 			{ _id: userId, "address._id": addressId }, // Filter to find the specific address
 			{ $set: { "address.$": updateAddress } }
 			 // Update the matching address within the array
 		  );
+		  await user.save();
 
 
-		  if(req.body.isDefault==true)
-		  {
-			await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
-
-		  }
+		  
 	
-		  user.save().then(() => res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" }));
+		  res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" });
 		} catch (error) {
 		  console.error(error);
 		  return res.json({ success: false, message: "Error updating address", color: "text-red-500" });
