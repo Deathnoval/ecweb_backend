@@ -238,15 +238,17 @@ router.post("/insert_address/:token/",async function(req, res){
 		});
 		console.log(user);
 		const newAddress =req.body;
+		if(req.body.isDefault==true)
+		{
+			await User.updateOne({ _id: userId,  }, { $set: { 'address.$.isDefault': false } });
+
+		}
 		console.log(newAddress);
 		user.address.push(newAddress);
 		try
 			{
 				user.save();
-				if(req.body.isDefault==true)
-				{
-					changeDefaultAddress(userId,addressId);
-				}
+				
 				console.log('Address added successfully');
 				return res.json({success:true,message:"Thêm thành công",color:"text-green-500"});
 
@@ -327,12 +329,15 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 		  // Update the address using the User model's updateOne method
 		  await User.updateOne(
 			{ _id: userId, "address._id": addressId }, // Filter to find the specific address
-			{ $set: { "address.$": updateAddress } } // Update the matching address within the array
+			{ $set: { "address.$": updateAddress } }
+			 // Update the matching address within the array
 		  );
+
+
 		  if(req.body.isDefault==true)
 		  {
-			changeDefaultAddress(userId,addressId);
-			console.log("address updated is default")
+			await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
+
 		  }
 	
 		  user.save().then(() => res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" }));
