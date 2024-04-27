@@ -24,15 +24,22 @@ async function changeDefaultAddress(userId, addressId) {
 	  console.error(`User with ID ${userId} does not have an address with ID ${addressId}`);
 	  return;
 	}
+
+	if(user.address.lenght>1)
+	{
+		// await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
   
-	// Cập nhật địa chỉ mặc định
+		// Set các địa chỉ khác là false
+		await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
+	  
+		// Ngắt kết nối với database MongoDB
+		
+	}
+	
 	await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
-  
-	// Set các địa chỉ khác là false
-	await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
-  
-	// Ngắt kết nối với database MongoDB
+
 	await connection.disconnect();
+	
   }
 
 router.post("/", async (req, res) => {
@@ -317,6 +324,10 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 			{ _id: userId, "address._id": addressId }, // Filter to find the specific address
 			{ $set: { "address.$": updateAddress } } // Update the matching address within the array
 		  );
+		  if(req.body.isDefault==true)
+		  {
+			changeDefaultAddress(userId,addressId);
+		  }
 	
 		  user.save().then(() => res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" }));
 		} catch (error) {
