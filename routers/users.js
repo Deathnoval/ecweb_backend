@@ -25,18 +25,19 @@ async function changeDefaultAddress(userId, addressId) {
 	  return;
 	}
 
-	if(user.address.length >1)
-	{
+	// if(user.address.length >1)
+	// {
 		// await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
   
 		// Set các địa chỉ khác là false
-		await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
-	  
+	await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
+	await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
+	console.log(user)
 		// Ngắt kết nối với database MongoDB
 		
-	}
+	// }
 	
-	await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
+	
 
 	// await connection.disconnect();
 	
@@ -331,6 +332,7 @@ router.post("/update_address/:token/:address_id/",async function(req, res){
 		  if(req.body.isDefault==true)
 		  {
 			changeDefaultAddress(userId,addressId);
+			console.log("address updated is default")
 		  }
 	
 		  user.save().then(() => res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" }));
