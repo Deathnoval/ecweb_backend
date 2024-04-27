@@ -25,7 +25,7 @@ async function changeDefaultAddress(userId, addressId) {
 	  return;
 	}
 
-	if(user.address.lenght>1)
+	if(user.address.length >1)
 	{
 		// await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
   
