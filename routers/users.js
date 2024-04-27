@@ -291,49 +291,43 @@ router.post("/delete_address/:token/:Address_id/",async function(req, res){
 });
 
 router.post("/update_address/:token/:address_id/",async function(req, res){
-	try{
-		token = req.params.token;
-		if(!token){
-			return res.json({success:false,message:"Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại",color:"text-red-500"});
+	try {
+		const token = req.params.token;
+		if (!token) {
+		  return res.json({ success: false, message: "Phiên Đăng Nhập Hết Hạn Vui Lòng Đăng Nhập Lại", color: "text-red-500" });
 		}
-		token = await Token.findOne({
-			token: req.params.token,
-		});
-		const UserId =token.userId;
-		const user= await User.findOne({
-			_id:UserId,
-		});
-		console.log(user);
-		id_address=req.params.address_id;
-		const address = user.address.id(
-			id_address
-		)
-		const updateAddress =req.body;
+	
+		const tokenData = await Token.findOne({ token: req.params.token });
+		if (!tokenData) {
+		  return res.json({ success: false, message: "Invalid Token", color: "text-red-500" });
+		}
+	
+		const userId = tokenData.userId;
+		const user = await User.findById(userId);
+		if (!user) {
+		  return res.json({ success: false, message: "User not found", color: "text-red-500" });
+		}
+	
+		const addressId = req.params.address_id;
+		const updateAddress = req.body;
+	
 		try {
-			console.log(address);
-			await address.updateOne(
-				{
-					_id: id_address
-				},
-				{
-					$set:updateAddress,
-				},
-				{
-					new: true,
-				}
-			)
-			user.save().then( res.json({success:true,message:"Địa chỉ đã xóa thành công",color:"text-red-500"}));	
+		  // Update the address using the User model's updateOne method
+		  await User.updateOne(
+			{ _id: userId, "address._id": addressId }, // Filter to find the specific address
+			{ $set: { "address.$": updateAddress } } // Update the matching address within the array
+		  );
+	
+		  user.save().then(() => res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" }));
+		} catch (error) {
+		  console.error(error);
+		  return res.json({ success: false, message: "Error updating address", color: "text-red-500" });
 		}
-		catch(e){
-			console.log(e);
-		}
-	}
-	catch (err){
-		console.log(err);
-		return res.json({success:false,message:err,color:"text-red-500"});
-	}
-
-});
+	  } catch (err) {
+		console.error(err);
+		return res.json({ success: false, message: err, color: "text-red-500" });
+	  }
+	});
 
 
 module.exports = router;
