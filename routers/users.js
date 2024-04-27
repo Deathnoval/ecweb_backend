@@ -242,6 +242,10 @@ router.post("/insert_address/:token/",async function(req, res){
 		try
 			{
 				user.save();
+				if(req.body.isDefault==true)
+				{
+					changeDefaultAddress(userId,addressId);
+				}
 				console.log('Address added successfully');
 				return res.json({success:true,message:"Thêm thành công",color:"text-green-500"});
 
