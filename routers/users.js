@@ -7,6 +7,34 @@ const { status } = require("express/lib/response");
 const { isDeepStrictEqual } = require("util");
 //const bcrypt = require("bcrypt");
 
+
+async function changeDefaultAddress(userId, addressId) {
+	// Kết nối với database MongoDB
+	const connection = await mongoose.connect('mongodb://localhost:27017/yourDatabaseName');
+  
+	// Tìm kiếm model User
+	const User = connection.model('User');
+  
+	// Tìm kiếm user với ID được cung cấp
+	const user = await User.findById(userId);
+  
+	// Kiểm tra xem user có địa chỉ với ID được cung cấp hay không
+	const address = user.address.find(addr => addr._id.toString() === addressId);
+	if (!address) {
+	  console.error(`User with ID ${userId} does not have an address with ID ${addressId}`);
+	  return;
+	}
+  
+	// Cập nhật địa chỉ mặc định
+	await User.updateOne({ _id: userId, 'address._id': addressId }, { $set: { 'address.$.isDefault': true } });
+  
+	// Set các địa chỉ khác là false
+	await User.updateOne({ _id: userId, 'address._id': { $ne: addressId } }, { $set: { 'address.$.isDefault': false } });
+  
+	// Ngắt kết nối với database MongoDB
+	await connection.disconnect();
+  }
+
 router.post("/", async (req, res) => {
 	try {
 		const { error } = validate(req.body);
