@@ -21,6 +21,7 @@ app.use(morgan('tiny'));
 
 const authRoutes=require('./routers/auth')
 const userRouter=require('./routers/users')
+const categoryRouter=require('./routers/category')
 
 const api = process.env.API_URL;
 
@@ -28,6 +29,7 @@ const api = process.env.API_URL;
 //Routers
 app.use(`${api}/auth`,authRoutes)
 app.use(`${api}/users`,userRouter)
+app.use(`${api}/category`,categoryRouter)
 
 
 mongoose.connect(process.env.CONNECTION_STRING,{
