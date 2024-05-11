@@ -62,7 +62,7 @@ const getAllCategories = async (req, res) => {
           key: category.category_id, // Convert _id from ObjectId to string
           icon: '', // Assuming 'icon' property exists
           children: null, // Assuming sub-categories don't have nested children
-          label: category.name, // Assuming 'name' property holds the label
+          label: "Xem Tất Cả " + category.name, // Assuming 'name' property holds the label
           route: category.route,
           type: ''
         }),
