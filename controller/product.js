@@ -4,23 +4,48 @@ const Product = require('../models/product');
 const getProductListALL = async (req, res) => {
     const type_get = req.params.type_get
     const value_sort = req.params.value_sort
+    console.log(value_sort)
+    let sortField = "createdAt"
+    let sortOrder = "desc"
 
+    if (value_sort == "1") {
+        sortField = "price"
+        sortOrder = "asc"
+    }
+    else if (value_sort == "2") {
+        sortField = "price"
+        sortOrder = "desc"
+    }
+    else if (value_sort == "3") {
+        sortField = "name"
+        sortOrder = "asc"
+    }
+    else if (value_sort == "4") {
+        sortField = "name"
+        sortOrder = "desc"
+    }
+
+
+
+    const sortOptions = {};
+    sortOptions[sortField] = sortOrder;
+    console.log(sortOptions);
     try {
-        productListAll = await Product.find();
+        productListAll = await Product.find().sort(sortOptions);
         if (type_get != "all") {
 
             productListAll = await Product.find({
                 category_id: type_get,
 
 
-            })
+            }).sort(sortOptions);
             console.log(productListAll);
             if (!(productListAll.length > 0)) {
                 console.log('Product');
                 productListAll = await Product.find({
 
                     sub_category_id: type_get,
-                })
+                }).sort(sortOptions);
             }
             console.log(productListAll)
 
