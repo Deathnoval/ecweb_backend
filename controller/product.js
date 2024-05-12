@@ -77,6 +77,26 @@ const getProductListALL = async (req, res) => {
         res.json({ success: false, message: err, color: 'text-red-500' })
     }
 }
+const getProductDetail = async (req, res) => {
+    const { id } = req.params
+    try {
+        const product = await Product.find({ product_id: id })
+        console.log(product)
+        if (product) {
+            res.json({ success: true, product })
+        }
+        else {
+            res.json({ success: false, message: 'không tìm thấy sản phẩm', color: 'text-red-500' });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        res.json({ success: false, message: err });
+    }
+
+
+}
 module.exports = {
     getProductListALL,
+    getProductDetail
 }
