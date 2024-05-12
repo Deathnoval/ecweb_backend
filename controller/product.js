@@ -80,8 +80,8 @@ const getProductListALL = async (req, res) => {
 const getProductDetail = async (req, res) => {
     const { id } = req.params
     try {
-        const product = await Product.find({ product_id: id })
-        console.log(product)
+        const product = await Product.findOne({ product_id: id })
+        console.log(typeof (product))
         if (product) {
             res.json({ success: true, product })
         }
