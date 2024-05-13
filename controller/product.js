@@ -31,11 +31,15 @@ const getProductListALL = async (req, res) => {
     sortOptions[sortField] = sortOrder;
     console.log(sortOptions);
     try {
-        productListAll = await Product.find().sort(sortOptions);
+        productListAll = await Product.find({ total_number: { $gt: 0 } }).sort(sortOptions);
         if (type_get != "all") {
 
             productListAll = await Product.find({
                 category_id: type_get,
+                total_number: {
+                    $gt: 0
+                }
+
 
 
             }).sort(sortOptions);
@@ -43,8 +47,8 @@ const getProductListALL = async (req, res) => {
             if (!(productListAll.length > 0)) {
                 console.log('Product');
                 productListAll = await Product.find({
-
                     sub_category_id: type_get,
+                    total_number: { $gt: 0 }
                 }).sort(sortOptions);
             }
             console.log(productListAll)

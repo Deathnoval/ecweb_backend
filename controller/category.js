@@ -80,7 +80,36 @@ const getAllCategories = async (req, res) => {
   }
 
 };
-const insertCategory = async (req, res) => { };
+const insertCategory = async (req, res) => {
+  try {
+    const newCategory = await Category({
+      name: req.body.name,
+      route: req.body.route,
+      category_id: shortid.generate(),
+      sub_category: req.body.sub_category.map(subCategory => ({
+        sub_category_id: shortid.generate(),
+        name: subCategory.name,
+        route: subCategory.route,
+
+      })),
+
+    });
+    await newCategory.save();
+    res.json({ success: true, message: 'Category inserted successfully', color: 'text--green-500' });
+    console.log(newCategory);
+  } catch (err) {
+    console.log(err);
+    if (err.code === 11000) { // Duplicate key error (unique constraint violation)
+      errorMessage = 'Unique constraint violation. Name, route, category_id, or sub_category_id might already exist.';
+    }
+    let errorMessage = 'Error creating category';
+    res.status(400).json({
+      success: false,
+      message: errorMessage,
+      color: 'text-red-500'
+    });
+  }
+};
 
 const deleteCategory = async (req, res) => { };
 
