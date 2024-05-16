@@ -111,11 +111,60 @@ const insertCategory = async (req, res) => {
   }
 };
 
+
+const getAllCategoriesList=async(req,res)=>{
+  try{
+    const categories = await Category.find().populate('sub_category');
+    if (categories)
+    {
+      const formattedData = categories.map(category => ({
+        key: category.category_id, // Convert _id from ObjectId to string
+        label: category.name, // Assuming 'icon' property exists
+        
+        }))
+      console.log(formattedData)
+
+      res.json({ success: true, formattedData });
+    }
+  }
+  catch(err)
+  {
+    console.log(err);
+    res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+  }
+};
+const getSubCategory=async(req,res)=>{
+  const { id } = req.params; // Lấy id từ URL
+  try{
+    const category = await Category.findOne({
+      category_id: id,
+    });
+    if (category) {
+      // Convert the category and sub_category data to the desired JSON format
+      const formattedSubCategories = category.sub_category.map(subCategory => ({
+        key: subCategory.sub_category_id, // Convert _id from ObjectId to string
+        label: subCategory.name, // Assuming 'name' property holds the label
+        
+      }));
+      console.log(formattedSubCategories)
+      res.json({ success: true, formattedSubCategories });
+    }
+  }
+  catch(err)
+  {
+    console.log(err);
+    res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+  }
+};
+
 const deleteCategory = async (req, res) => { };
+ 
 
 module.exports = {
   getCategories,
   getAllCategories,
   insertCategory,
-  deleteCategory
+  deleteCategory,
+  getAllCategoriesList,
+  getSubCategory
 };

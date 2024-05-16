@@ -1,3 +1,4 @@
+const { boolean, bool } = require('joi');
 const mongoose = require('mongoose');
 
 const productSchema = mongoose.Schema({
@@ -31,6 +32,7 @@ const productSchema = mongoose.Schema({
         type: String,
         unique: true,
     },
+    onlShop:Boolean,
     createdAt: { type: Date, default: Date.now, }
 
 
