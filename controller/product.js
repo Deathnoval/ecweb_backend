@@ -209,6 +209,27 @@ const getProductListALL_with_Sattus = async (req, res) => {
         res.json({ success: false, message: err, color: 'text-red-500' })
     }
 };
+const update_onlShop_product =async(req,res) =>
+{
+    const id=req.body.id
+    const onlShop=req.body.onlShop
+    try {
+        const updatedProduct = await Product.findOneAndUpdate(
+          { product_id:id }, // Find the product by product_id
+          { onlShop:onlShop }, // Update the onlShop property
+          { new: true } // Return the updated document
+        );
+    
+        if (!updatedProduct) {
+            res.json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
+        }
+    
+        res.json({ success: true,message:'Cập nhật trạng thái thành công ',color:'text-green-500'});
+      } catch (error) {
+        console.error(error);
+        res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+      }
+}
 
 
 
@@ -217,5 +238,6 @@ const getProductListALL_with_Sattus = async (req, res) => {
 module.exports = {
     getProductListALL,
     getProductDetail,
-    getProductListALL_with_Sattus
+    getProductListALL_with_Sattus,
+    update_onlShop_product 
 }
