@@ -168,13 +168,13 @@ const getProductListALL_with_Sattus = async (req, res) => {
 
             }).sort(sortOptions);
             console.log(productListAll);
-            
+            if (!(productListAll.length > 0)) {
                 console.log('Product');
                 productListAll = await Product.find({
                     sub_category_id: type_get
                     
                 }).sort(sortOptions);
-            
+            }
             console.log(productListAll)
 
         }
