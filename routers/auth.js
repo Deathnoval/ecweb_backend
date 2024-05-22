@@ -45,7 +45,7 @@ router.post("/", async (req, res) => {
 			userId: user._id,
 			token: crypto.randomBytes(32).toString("hex"),
 		}).save();
-		res.status(200).send({ data: token.token, message: "logged in successfully", success: true });
+		res.status(200).send({ data: token.token,isAdmin: user.isAdmin, message: "logged in successfully", success: true });
 
 	} catch (error) {
 		res.status(500).send({ message: "Internal Server Error" });

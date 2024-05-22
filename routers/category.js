@@ -5,10 +5,12 @@ const categoryController = require('../controller/category');
 
 router.get('/findCategory/:id', categoryController.getCategories);
 router.get('/getAllCategories', categoryController.getAllCategories);
-router.get('/insertCategory', categoryController.insertCategory);
+router.post('/insertCategory', categoryController.insertCategory);
 router.get('/deleteCategory', categoryController.deleteCategory);
-router.get('/getAllCategoriesList',categoryController.getAllCategoriesList)
-router.get('/getSubCategory/:id',categoryController.getSubCategory)
+router.get('/getAllCategoriesList',categoryController.getAllCategoriesList);
+router.get('/getSubCategory/:id',categoryController.getSubCategory);
+router.post('/add_primary_category',categoryController.add_primary_category);
+router.post('/add_sub_category/:id',categoryController.add_sub_category);
 
 
 
