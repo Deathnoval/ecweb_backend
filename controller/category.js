@@ -197,10 +197,10 @@ const add_primary_category = async (req, res) => {
   }
 
 
-}
+};
 const add_sub_category = async (req, res) => {
   try {
-    const { id } = req.params;
+    const  id  = req.body.id;
     const new_name_sub_category = req.body.name_sub_category
     console.log("new_name_sub_category:" + new_name_sub_category);
     if (new_name_sub_category.length == 0) {
@@ -232,14 +232,15 @@ const add_sub_category = async (req, res) => {
     console.log(err);
     res.json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
   }
-}
+};
 
 
 const update_Catergory = async (req, res) => {
   const new_name_category = req.body.name;
   const category_id = req.body.category_id;
   try {
-    const is_not_exists_category = await Category.find({ category_id: category_id })
+    const is_not_exists_category = await Category.findOne({ category_id: category_id })
+    console.log(is_not_exists_category)
     if (!is_not_exists_category) {
       return res.json({ success: false, message: "Không tìm thấy danh mục", colo: "text-red-500" });
     }
@@ -253,7 +254,7 @@ const update_Catergory = async (req, res) => {
         route: new_route
       }, { new: true });
       if (!updateCategory) {
-        console.log("lỗi update category");
+        return res.json({ success: false, message: "Cập nhật tên danh mục không thành công", color: "text-red-500" });
       }
       else {
         return res.json({ success: true, message: "Cập nhật tên danh mục thành công", color: "text-green-500" });
@@ -263,7 +264,7 @@ const update_Catergory = async (req, res) => {
     console.log(err);
     res.json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
   }
-}
+};
 
 
 const update_sub_category = async (req, res) => {
@@ -274,13 +275,17 @@ const update_sub_category = async (req, res) => {
     if (name.length > 0) {
       const is_exit_category = await Category.findOne({ category_id: category_id })
       if (is_exit_category) {
-        const is_exit_sub_category = await is_exit_category.sub_category.find(sub => sub.sub_category_id === sub_category_id);
+        const is_exit_sub_category =  is_exit_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
         console.log(is_exit_sub_category)
-        if (is_exit_sub_category) {
-
+        if (is_exit_sub_category===-1) {
+          return res.json({ success: false, message: "Không tìm thấy danh mục phụ", color: "text-red-500" });
         }
         else {
-          return res.json({ success: false, message: "Không tìm thấy danh mục phụ", color: "text-red-500" });
+          const new_sub_route=`xem-tat-ca-${name.toLowerCase().replace(/ /g, '-')}`;
+          is_exit_category.sub_category[is_exit_sub_category].name = name;
+          is_exit_category.sub_category[is_exit_sub_category].route = new_sub_route;
+          await is_exit_category.save();
+          return res.json({success:true,message:"Cập nhật tên danh mục phụ thành công",color:"text-green-500"});
         }
       }
       else {
@@ -288,14 +293,14 @@ const update_sub_category = async (req, res) => {
       }
     }
     else {
-      return res.json({ success: false, message: "Tên danh mục phụ không được để  trống" });
+      return res.json({ success: false, message: "Tên danh mục phụ không được để  trống",color:"text-red-500" });
     }
   } catch (err) {
     console.log(err);
     return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 
-}
+};
 
 const deleteCategory = async (req, res) => {
   const category_id = req.body.category_id;
@@ -318,7 +323,43 @@ const deleteCategory = async (req, res) => {
     return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
   }
 };
+const delete_sub_category=async (req,res)=>{
+  const category_id=req.body.category_id;
+  const sub_category_id=req.body.sub_category_id;
+  try{
+    const is_exit_category = await Category.findOne({ category_id: category_id });
+    if (!is_exit_category) {
+      return res.json({ success: false, message: "Không tìm thấy danh mục chính", color: "text-red-500" });
+    }
+    else {
+      const is_exit_sub_category =  is_exit_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
+      if (is_exit_sub_category===-1) {
+        return res.json({ success: false, message: "Không tìm thấy danh mục phụ", color: "text-red-500" });
+      }
+      else{
+        is_exit_category.sub_category.splice(is_exit_sub_category, 1);
+        let check_deletion_success = true;
+        await is_exit_category.save().catch(err=>{
+          console.log(err);
+          check_deletion_success=false;
+        });
+        if(check_deletion_success)
+        {
+          return res.json({success:true,message:"Xoá danh mục phụ thành công",color:"text-green-500"});
+        }
+        else
+        {
+          return res.json({success:false,message:"Xoá danh mục phụ không thành công",color:"text-red-500"});
+        }
 
+      }
+    }
+  }catch(err)
+  {
+    console.log(err);
+    return res.json({success:false,message:"Lỗi truy xuất dữ liệu",color:"text-red-500"});
+  }
+};
 
 module.exports = {
   getCategories,
@@ -330,5 +371,6 @@ module.exports = {
   add_primary_category,
   add_sub_category,
   update_Catergory,
-  update_sub_category
+  update_sub_category,
+  delete_sub_category
 };
