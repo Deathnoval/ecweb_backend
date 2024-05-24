@@ -236,7 +236,8 @@ const add_sub_category = async (req, res) => {
 
 
 const update_Catergory = async (req, res) => {
-  const { new_name_category, category_id } = req.body
+  const new_name_category = req.body.name;
+  const category_id = req.body.category_id;
   try {
     const is_not_exists_category = await Category.find({ category_id: category_id })
     if (!is_not_exists_category) {
@@ -246,7 +247,11 @@ const update_Catergory = async (req, res) => {
       return res.json({ success: false, message: "Tên danh mục không được để trống", color: "text-red-500" });
     }
     else {
-      const updateCategory = await Category.findOneAndUpdate({ category_id: category_id }, { name: new_name_category }, { new: true });
+      const new_route = `xem-tat-ca-${new_name_category.toLowerCase().replace(/ /g, '-')}`;
+      const updateCategory = await Category.findOneAndUpdate({ category_id: category_id }, {
+        name: new_name_category,
+        route: new_route
+      }, { new: true });
       if (!updateCategory) {
         console.log("lỗi update category");
       }
@@ -260,7 +265,59 @@ const update_Catergory = async (req, res) => {
   }
 }
 
-const deleteCategory = async (req, res) => { };
+
+const update_sub_category = async (req, res) => {
+  const category_id = req.body.category_id
+  const name = req.body.name
+  const sub_category_id = req.body.sub_category_id
+  try {
+    if (name.length > 0) {
+      const is_exit_category = await Category.findOne({ category_id: category_id })
+      if (is_exit_category) {
+        const is_exit_sub_category = await is_exit_category.sub_category.find(sub => sub.sub_category_id === sub_category_id);
+        console.log(is_exit_sub_category)
+        if (is_exit_sub_category) {
+
+        }
+        else {
+          return res.json({ success: false, message: "Không tìm thấy danh mục phụ", color: "text-red-500" });
+        }
+      }
+      else {
+        return res.json({ success: false, message: "Không tìm thấy danh mục chính", color: "text-red-500" });
+      }
+    }
+    else {
+      return res.json({ success: false, message: "Tên danh mục phụ không được để  trống" });
+    }
+  } catch (err) {
+    console.log(err);
+    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+  }
+
+}
+
+const deleteCategory = async (req, res) => {
+  const category_id = req.body.category_id;
+  try {
+    const is_exit_category = await Category.findOne({ category_id: category_id });
+    if (!is_exit_category) {
+      return res.json({ success: false, message: "Không tìm thấy danh mục cần xóa", color: "text-red-500" });
+    }
+    else {
+      const check_success = await Category.deleteOne({ category_id: category_id })
+      if (check_success) {
+        return res.json({ success: true, message: "Xóa danh mục thành công", color: "text-green-500" });
+      }
+      else {
+        return res.json({ success: false, message: "Xóa danh mục thất bại", color: "text-red-500" });
+      }
+    }
+  } catch (err) {
+    console.error(err);
+    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
+  }
+};
 
 
 module.exports = {
@@ -272,5 +329,6 @@ module.exports = {
   getSubCategory,
   add_primary_category,
   add_sub_category,
-  update_Catergory
+  update_Catergory,
+  update_sub_category
 };
