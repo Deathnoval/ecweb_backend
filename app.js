@@ -23,7 +23,7 @@ const authRoutes = require('./routers/auth')
 const userRouter = require('./routers/users')
 const categoryRouter = require('./routers/category')
 const productRouter = require('./routers/products')
-
+const adminRouter=require('./routers/admin')
 const api = process.env.API_URL;
 
 
@@ -32,6 +32,8 @@ app.use(`${api}/auth`, authRoutes)
 app.use(`${api}/users`, userRouter)
 app.use(`${api}/category`, categoryRouter)
 app.use(`${api}/product`, productRouter)
+app.use(`${api}/admin`, adminRouter)
+
 
 
 mongoose.connect(process.env.CONNECTION_STRING, {

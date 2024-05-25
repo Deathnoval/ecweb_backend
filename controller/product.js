@@ -253,24 +253,31 @@ const update_onlShop_product =async(req,res) =>
 }
 const add_product=async(req,res)=>{
     try{
-        const { name, price, total_number, array_color, array_images, primary_image, image_hover, category_id, sub_category_id, onlShop } = req.body;
-        if (!name || !price || !total_number || !array_color || !array_images || !primary_image || !category_id || !sub_category_id) {
+        const { name, price, array_color, array_image, primary_image, image_hover, category_id, sub_category_id,code } = req.body;
+        console.log({name, price, array_color, array_image, primary_image, image_hover, category_id, sub_category_id,code})
+        if (!name || !price  || !array_color || !array_image || !primary_image || !category_id || !sub_category_id||!code) {
             return res.json({success:false, message: "Thông tin sản phẩm không được để trống",color:"text-red-500" });
         }
         else{
+            let total_number = 0;
+            array_color.forEach(color => {
+                total_number += color.total_number_with_color;
+            });
+
             const newProduct = new Product({
                 name,
                 price,
                 total_number,
                 array_color,
-                array_images,
+                array_image,
                 primary_image,
                 image_hover,
                 category_id,
                 sub_category_id,
-                onlShop,
+                onlShop:false,
                 product_id: generateProductId(), // Function to generate unique product ID (optional)
                 createdAt: Date.now(),
+                code,
               });
           
               // Save the product to the database

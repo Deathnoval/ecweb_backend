@@ -14,7 +14,17 @@ function generateCategoryId() {
   return id;
 }
 
-
+const Admin_get_all_category=async(req,res)=>{
+  try{
+    const category=await Category.find()
+    console.log(category)
+    return res.json({success:true,category})
+  }catch(err)
+  {
+    console.log(err)
+    return res.json({success:false,message:"Lỗi truy xuất dữ liệu",color:"text-red-500"});
+  }
+};
 
 const getCategories = async (req, res) => {
   const { id } = req.params; // Lấy id từ URL
@@ -372,5 +382,6 @@ module.exports = {
   add_sub_category,
   update_Catergory,
   update_sub_category,
-  delete_sub_category
+  delete_sub_category,
+  Admin_get_all_category
 };
