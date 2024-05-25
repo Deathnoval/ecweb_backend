@@ -123,6 +123,23 @@ const getProductDetail = async (req, res) => {
 
 
 };
+
+const admin_to_get_product_list= async(req,res)=>{
+    try{
+        const id =req.params.id;
+        let product_list=await Product.find({category_id:id})
+        if(!(product_list.length>0))
+        {
+            product_list=await Product.find({sub_category_id:id})
+        }
+        
+    }catch(err)
+    {
+        console.log(err);
+        return res.json({success:false,message:"Lỗi truy xuất dữ liệu",color:"text-red-500"});
+    }
+};
+
 async function getNameSubCategor(id,subId){
     
     try{
@@ -158,7 +175,7 @@ const getProductListALL_with_Sattus = async (req, res) => {
     if (value_sort == "1") {
         sortField = "price"
         sortOrder = "asc"
-    }
+    } 
     else if (value_sort == "2") {
         sortField = "price"
         sortOrder = "desc"
