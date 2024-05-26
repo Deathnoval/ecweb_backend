@@ -295,7 +295,7 @@ const add_product = async (req, res) => {
                     console.log(total_number_with_color);
                 });
                 console.log(color.total_number_with_color);
-                color.push("total_number_with_color", total_number_with_color);
+                color.total_number_with_color = total_number_with_color;
                 total_number += color.total_number_with_color
             });
 
