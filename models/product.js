@@ -20,7 +20,7 @@ const productSchema = mongoose.Schema({
         }
     ],
     array_image: [
-        
+
     ],
     primary_image: String,
     image_hover: String,
@@ -30,8 +30,9 @@ const productSchema = mongoose.Schema({
         type: String,
         unique: true,
     },
-    onlShop:{ type: Boolean, default: false, },
-    createdAt: { type: Date, default: Date.now, }
+    description: String,
+    onlShop: { type: Boolean, default: false, },
+    createDate: { type: Date, default: Date.now, }
 
 
 });
