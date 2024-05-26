@@ -292,9 +292,9 @@ const add_product = async (req, res) => {
                 let total_number_with_color = 0;
                 color.array_sizes.forEach(size => {
                     total_number_with_color += size.total_number_with_size;
-                    console.log(total_number_with_color);
+
                 });
-                console.log(color.total_number_with_color);
+
                 color.total_number_with_color = total_number_with_color;
                 total_number += color.total_number_with_color
             });
