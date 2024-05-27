@@ -49,7 +49,7 @@ const getProductListALL = async (req, res) => {
 
 
 
-    const sortOptions = {};
+    let sortOptions = {};
     sortOptions[sortField] = sortOrder;
     console.log(sortOptions);
     try {
@@ -127,17 +127,18 @@ const getProductDetail = async (req, res) => {
 const admin_to_get_product_list = async (req, res) => {
     try {
         const id = req.params.id;
-        const sortField = "createdAt"
-        const sortOrder = "desc"
-        const sortOptions = {};
-        sortOptions[sortField] = sortOrder;
-        let product_list = await Product.find({ category_id: id }).sort(sortOptions);
-        console.log(product_list)
+        const sortField = "createDate"
+        const sortOrder = 1
+        let sortOptions = {};
+        sortOptions[`${sortField}`] = sortOrder;
+        console.log(sortOptions);
+        let product_list = await Product.find({ category_id: id }).sort({"createDate.date":1});
+        
         if (!(product_list.length > 0)) {
-            product_list = await Product.find({ sub_category_id: id })
+            product_list = await Product.find({ sub_category_id: id }).sort({"createDate.date":1});
 
         }
-        console.log(product_list);
+        
         const formatted_product = product_list.map(product => ({
             name: product.name,
             code: product.code,
@@ -149,6 +150,7 @@ const admin_to_get_product_list = async (req, res) => {
             createDate: date.format(product.createDate, "DD/MM/YYYY"),
             
         }));
+        
         return res.json({ success: true, formatted_product });
 
     } catch (err) {
