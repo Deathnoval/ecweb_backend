@@ -127,7 +127,11 @@ const getProductDetail = async (req, res) => {
 const admin_to_get_product_list = async (req, res) => {
     try {
         const id = req.params.id;
-        let product_list = await Product.find({ category_id: id })
+        const sortField = "createdAt"
+        const sortOrder = "desc"
+        const sortOptions = {};
+        sortOptions[sortField] = sortOrder;
+        let product_list = await Product.find({ category_id: id }).sort(sortOptions);
         console.log(product_list)
         if (!(product_list.length > 0)) {
             product_list = await Product.find({ sub_category_id: id })
@@ -143,7 +147,7 @@ const admin_to_get_product_list = async (req, res) => {
             product_id: product.product_id,
             onlShop: product.onlShop,
             createDate: date.format(product.createDate, "DD/MM/YYYY"),
-            code: product.code
+            
         }));
         return res.json({ success: true, formatted_product });
 
