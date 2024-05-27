@@ -142,7 +142,8 @@ const admin_to_get_product_list = async (req, res) => {
             primary_image: product.primary_image,
             product_id: product.product_id,
             onlShop: product.onlShop,
-            createDate: date.format(product.createDate, "DD/MM/YYYY")
+            createDate: date.format(product.createDate, "DD/MM/YYYY"),
+            code: product.code
         }));
         return res.json({ success: true, formatted_product });
 
@@ -285,8 +286,28 @@ const add_product = async (req, res) => {
         if (!name || !price || !array_color || !array_image || !primary_image || !category_id || !sub_category_id || !description || !code) {
             return res.json({ success: false, message: "Thông tin sản phẩm không được để trống", color: "text-red-500" });
         }
+        
         else {
-
+            const checkProduct_code=await Product.findOne({code:code});
+            const checkProduct_category=await Category.findOne({category_id:category_id});
+            
+            if(checkProduct_code.length>0)
+            {
+                return res.json({ success: false, message: "Mã sãn phẫm đã tồn tại", color: "text-red-500" })
+            }
+            if(!checkProduct_category)
+            {
+                return res.json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" })
+            }
+            else
+            {
+                const checkProduct_sub_category= checkProduct_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
+                if(checkProduct_sub_category===-1)
+                {
+                    return res.json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" })
+                }
+            }
+            
             let total_number = 0;
             array_color.forEach(color => {
                 let total_number_with_color = 0;
@@ -297,8 +318,13 @@ const add_product = async (req, res) => {
 
                 color.total_number_with_color = total_number_with_color;
                 total_number += color.total_number_with_color
+                console.log(color.array_sizes)
             });
-
+            let new_product_id ;
+            do {
+                new_product_id = generateProductId();
+                console.log(new_product_id);
+            } while (await Product.findOne({ Product: new_product_id }));
 
             const newProduct = new Product({
                 name,
@@ -312,7 +338,7 @@ const add_product = async (req, res) => {
                 sub_category_id,
                 description,
                 onlShop: false,
-                product_id: generateProductId(), // Function to generate unique product ID (optional)
+                product_id: new_product_id, 
                 createdAt: Date.now(),
                 code,
             });
