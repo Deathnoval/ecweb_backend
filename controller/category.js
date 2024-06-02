@@ -18,7 +18,7 @@ function generateCategoryId() {
 
 const Admin_get_all_category = async (req, res) => {
   try {
-    const category = await Category.find()
+    let category = await Category.find()
     let formatted = category
     const check_undefined_product = await Product.findOne({ category_id: "undefined" })
     const check_undefined_product_with_sub_category = await Product.findOne({ sub_category_id: "undefined" })
