@@ -6,6 +6,7 @@ const req = require('express/lib/request');
 const Product = require('../models/product');
 
 
+
 function generateCategoryId() {
   const chars = 'abcdefghijklmnopqrstuvwxyz';
   let id = '';
@@ -18,8 +19,26 @@ function generateCategoryId() {
 const Admin_get_all_category = async (req, res) => {
   try {
     const category = await Category.find()
-    console.log(category)
-    return res.json({ success: true, category })
+    let formatted = category
+    const check_undefined_product = await Product.findOne({ category_id: "undefined" })
+    const check_undefined_product_with_sub_category = await Product.findOne({ sub_category_id: "undefined" })
+    // console.log(check_undefined_product)
+    if (check_undefined_product != null || check_undefined_product_with_sub_category != null) {
+      const formatted_product = {
+        name: "Tồn Kho",
+        category_id: "undefined",
+        route: "xem-tat-ca-tồn-kho",
+        sub_category: [
+          {
+            name: "Tồn Kho",
+            sub_category_id: "undefined",
+          }
+        ]
+      };
+      formatted = formatted.concat(formatted_product)
+    }
+    // console.log(formatted)
+    return res.json({ success: true, formatted })
   } catch (err) {
     console.log(err)
     return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
