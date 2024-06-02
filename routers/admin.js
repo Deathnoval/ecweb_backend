@@ -17,7 +17,7 @@ router.post('/delete_sub_category', middlewareController.verifyTokenAdmin, categ
 
 //admin for product
 router.post('/update_onlShop_product', middlewareController.verifyTokenAdmin, productController.update_onlShop_product)
-router.post('/add_product', productController.add_product);
+router.post('/add_product', middlewareController.verifyTokenAdmin, productController.add_product);
 router.post('/delete_product', middlewareController.verifyTokenAdmin, productController.delete_product);
 router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
 router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
