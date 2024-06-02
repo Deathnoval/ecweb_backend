@@ -5,6 +5,10 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 //const bcrypt = require("bcrypt");
 const Joi = require("joi");
+const auth_controller = require("../controller/auth");
+const middlewareController = require("../controller/middleware");
+
+router.post("/test", auth_controller.loginUser);
 
 router.post("/", async (req, res) => {
 	try {
@@ -45,7 +49,7 @@ router.post("/", async (req, res) => {
 			userId: user._id,
 			token: crypto.randomBytes(32).toString("hex"),
 		}).save();
-		res.status(200).send({ data: token.token,isAdmin: user.isAdmin, message: "logged in successfully", success: true });
+		res.status(200).send({ data: token.token, isAdmin: user.isAdmin, message: "logged in successfully", success: true });
 
 	} catch (error) {
 		res.status(500).send({ message: "Internal Server Error" });

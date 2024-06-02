@@ -3,6 +3,7 @@ const Category = require('../models/category');
 const mongoose = require('mongoose');
 const { v4: uuidv4 } = require('uuid');
 const req = require('express/lib/request');
+const Product = require('../models/product');
 
 
 function generateCategoryId() {
@@ -319,12 +320,33 @@ const deleteCategory = async (req, res) => {
       return res.json({ success: false, message: "Không tìm thấy danh mục cần xóa", color: "text-red-500" });
     }
     else {
-      const check_success = await Category.deleteOne({ category_id: category_id })
-      if (check_success) {
-        return res.json({ success: true, message: "Xóa danh mục thành công", color: "text-green-500" });
+      const is_exit_product_with_category = await Product.find({ category_id: category_id });
+      console.log(is_exit_product_with_category);
+      if (is_exit_product_with_category.length > 0) {
+        const productIdsToUpdate = is_exit_product_with_category.map(product => product.product_id);
+        const check_update = await Product.updateMany({ product_id: { $in: productIdsToUpdate } }, { $set: { category_id: "undefined", sub_category_id: "undefined" } });
+        if (check_update) {
+          const check_success = await Category.deleteOne({ category_id: category_id })
+          if (check_success) {
+            return res.json({ success: true, message: "Xóa danh mục thành công", color: "text-green-500" });
+          }
+          else {
+            return res.json({ success: false, message: "Xóa danh mục thất bại", color: "text-red-500" });
+          }
+        }
+        else {
+          return res.json({ success: false, message: "Xóa danh mục thất bại do không thể thay đổi id của sản phẩm", color: "text-red-500" });
+        }
+
       }
       else {
-        return res.json({ success: false, message: "Xóa danh mục thất bại", color: "text-red-500" });
+        const check_success = await Category.deleteOne({ category_id: category_id })
+        if (check_success) {
+          return res.json({ success: true, message: "Xóa danh mục thành công", color: "text-green-500" });
+        }
+        else {
+          return res.json({ success: false, message: "Xóa danh mục thất bại", color: "text-red-500" });
+        }
       }
     }
   } catch (err) {
@@ -346,8 +368,16 @@ const delete_sub_category = async (req, res) => {
         return res.json({ success: false, message: "Không tìm thấy danh mục phụ", color: "text-red-500" });
       }
       else {
-        is_exit_category.sub_category.splice(is_exit_sub_category, 1);
         let check_deletion_success = true;
+        const is_exit_product_with_sub_category = await Product.find({ sub_category_id: sub_category_id });
+        if (is_exit_product_with_sub_category.length > 0) {
+          const productIdsToUpdate = is_exit_product_with_sub_category.map(product => product.product_id);
+          const check_update = await Product.updateMany({ product_id: { $in: productIdsToUpdate } }, { $set: { sub_category_id: "undefined" } });
+          if (!check_update) {
+            check_deletion_success = false;
+          }
+        }
+        is_exit_category.sub_category.splice(is_exit_sub_category, 1);
         await is_exit_category.save().catch(err => {
           console.log(err);
           check_deletion_success = false;

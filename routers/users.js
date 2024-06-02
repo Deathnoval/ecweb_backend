@@ -5,7 +5,7 @@ const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { status } = require("express/lib/response");
 const { isDeepStrictEqual } = require("util");
-//const bcrypt = require("bcrypt");
+const bcrypt = require("bcryptjs");
 
 
 async function changeDefaultAddress(userId, addressId) {
@@ -55,8 +55,8 @@ router.post("/", async (req, res) => {
 				.status(409)
 				.send({ message: "User with given email already Exist!" });
 
-		//const salt = await bcrypt.genSalt(Number(process.env.SALT));
-		const hashPassword = req.body.password//await bcrypt.hashSync(req.body.password, salt);
+		const salt = await bcrypt.genSalt(Number(process.env.SALT));
+		const hashPassword = await bcrypt.hashSync(req.body.password, salt);
 
 		user = await new User({ ...req.body, password: hashPassword }).save();
 
@@ -66,6 +66,7 @@ router.post("/", async (req, res) => {
 		}).save();
 		//const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
         const url = `http://localhost:3000/verify/${user.id}/verify/${token.token}`;
+		console.log(url);
 		await sendEmail(user.email, "Verify Email", url);
 
 		res
