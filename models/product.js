@@ -10,19 +10,25 @@ const productSchema = mongoose.Schema({
             name_color: String,
             code_color: String,
             total_number_with_color: Number,
-            image: String,
-            _id: false,
+            image: {
+                uid: String,
+                url: String,
+            },
+            _id: String,
             array_sizes: [
                 {
                     name_size: String,
                     total_number_with_size: Number,
-                    _id: false
+                    _id: String,
                 }
             ]
         }
     ],
     array_image: [
-
+        {
+            uid: String,
+            url: String,
+        }
     ],
     primary_image: String,
     image_hover: String,
@@ -35,7 +41,7 @@ const productSchema = mongoose.Schema({
     description: String,
     onlShop: { type: Boolean, default: false, },
     createDate: { type: Date, default: Date.now, },
-    code:{type:String,require:true}
+    code: { type: String, require: true }
 
 
 });

@@ -7,6 +7,18 @@ const loginUser = async (req, res) => {
         if (!user) {
             return res.json({ success: false, message: "Tài khoản không tồn tại", color: "text-red-500" });
         }
+        if (!user.verified) {
+            let token = await Token.findOne({ userId: user._id });
+            if (!token) {
+                token = await new Token({
+                    userId: user._id,
+                    token: crypto.randomBytes(32).toString("hex"),
+                }).save();
+                const url = `${process.env.BASE_URL}users/${user.id}/verify/${token.token}`;
+                await sendEmail(user.email, "Verify Email", url);
+            }
+        }
+
         else {
             const validPassword = await bcrypt.compare(req.body.password, user.password);
             // console.log(req.body.password);
@@ -25,7 +37,7 @@ const loginUser = async (req, res) => {
                     { expiresIn: "1d" }
                 );
                 const { password, ...other } = user._doc;
-                return res.json({ success: true, message: "Đăng nhập thành công", ...other, Token, color: "text-green-500" });
+                return res.json({ success: true, message: "Đăng nhập thành công", isAdmin: user.isAdmin, Token, color: "text-green-500" });
             }
         }
     } catch (error) {
