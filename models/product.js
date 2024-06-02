@@ -11,10 +11,12 @@ const productSchema = mongoose.Schema({
             code_color: String,
             total_number_with_color: Number,
             image: String,
+            _id: false,
             array_sizes: [
                 {
-                    name_sizes: String,
-                    total_number_with_sizes: Number,
+                    name_size: String,
+                    total_number_with_size: Number,
+                    _id: false
                 }
             ]
         }
@@ -32,10 +34,12 @@ const productSchema = mongoose.Schema({
     },
     description: String,
     onlShop: { type: Boolean, default: false, },
-    createDate: { type: Date, default: Date.now, }
+    createDate: { type: Date, default: Date.now, },
+    code:{type:String,require:true}
 
 
 });
+
 const Product = mongoose.model('products', productSchema, 'products');
 
 module.exports = Product;
