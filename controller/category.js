@@ -38,7 +38,8 @@ const Admin_get_all_category = async (req, res) => {
       formatted = formatted.concat(formatted_product)
     }
     // console.log(formatted)
-    return res.json({ success: true, formatted })
+    category = formatted
+    return res.json({ success: true, category })
   } catch (err) {
     console.log(err)
     return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
