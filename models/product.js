@@ -30,8 +30,14 @@ const productSchema = mongoose.Schema({
             url: String,
         }
     ],
-    primary_image: String,
-    image_hover: String,
+    primary_image: {
+        uid: String,
+        url: String,
+    },
+    image_hover: {
+        uid: String,
+        url: String,
+    },
     category_id: String,
     sub_category_id: String,
     product_id: {
