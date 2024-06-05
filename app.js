@@ -14,9 +14,9 @@ app.options('*', cors());
 
 //middleware
 app.use(express.json());
-app.use(bodyParser.json({type:'aplication/*+json'}));
-app.use(bodyParser.raw({type:'aplication/vnd.custom-type'}));
-app.use(bodyParser.text({type:'text/html'}));
+// app.use(bodyParser.json({type:'aplication/*+json'}));
+// app.use(bodyParser.raw({type:'aplication/vnd.custom-type'}));
+// app.use(bodyParser.text({type:'text/html'}));
 
 
 app.use(morgan('tiny'));
