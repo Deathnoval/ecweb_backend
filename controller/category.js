@@ -21,18 +21,15 @@ const Admin_get_all_category = async (req, res) => {
     let category = await Category.find()
     let formatted = category
     const check_undefined_product = await Product.findOne({ category_id: "undefined" })
-    const check_undefined_product_with_sub_category = await Product.findOne({ sub_category_id: "undefined" })
+    // const check_undefined_product_with_sub_category = await Product.findOne({ sub_category_id: "undefined" })
     // console.log(check_undefined_product)
-    if (check_undefined_product != null || check_undefined_product_with_sub_category != null) {
+    if (check_undefined_product != null) {
       const formatted_product = {
         name: "Tồn Kho",
         category_id: "undefined",
         route: "xem-tat-ca-tồn-kho",
         sub_category: [
-          {
-            name: "Tồn Kho",
-            sub_category_id: "undefined",
-          }
+
         ]
       };
       formatted = formatted.concat(formatted_product)

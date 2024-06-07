@@ -346,14 +346,15 @@ const add_product = async (req, res) => {
 
                     });
                     if (color.total_number_with_color != total_number_with_color) {
-                        hasError = true
+
                     } else {
+                        hasError = true
                         total_number += parseInt(color.total_number_with_color)
                         console.log(color.array_sizes)
 
                     }
                 });
-                if (hasError)
+                if (hasError == false)
                     return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm ", color: "text-red-500" });
 
                 if (parseInt(total_number) != total) {
@@ -496,14 +497,15 @@ const update_product = async (req, res) => {
 
                         });
                         if (color.total_number_with_color != total_number_with_color) {
-                            hasError = true
+
                         } else {
                             total_number += parseInt(color.total_number_with_color)
+                            hasError = true
                             console.log(color.array_sizes)
 
                         }
                     });
-                    if (hasError)
+                    if (hasError == false)
                         return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm ", color: "text-red-500" });
 
                     if (parseInt(total_number) != total) {
