@@ -13,8 +13,12 @@ app.use(cors());
 app.options('*', cors());
 
 //middleware
-
+app.use(express.json());
 app.use(bodyParser.json());
+// app.use(bodyParser.raw({type:'aplication/vnd.custom-type'}));
+// app.use(bodyParser.text({type:'text/html'}));
+
+
 app.use(morgan('tiny'));
 //app.use(authJwt());
 

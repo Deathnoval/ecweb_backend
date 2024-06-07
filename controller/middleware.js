@@ -12,6 +12,7 @@ const verifyToken = async (req, res, next) => {
             }
             req.user = user;
             // console.log(user);
+            
             next();
         });
     } else {
@@ -22,6 +23,8 @@ const verifyTokenAdmin = async (req, res, next) => {
     verifyToken(req, res, () => {
         // console.log(req.user.isAdmin);
         if (req.user.isAdmin) {
+            res.set('Content-Type', 'application/json');
+            req.header('Content-Type', 'application/json');
             next();
         }
         else {
