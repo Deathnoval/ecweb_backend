@@ -332,7 +332,7 @@ const update_address=async function(req, res){
 		  res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" });
 		} catch (error) {
 		  console.error(error);
-		  return res.json({ success: false, message: "Error updating address", color: "text-red-500" });
+		  return res.json({ success: false, message: "Lỗi cập nhật địa chỉ ", color: "text-red-500" });
 		}
 	  } catch (err) {
 		console.error(err);

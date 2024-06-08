@@ -53,7 +53,7 @@ const getProductListALL = async (req, res) => {
     sortOptions[sortField] = sortOrder;
     console.log(sortOptions);
     try {
-        let productListAll = await Product.find({ total_number: { $gt: 0 } }).sort(sortOptions);
+        let productListAll = await Product.find({ total_number: { $gt: 0 },onlShop:true }).sort(sortOptions);
         console.log(productListAll);
         if (type_get != "all") {
 
