@@ -494,7 +494,7 @@ const deleteCategory = async (req, res) => {
         );
         const check_update = await Product.updateMany(
           { product_id: { $in: productIdsToUpdate } },
-          { $set: { category_id: "undefined", sub_category_id: "undefined" } }
+          { $set: { category_id: "undefined", sub_category_id: "undefined",onlShop:false } }
         );
         if (check_update) {
           const check_success = await Category.deleteOne({
@@ -583,7 +583,7 @@ const delete_sub_category = async (req, res) => {
           );
           const check_update = await Product.updateMany(
             { product_id: { $in: productIdsToUpdate } },
-            { $set: { sub_category_id: "undefined" } }
+            { $set: { sub_category_id: "undefined",onlShop:false } }
           );
           if (!check_update) {
             check_deletion_success = false;
