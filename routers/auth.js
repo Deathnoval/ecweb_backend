@@ -9,7 +9,8 @@ const auth_controller = require("../controller/auth");
 const middlewareController = require("../controller/middleware");
 
 router.post("/", auth_controller.loginUser);
-
+router.post("/logout",middlewareController.verifyToken,auth_controller.logOut);
+router.post("/refresh",auth_controller.requestRefreshToken);
 // router.post("/", async (req, res) => {
 // 	try {
 // 		const { error } = validate(req.body);

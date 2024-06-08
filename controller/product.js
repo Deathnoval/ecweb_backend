@@ -104,11 +104,14 @@ const getProductListALL = async (req, res) => {
         res.json({ success: false, message: err, color: 'text-red-500' })
     }
 };
+
 const getProductDetail = async (req, res) => {
     const { id } = req.params
+    // const token = req.headers.token;
     try {
-        const product = await Product.findOne({ product_id: id })
-        console.log(typeof (product))
+        let product = await Product.findOne({ product_id: id })
+        
+        // console.log(typeof (product))
         if (product) {
             res.json({ success: true, product })
         }

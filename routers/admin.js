@@ -22,7 +22,7 @@ router.post('/update_product', middlewareController.verifyTokenAdmin, productCon
 router.post('/add_product', middlewareController.verifyTokenAdmin, productController.add_product);
 router.post('/delete_product', middlewareController.verifyTokenAdmin, productController.delete_product);
 router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
-router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
+// router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
 
 
 module.exports = router;

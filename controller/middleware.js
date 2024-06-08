@@ -32,4 +32,13 @@ const verifyTokenAdmin = async (req, res, next) => {
         }
     })
 };
-module.exports = { verifyToken, verifyTokenAdmin }
+const verifyTokenAndUserAuthorization = (req, res, next) => {
+    verifyToken(req, res, () => {
+      if (req.user.id === req.params.id|| req.user.isAdmin) {
+        next();
+      } else {
+        res.json({ success: false, message: "Bạn không có quyền truy cập", color: "text-green-500" });
+      }
+    });
+  };
+module.exports = { verifyToken, verifyTokenAdmin,verifyTokenAndUserAuthorization }
