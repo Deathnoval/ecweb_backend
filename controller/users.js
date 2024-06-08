@@ -172,7 +172,7 @@ const reset_Pass=async function(req, res) {
 const get_info=async function(req, res) {
 	try{
 		
-		const id =req.params.id;
+		const id =req.user.id;
 		const user= await User.findOne({
 			_id:id,
 		});
