@@ -9,7 +9,7 @@ router.get('/getAllCategories', categoryController.getAllCategories);
 router.get('/getAllCategoriesList', categoryController.getAllCategoriesList);
 router.get('/getSubCategory/:id', categoryController.getSubCategory);
 
-router.get('/admin/Admin_get_all_category',categoryController.Admin_get_all_category);
+// router.get('/admin/Admin_get_all_category',categoryController.Admin_get_all_category);
 
 
 

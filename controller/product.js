@@ -53,7 +53,7 @@ const getProductListALL = async (req, res) => {
     sortOptions[sortField] = sortOrder;
     console.log(sortOptions);
     try {
-        let productListAll = await Product.find({ total_number: { $gt: 0 },onlShop:true }).sort(sortOptions);
+        let productListAll = await Product.find({ total_number: { $gt: 0 }, onlShop: true }).sort(sortOptions);
         console.log(productListAll);
         if (type_get != "all") {
 
@@ -61,7 +61,8 @@ const getProductListALL = async (req, res) => {
                 category_id: type_get,
                 total_number: {
                     $gt: 0
-                }
+                },
+                onlShop: true,
 
 
 
@@ -71,7 +72,8 @@ const getProductListALL = async (req, res) => {
                 console.log('Product');
                 productListAll = await Product.find({
                     sub_category_id: type_get,
-                    total_number: { $gt: 0 }
+                    total_number: { $gt: 0 },
+                    onlShop: true,
                 }).sort(sortOptions);
             }
             console.log(productListAll)
@@ -110,7 +112,7 @@ const getProductDetail = async (req, res) => {
     // const token = req.headers.token;
     try {
         let product = await Product.findOne({ product_id: id })
-        
+
         // console.log(typeof (product))
         if (product) {
             res.json({ success: true, product })
@@ -272,26 +274,24 @@ const update_onlShop_product = async (req, res) => {
     const id = req.body.id
     const onlShop = req.body.onlShop
     try {
-        const check_category_undefined=Product.findOne({product_id:id})
-        if(check_category_undefined.category_id=="undefined"|| check_category_undefined.sub_category_id=="undefined")
-        {
-            return res.json({success:false,message:"Sản phẩm phải có danh mục chính rõ ràng",color:"text-red-500"})
+        const check_category_undefined = Product.findOne({ product_id: id })
+        if (check_category_undefined.category_id == "undefined" || check_category_undefined.sub_category_id == "undefined") {
+            return res.json({ success: false, message: "Sản phẩm phải có danh mục chính rõ ràng", color: "text-red-500" })
         }
-        else
-        {
+        else {
             const updatedProduct = await Product.findOneAndUpdate(
                 { product_id: id }, // Find the product by product_id
                 { onlShop: onlShop }, // Update the onlShop property
                 { new: true } // Return the updated document
             );
-    
+
             if (!updatedProduct) {
                 res.json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
             }
-    
+
             res.json({ success: true, message: 'Cập nhật trạng thái thành công ', color: 'text-green-500' });
         }
-        
+
     } catch (error) {
         console.error(error);
         res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
