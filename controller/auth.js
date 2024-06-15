@@ -1,7 +1,7 @@
 const { User } = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-let refreshTokens = [];
+let accessTokens = [];
 
 function generateAccessToken(user) {
   return jwt.sign(
@@ -56,17 +56,18 @@ const loginUser = async (req, res) => {
         return res.json({ success: false, message: "Sai mật khẩu", color: "text-red-500" });
       }
       else {
+        accessTokens = []
         const accessToken = generateAccessToken(user)
-        const refreshToken = generateRefreshToken(user)
-        refreshTokens.push(refreshToken)
-        res.cookie("refreshToken", refreshToken, {
+        // const refreshToken = generateRefreshToken(user)
+        accessTokens.push(accessToken)
+        res.cookie("accessTokens", accessTokens, {
           httpOnly: true,
           secure: false,
           path: "/",
           sameSite: "strict",
         });
         const { password, ...other } = user._doc;
-        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, accessToken, refreshToken, color: "text-green-500" });
+        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, accessToken, color: "text-green-500" });
       }
     }
   } catch (error) {
@@ -105,8 +106,8 @@ const requestRefreshToken = async (req, res) => {
   });
 };
 const logOut = async function (req, res) {
-  refreshTokens = refreshTokens.filter((token) => token !== req.body.token);
-  res.clearCookie("refreshToken");
+  accessTokens = accessTokens.filter((token) => token !== req.cookies.token);
+  res.clearCookie("accessTokens");
   res.status(200).json("Logged out successfully!");
 
 };
