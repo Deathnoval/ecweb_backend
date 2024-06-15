@@ -62,7 +62,7 @@ const Admin_get_all_category = async (req, res) => {
           formatted[categoryIndex].sub_category.push({
             name: "Chưa có danh mục chính",
             sub_category_id: "undefined",
-            route:""
+            route: ""
           });
         }
       }
@@ -239,7 +239,14 @@ const getSubCategory = async (req, res) => {
       );
       console.log(formattedSubCategories);
       res.json({ success: true, formattedSubCategories });
+    } else {
+      res.json({
+        success: false,
+        message: "Không tìm thấy category",
+        color: "text-red-500",
+      });
     }
+
   } catch (err) {
     console.log(err);
     res.json({
@@ -494,7 +501,7 @@ const deleteCategory = async (req, res) => {
         );
         const check_update = await Product.updateMany(
           { product_id: { $in: productIdsToUpdate } },
-          { $set: { category_id: "undefined", sub_category_id: "undefined",onlShop:false } }
+          { $set: { category_id: "undefined", sub_category_id: "undefined", onlShop: false } }
         );
         if (check_update) {
           const check_success = await Category.deleteOne({
@@ -583,7 +590,7 @@ const delete_sub_category = async (req, res) => {
           );
           const check_update = await Product.updateMany(
             { product_id: { $in: productIdsToUpdate } },
-            { $set: { sub_category_id: "undefined",onlShop:false } }
+            { $set: { sub_category_id: "undefined", onlShop: false } }
           );
           if (!check_update) {
             check_deletion_success = false;
