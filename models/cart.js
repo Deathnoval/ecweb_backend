@@ -2,7 +2,7 @@ const { boolean, bool } = require('joi');
 const mongoose = require('mongoose');
 
 const cartSchema = new mongoose.Schema({
-    used_id: {
+    user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         required: true,

@@ -1,4 +1,6 @@
 const express = require('express');
+const cookieParser = require("cookie-parser");
+
 const app = express();
 const bodyParser = require('body-parser');
 const morgan = require('morgan');
@@ -13,6 +15,8 @@ app.use(cors());
 app.options('*', cors());
 
 //middleware
+app.use(cookieParser());
+
 app.use(express.json());
 app.use(bodyParser.json());
 // app.use(bodyParser.raw({type:'aplication/vnd.custom-type'}));

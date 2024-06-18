@@ -3,9 +3,10 @@ const jwt = require('jsonwebtoken');
 
 
 const verifyToken = async (req, res, next) => {
-    const token = req.headers.token;
+    const token = req.cookies.accessTokens;
+    // console.log(token)
     if (token) {
-        const accessToken = token;
+        const accessToken = token.toString();
         jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY, (err, user) => {
             if (err) {
                 return res.json({ success: false, message: "Token is invalid", color: "text-red-500" });
