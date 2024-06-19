@@ -10,7 +10,7 @@ function generateAccessToken(user) {
       isAdmin: user.isAdmin,
     },
     process.env.JWT_PRIVATE_KEY,
-    { expiresIn: "1d" }
+    { expiresIn: "365d" }
   );
 };
 
@@ -110,7 +110,7 @@ const logOut = async function (req, res) {
   accessTokens = accessTokens.filter((token) => token !== req.cookies.token);
   res.clearCookie("accessTokens");
   res.status(200).json("Logged out successfully!");
-
+  console.log("logout")
 };
 
 
