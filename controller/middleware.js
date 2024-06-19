@@ -17,6 +17,7 @@ const verifyToken = async (req, res, next) => {
             next();
         });
     } else {
+        console.log(token)
         return res.json({ success: false, message: "You're not authenticated", color: "text-red-500" });
     }
 };
@@ -24,8 +25,8 @@ const verifyTokenAdmin = async (req, res, next) => {
     verifyToken(req, res, () => {
         // console.log(req.user.isAdmin);
         if (req.user.isAdmin) {
-            res.set('Content-Type', 'application/json');
-            req.header('Content-Type', 'application/json');
+            // res.set('Content-Type', 'application/json');
+            // req.header('Content-Type', 'application/json');
             next();
         }
         else {

@@ -286,15 +286,15 @@ const update_onlShop_product = async (req, res) => {
             );
 
             if (!updatedProduct) {
-                res.json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
+                return res.json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
             }
 
-            res.json({ success: true, message: 'Cập nhật trạng thái thành công ', color: 'text-green-500' });
+            return res.json({ success: true, message: 'Cập nhật trạng thái thành công ', color: 'text-green-500' });
         }
 
     } catch (error) {
         console.error(error);
-        res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 }
 const add_product = async (req, res) => {

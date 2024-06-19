@@ -57,6 +57,7 @@ const loginUser = async (req, res) => {
       }
       else {
         accessTokens = []
+        res.clearCookie("accessTokens");
         const accessToken = generateAccessToken(user)
         // const refreshToken = generateRefreshToken(user)
         accessTokens.push(accessToken)
