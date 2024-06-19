@@ -17,7 +17,7 @@ const verifyToken = async (req, res, next) => {
             next();
         });
     } else {
-        console.log(token)
+        console.log("token check:"+token)
         return res.json({ success: false, message: "You're not authenticated", color: "text-red-500" });
     }
 };
