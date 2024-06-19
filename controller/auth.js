@@ -9,8 +9,7 @@ function generateAccessToken(user) {
       id: user.id,
       isAdmin: user.isAdmin,
     },
-    process.env.JWT_PRIVATE_KEY,
-    { expiresIn: "365d" }
+    process.env.JWT_PRIVATE_KEY
   );
 };
 
