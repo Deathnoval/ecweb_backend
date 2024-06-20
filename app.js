@@ -15,7 +15,7 @@ app.use(cors());
 app.options('*', cors());
 
 //middleware
-// app.use(cookieParser());
+app.use(cookieParser());
 
 app.use(express.json());
 app.use(bodyParser.json());

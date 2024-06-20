@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 
 const verifyToken = async (req, res, next) => {
-    const token = req.header.token;
+    const token = req.headers.token;
     // const localStorageToken = localStorage.getItem('token');
     // console.log(localStorageToken)
     // console.log(token)
