@@ -66,7 +66,7 @@ const loginUser = async (req, res) => {
         res.cookie("accessTokens", accessTokens, {
           httpOnly: false,
           secure: true,
-          path: "/",
+          domain: "localhost",
           sameSite:"Lax",
           
 
