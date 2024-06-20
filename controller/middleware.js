@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 
 const verifyToken = async (req, res, next) => {
-    const token = req.cookies.accessTokens;
+    const token = req.cookies.accessTokens.toString();
     // console.log(token)
     if (token) {
         const accessToken = token.toString();
@@ -13,11 +13,11 @@ const verifyToken = async (req, res, next) => {
             }
             req.user = user;
             // console.log(user);
-            
+
             next();
         });
     } else {
-        console.log("token check:"+token)
+        console.log("token check:" + token)
         return res.json({ success: false, message: "You're not authenticated", color: "text-red-500" });
     }
 };
@@ -36,11 +36,11 @@ const verifyTokenAdmin = async (req, res, next) => {
 };
 const verifyTokenAndUserAuthorization = (req, res, next) => {
     verifyToken(req, res, () => {
-      if (req.user.id === req.params.id|| req.user.isAdmin) {
-        next();
-      } else {
-        res.json({ success: false, message: "Bạn không có quyền truy cập", color: "text-green-500" });
-      }
+        if (req.user.id === req.params.id || req.user.isAdmin) {
+            next();
+        } else {
+            res.json({ success: false, message: "Bạn không có quyền truy cập", color: "text-green-500" });
+        }
     });
-  };
-module.exports = { verifyToken, verifyTokenAdmin,verifyTokenAndUserAuthorization }
+};
+module.exports = { verifyToken, verifyTokenAdmin, verifyTokenAndUserAuthorization }
