@@ -65,7 +65,7 @@ const loginUser = async (req, res) => {
         res.cookie("accessTokens", accessTokens, {
           httpOnly: false,
           secure: false,
-          path: "/api/V1",
+          path: "/",
           sameSite: "strict",
           expires: new Date(Date.now() + 86400000),
         });
