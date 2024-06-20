@@ -66,7 +66,7 @@ const loginUser = async (req, res) => {
           httpOnly: false,
           secure: false,
           path: "/",
-          sameSite: "strict",
+
           expires: new Date(Date.now() + 86400000),
         });
         const { password, ...other } = user._doc;
