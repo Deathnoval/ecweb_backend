@@ -9,7 +9,9 @@ function generateAccessToken(user) {
       id: user.id,
       isAdmin: user.isAdmin,
     },
-    process.env.JWT_PRIVATE_KEY
+    process.env.JWT_PRIVATE_KEY,
+    { expiresIn: "7d" }
+
   );
 };
 
@@ -56,15 +58,16 @@ const loginUser = async (req, res) => {
       }
       else {
         accessTokens = []
-        res.clearCookie("accessTokens");
+        // res.clearCookie("accessTokens");
         const accessToken = generateAccessToken(user)
         // const refreshToken = generateRefreshToken(user)
         accessTokens.push(accessToken)
         res.cookie("accessTokens", accessTokens, {
           httpOnly: true,
           secure: false,
-          path: "/",
+          path: "/api/V1",
           sameSite: "strict",
+          expires: new Date(Date.now() + 86400000),
         });
         const { password, ...other } = user._doc;
         return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, accessToken, color: "text-green-500" });
