@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const verifyToken = async (req, res, next) => {
     const token = req.header.token;
     // const localStorageToken = localStorage.getItem('token');
-    console.log(localStorageToken)
+    // console.log(localStorageToken)
     // console.log(token)
     if (token) {
         const accessToken = token.toString();
