@@ -62,13 +62,14 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user)
         // const refreshToken = generateRefreshToken(user)
         accessTokens.push(accessToken)
-        res.cookie("accessTokens", accessTokens, {
-          httpOnly: false,
-          secure: false,
-          path: "/",
+        res.cookie("accessTokens", accessTokens)
+        // res.cookie("accessTokens", accessTokens, {
+        //   httpOnly: false,
+        //   secure: false,
+        //   path: "/",
 
-          expires: new Date(Date.now() + 86400000),
-        });
+        //   expires: new Date(Date.now() + 86400000),
+        // });
         const { password, ...other } = user._doc;
         return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, accessToken, color: "text-green-500" });
       }
