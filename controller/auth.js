@@ -67,6 +67,10 @@ const loginUser = async (req, res) => {
           httpOnly: false,
           secure: true,
           path: "/",
+          sameSite:"Lax",
+          
+
+
 
           expires: new Date(Date.now() + 86400000),
         });
