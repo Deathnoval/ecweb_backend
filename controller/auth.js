@@ -63,7 +63,7 @@ const loginUser = async (req, res) => {
         // const refreshToken = generateRefreshToken(user)
         accessTokens.push(accessToken)
         res.cookie("accessTokens", accessTokens, {
-          httpOnly: true,
+          httpOnly: false,
           secure: false,
           path: "/api/V1",
           sameSite: "strict",
