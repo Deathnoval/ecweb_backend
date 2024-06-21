@@ -62,10 +62,15 @@ const loginUser = async (req, res) => {
         const accessToken = generateAccessToken(user)
         // const refreshToken = generateRefreshToken(user)
         accessTokens.push(accessToken)
+        // res.cookie("accessTokens", accessTokens)
         res.cookie("accessTokens", accessTokens, {
           httpOnly: false,
-          secure: false,
-          path: "/",
+          secure: true,
+          domain: "localhost",
+          sameSite:"Lax",
+          
+
+
 
           expires: new Date(Date.now() + 86400000),
         });

@@ -3,7 +3,9 @@ const jwt = require('jsonwebtoken');
 
 
 const verifyToken = async (req, res, next) => {
-    const token = req.cookies.accessTokens.toString();
+    const token = req.headers.token;
+    // const localStorageToken = localStorage.getItem('token');
+    // console.log(localStorageToken)
     // console.log(token)
     if (token) {
         const accessToken = token.toString();
@@ -13,7 +15,7 @@ const verifyToken = async (req, res, next) => {
             }
             req.user = user;
             // console.log(user);
-
+            
             next();
         });
     } else {
