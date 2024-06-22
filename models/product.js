@@ -12,7 +12,9 @@ const productSchema = mongoose.Schema({
             total_number_with_color: Number,
             image: {
                 uid: String,
-                url: String,
+                url: { type: String, required: true }
+
+
             },
             _id: String,
             array_sizes: [
@@ -27,16 +29,20 @@ const productSchema = mongoose.Schema({
     array_image: [
         {
             uid: String,
-            url: String,
+            url: { type: String, required: true }
+
         }
     ],
     primary_image: {
         uid: String,
-        url: String,
+        url: { type: String, required: true }
+
+
     },
     image_hover: {
         uid: String,
-        url: String,
+        url: { type: String, required: true }
+
     },
     category_id: String,
     sub_category_id: String,

@@ -310,8 +310,9 @@ const add_product = async (req, res) => {
         if (!total) {
             return res.json({ success: false, message: "Số lượng  sản phẩm không được để trống", color: "text-red-500" });
         }
+
         if (!array_image) {
-            return res.json({ success: false, message: "Danh sác ảnh sản phẩm không được để trống", color: "text-red-500" });
+            return res.json({ success: false, message: "Danh sách ảnh sản phẩm không được để trống", color: "text-red-500" });
         }
         if (!imagePrimaryAndHover) {
             return res.json({ success: false, message: "vui lòng chọn ảnh chính và ảnh review", color: "text-red-500" });
@@ -353,12 +354,16 @@ const add_product = async (req, res) => {
                 total_number = 0;
                 array_color.forEach(color => {
                     let total_number_with_color = 0;
+                    // if (color.array_sizes.length <= 0) {
+                    //     hashError = true;
+                    // }else
+                    // {}
                     color.array_sizes.forEach(size => {
                         total_number_with_color += parseInt(size.total_number_with_size);
 
                     });
-                    if (color.total_number_with_color != total_number_with_color) {
-
+                    if (color.total_number_with_color != total_number_with_color && color.array_sizes.length > 0) {
+                        hashError = false;
                     } else {
                         hasError = true
                         total_number += parseInt(color.total_number_with_color)
@@ -366,7 +371,7 @@ const add_product = async (req, res) => {
 
                     }
                 });
-                if (hasError == false)
+                if (!hasError)
                     return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm ", color: "text-red-500" });
 
                 if (parseInt(total_number) != total) {
