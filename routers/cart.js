@@ -7,5 +7,6 @@ router.get('/cart_show', middlewareController.verifyToken, cartController.cart_s
 router.get('/show_number_items_in_cart', middlewareController.verifyToken, cartController.show_number_items_in_cart);
 router.post('/delete_items_in_cart', middlewareController.verifyToken, cartController.delete_items_in_cart);
 router.post('/update_items_in_cart', middlewareController.verifyToken, cartController.update_items_in_cart);
+router.post('/check_out', middlewareController.verifyToken, cartController.check_out);
 
 module.exports = router;

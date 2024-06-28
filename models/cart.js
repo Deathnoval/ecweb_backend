@@ -1,4 +1,4 @@
-const { boolean, bool } = require('joi');
+const { boolean, bool, number } = require('joi');
 const mongoose = require('mongoose');
 
 const cartSchema = new mongoose.Schema({
@@ -37,7 +37,8 @@ const cartSchema = new mongoose.Schema({
             required: true,
             default: true,
         },
-        price_per_one: { type: String, required: true, default: 0 }
+        price_per_one: { type: number, required: true, default: 0 },
+        price_per_item: { type: number, required: true }
     }],
     total_price: {
         type: Number,

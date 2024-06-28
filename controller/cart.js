@@ -1,6 +1,7 @@
 const Product = require("../models/product");
 const Category = require("../models/category");
 const Cart = require("../models/cart");
+const User = require("../models/user");
 
 const add_to_cart = async (req, res) => {
   const user_id = req.user.id;
@@ -143,6 +144,7 @@ const add_to_cart = async (req, res) => {
         image_hover: image_hover,
         code: code,
         price_per_one: price_per_one,
+        price_per_item: price_per_one * quantity
       });
     }
     cart.total_price = cart.items.reduce(
@@ -220,6 +222,7 @@ const delete_items_in_cart = async (req, res) => {
       return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
     }
     product_cart.items.splice(productIndex, 1);
+
     // console.log(product_cart)
     product_cart.total_price = product_cart.items.reduce(
       (total, item) => total + item.price_per_one * item.quantity,
@@ -234,7 +237,60 @@ const delete_items_in_cart = async (req, res) => {
   }
 };
 
-const update_items_in_cart = async (req, res) => { };
+const update_items_in_cart = async (req, res) => {
+  const user_id = req.user.id;
+  const id = req.body._id.toString();
+  const quantity = req.body.quantity
+  try {
+    if (!id) {
+      return res.json({ success: false, message: "Mã sản phẩm trong giỏ hàng không được để trống" });
+    }
+    const product_cart = await Cart.findOne({ user_id: user_id })
+    const productIndex = product_cart.items.findIndex(item => item._id.toString() == id);
+    if (productIndex === -1) {
+      return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
+    }
+    if (quantity == 0) {
+      product_cart.items.splice(productIndex, 1);
+    }
+    else {
+      product_cart.items[productIndex].quantity = quantity;
+      product_cart.items[productIndex].price_per_item = product_cart.items[productIndex].price_per_one + quantity;
+    }
+    product_cart.total_price = product_cart.items.reduce(
+      (total, item) => total + item.price_per_one * item.quantity,
+      0
+    );
+    await product_cart.save();
+    console.log(product_cart)
+    return res.json({ success: true, message: "Cập nhật giỏ hàng thành công", color: "text-green-500" });
+
+  }
+  catch (err) {
+    console.log(err);
+    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+  }
+};
+
+
+const check_out = async (req, res) => {
+  const user_id = req.user.id;
+  try {
+    const product_cart = await Cart.findOne({ user_id: user_id })
+    if (product_cart.items.length <= 0) {
+      return res.json({ success: false, message: "Không có bất kì sản phẩm nào trong giỏ hàng của bạn", color: "text-red-500" });
+    }
+    const user = User.findOne({ _id: user.id })
+    if (user.addresses.length <= 0) {
+      return res.json({ success: false, message: "Người dùng chưa có địa chỉ để giao hàng", color: "text-red-500" })
+    }
+    return res.json({ success: true, name: user.ho + " " + user.ten, product_cart, address: user.address })
+  }
+  catch (err) {
+    console.log(err);
+    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+  }
+}
 
 module.exports = {
   add_to_cart,
@@ -242,4 +298,5 @@ module.exports = {
   show_number_items_in_cart,
   delete_items_in_cart,
   update_items_in_cart,
+  check_out
 };
