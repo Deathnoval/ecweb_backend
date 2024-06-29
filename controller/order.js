@@ -235,7 +235,7 @@ const add_order = async (req, res) => {
             const cart_items = await Cart.findOne({ user_id: user_id })
             for (let item of order.items) {
                 let subtract_quantity = await sub_quantity(item.product_id, item.color, item.quantity, item.size);
-                console.log(subtract_quantity);
+                // console.log(subtract_quantity);
 
                 cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
                 cart_items.items.splice(cart_item_Index, 1);
