@@ -354,7 +354,7 @@ function generateOrderId() {
 
 const check_out = async (req, res) => {
   const order_id = generateOrderId()
-  const list_id = req.body.list_id_item;
+  const list_id = req.body.items;
   const user_id = req.user.id;
   try {
     if (list_id.length <= 0) {
@@ -365,7 +365,7 @@ const check_out = async (req, res) => {
     let items_user_choice = [];
     let total_price_user_choice = 0
     for (let item_id of list_id) {
-      const productIndex = user_cart.items.findIndex(item => item._id.toString() == item_id);
+      const productIndex = user_cart.items.findIndex(item => item._id.toString() == item_id._id);
       if (productIndex === -1) {
         return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
       }

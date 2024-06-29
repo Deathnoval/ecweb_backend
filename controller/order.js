@@ -204,12 +204,12 @@ const add_order = async (req, res) => {
             } while (await Order.findOne({ Order_id: new_order_id }));
         }
 
-        let order_status = 0;
+        let order_status = 1;
         if (type_pay == 0 || type_pay == 3) {
-            order_status = 0;
+            order_status = 1;
         }
         else {
-
+            return res.json({ message: "đang phát triển" })
         }
         for (let item of order.items) {
             let flag_check_quantity = await check_quantity(item.product_id, item.color, item.quantity, item.size);
@@ -224,7 +224,8 @@ const add_order = async (req, res) => {
             total_price: order.total_price,
             address: address,
             type_pay: type_pay,
-            status: order_status
+            status: order_status,
+            order_date: Date.now()
         })
         let check_add_success = true
         await new_order.save().catch(err => {

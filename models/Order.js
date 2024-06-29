@@ -53,8 +53,8 @@ const OrderSchema = new mongoose.Schema({
     },
     address: { type: String, required: true },
     type_pay: { type: Number, required: true },
-    status: { type: Number, required: true, default: 0 },
-
+    status: { type: Number, required: true, default: 1 },
+    order_date: { type: Date, required: true }
 
 
 
