@@ -1,7 +1,70 @@
 const Product = require("../models/product");
 const Category = require("../models/category");
 const Cart = require("../models/cart");
-const User = require("../models/user");
+const { User, validate } = require("../models/user");
+
+
+
+
+const check_quantity = async (product_id, color, quantity, size) => {
+  const product = await Product.findOne({ product_id: product_id });
+  if (!product) {
+    return {
+      success: false,
+      message: "Không tìm thấy sản phẩm",
+      color: "text-red-500",
+    };
+  }
+  if (color && size) {
+    const selectedColor = product.array_color.find(
+      (colorObj) => colorObj.name_color === color
+    );
+
+
+    // Find the matching size object within the selected color's array_sizes
+    const selectedSize = selectedColor.array_sizes.find(
+      (sizeObj) => sizeObj.name_size === size
+    );
+    if (!selectedSize) {
+      return { success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" };
+    }
+
+
+    // Check stock availability for the chosen color and size
+    if (selectedSize.total_number_with_size < quantity) {
+      return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+
+    }
+  }
+  if (!color || !size) {
+    const check_color_product = product.array_color.length
+    if (check_color_product > 0 && !color) {
+      return { success: false, message: "Vui lòng chọn màu cho sản phẩm", color: "text-red-500" }
+    }
+    if (color) {
+      const selectedColor = product.array_color.find(
+        (colorObj) => colorObj.name_color === color
+      );
+      if (selectedColor.array_sizes.length > 0) {
+        if (!size) {
+          return { success: false, message: "Vui lòng chọn size sẩn phẩm", color: "text-red-500" }
+        }
+      }
+
+      if (selectedColor.total_number_with_color < quantity) {
+        return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+      }
+    }
+    else {
+      if (product.total_number < quantity) {
+        return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+
+      }
+    }
+  }
+  return {}
+}
+
 
 const add_to_cart = async (req, res) => {
   const user_id = req.user.id;
@@ -102,6 +165,8 @@ const add_to_cart = async (req, res) => {
     const cart = await Cart.findOne({ user_id: user_id });
     if (!cart) {
       const newCart = new Cart({ user_id: user_id });
+      const price_per_item = price_per_one * quantity
+      console.log(price_per_item);
       newCart.items.push({
         product_id: product_id,
         product_name: product_name,
@@ -111,6 +176,8 @@ const add_to_cart = async (req, res) => {
         image_hover: image_hover,
         code: code,
         price_per_one: price_per_one,
+        price_per_item: price_per_one * quantity
+
       });
 
       // await newCart.save();
@@ -239,7 +306,7 @@ const delete_items_in_cart = async (req, res) => {
 
 const update_items_in_cart = async (req, res) => {
   const user_id = req.user.id;
-  const id = req.body._id.toString();
+  const id = req.body._id;
   const quantity = req.body.quantity
   try {
     if (!id) {
@@ -254,8 +321,12 @@ const update_items_in_cart = async (req, res) => {
       product_cart.items.splice(productIndex, 1);
     }
     else {
+
+      const flag_check_quantity = await check_quantity(product_cart.items[productIndex].product_id, product_cart.items[productIndex].color, quantity, product_cart.items[productIndex].size)
+      console.log(flag_check_quantity)
+      if (flag_check_quantity.success == false) { return res.json(flag_check_quantity) }
       product_cart.items[productIndex].quantity = quantity;
-      product_cart.items[productIndex].price_per_item = product_cart.items[productIndex].price_per_one + quantity;
+      product_cart.items[productIndex].price_per_item = product_cart.items[productIndex].price_per_one * quantity;
     }
     product_cart.total_price = product_cart.items.reduce(
       (total, item) => total + item.price_per_one * item.quantity,
@@ -272,19 +343,46 @@ const update_items_in_cart = async (req, res) => {
   }
 };
 
+function generateOrderId() {
+  const chars = '1234567890abcdefghijklmnopqrstuvwxyz';
+  let id = '';
+  for (let i = 0; i < 10; i++) {
+    id += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return id;
+}
 
 const check_out = async (req, res) => {
+  const order_id = generateOrderId()
+  const list_id = req.body.list_id_item;
   const user_id = req.user.id;
   try {
-    const product_cart = await Cart.findOne({ user_id: user_id })
-    if (product_cart.items.length <= 0) {
-      return res.json({ success: false, message: "Không có bất kì sản phẩm nào trong giỏ hàng của bạn", color: "text-red-500" });
+    if (list_id.length <= 0) {
+      return res.json({ success: false, message: "Chưa chọn sản phẩm để thanh toán" })
     }
-    const user = User.findOne({ _id: user.id })
-    if (user.addresses.length <= 0) {
-      return res.json({ success: false, message: "Người dùng chưa có địa chỉ để giao hàng", color: "text-red-500" })
+    const user_cart = await Cart.findOne({ user_id: user_id });
+    // console.log(user_cart)
+    let items_user_choice = [];
+    let total_price_user_choice = 0
+    for (let item_id of list_id) {
+      const productIndex = user_cart.items.findIndex(item => item._id.toString() == item_id);
+      if (productIndex === -1) {
+        return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
+      }
+      let item = user_cart.items[productIndex];
+      total_price_user_choice += user_cart.items[productIndex].price_per_item;
+      let flag_check_quantity = await check_quantity(user_cart.items[productIndex].product_id, user_cart.items[productIndex].color, user_cart.items[productIndex].quantity, user_cart.items[productIndex].size)
+      // console.log(flag_check_quantity)
+      if (flag_check_quantity.success == false) { return res.json(flag_check_quantity) }
+      else {
+        items_user_choice.push(item);
+      }// console.log(item)
     }
-    return res.json({ success: true, name: user.ho + " " + user.ten, product_cart, address: user.address })
+    if (items_user_choice.length <= 0)
+      return res.json({ success: false, message: "Sản phẩm không tồn tại trong giỏ hàng của của bạn", color: "text-red-500" })
+
+
+    return res.json({ success: true, order: { order_id: order_id, items: items_user_choice, total_price: total_price_user_choice }, color: "text-green-500" })
   }
   catch (err) {
     console.log(err);
@@ -298,5 +396,6 @@ module.exports = {
   show_number_items_in_cart,
   delete_items_in_cart,
   update_items_in_cart,
-  check_out
+  check_out,
+
 };

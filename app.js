@@ -33,6 +33,7 @@ const categoryRouter = require('./routers/category')
 const productRouter = require('./routers/products')
 const adminRouter = require('./routers/admin')
 const cartRouter = require('./routers/cart')
+const orderRouter = require('./routers/order')
 const api = process.env.API_URL;
 
 
@@ -43,6 +44,7 @@ app.use(`${api}/category`, categoryRouter)
 app.use(`${api}/product`, productRouter)
 app.use(`${api}/admin`, adminRouter)
 app.use(`${api}/cart`, cartRouter)
+app.use(`${api}/order`, orderRouter)
 
 
 

@@ -1,12 +1,18 @@
-const { boolean, bool, number } = require('joi');
+const { boolean, bool, number, required } = require('joi');
 const mongoose = require('mongoose');
 
-const cartSchema = new mongoose.Schema({
+
+
+
+
+const OrderSchema = new mongoose.Schema({
+    Order_id: { type: String, required: true },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",
         required: true,
     },
+
     items: [{
         product_id: {
             type: String,
@@ -44,12 +50,16 @@ const cartSchema = new mongoose.Schema({
         type: Number,
         required: true,
         default: 0
-    }
+    },
+    address: { type: String, required: true },
+    type_pay: { type: Number, required: true },
+    status: { type: Number, required: true, default: 0 },
+
 
 
 
 });
 
-const Cart = mongoose.model('Cart', cartSchema, 'Cart');
+const Order = mongoose.model('Order', OrderSchema, 'Order');
 
-module.exports = Cart;
+module.exports = Order;
