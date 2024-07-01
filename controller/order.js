@@ -293,7 +293,7 @@ const get_list_detail_user = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date, total_price: order.total_price })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
@@ -343,7 +343,7 @@ const get_list_detail_admin = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date, total_price: order.total_price })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
