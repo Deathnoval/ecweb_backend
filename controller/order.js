@@ -2,8 +2,8 @@ const Cart = require('../models/cart');
 const Product = require('../models/product');
 const { User, validate } = require('../models/user');
 const Order = require('../models/Order');
-const { type } = require('express/lib/response');
-
+const { type, format } = require('express/lib/response');
+const OrderHistory = require('../models/order_history');
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -182,9 +182,7 @@ const add_order = async (req, res) => {
         }
         const cart_items = await Cart.findOne({ user_id: user_id })
         for (let item of order.items) {
-
-
-            cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
+            let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
             if (cart_item_Index == -1) {
                 return res.json({ success: false, message: "Sản phẩm này bạn đã bỏ khỏi giỏ hàng nên không thể thực hiện thanh toán", color: "text-red-500" })
             }
@@ -261,8 +259,207 @@ const add_order = async (req, res) => {
         console.log(err);
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
+};
+
+
+
+const get_order_detail = async (req, res) => {
+    const user_id = req.user.id
+    const Order_id = req.body.Order_id
+    try {
+        if (!Order_id) {
+            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color })
+        }
+        order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
+        if (!order_detail) {
+            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
+        }
+        return res.json({ success: true, order_detail, color: "text-green-500" })
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    }
+};
+const get_list_detail_user = async (req, res) => {
+    const user_id = req.user.id;
+    try {
+        if (!user_id) {
+            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+        }
+        order_list = await Order.find({ user_id: user_id });
+        if (!order_list) {
+            return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
+        }
+        let format_order_list = []
+        for (let order of order_list) {
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date })
+        }
+        return res.json({ success: true, format_order_list, color: "text-green-500" })
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    }
+};
+const get_OrderHistory_log = async (req, res) => {
+    user_id = req.user.id;
+    Order_id = req.body.Order_id;
+    {
+        try {
+            if (!user_id) {
+                return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            }
+            if (!Order_id) {
+                return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+            }
+            list_OrderHistory = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
+            if (!list_OrderHistory) {
+                return res.json({ sucess: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
+            }
+            return res.json({ success: true, log: list_OrderHistory.status_history, color: "text-green-500" })
+
+        } catch (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        }
+    }
 }
+
+
+
+
+
+///////////////////////////////////////////////////////for admin////////////////////////////////
+const get_list_detail_admin = async (req, res) => {
+    const user_id = req.body.user_id
+    try {
+        if (!user_id) {
+            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+        }
+        order_list = await Order.find({ user_id: user_id });
+        if (!order_list) {
+            return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
+        }
+        let format_order_list = []
+        for (let order of order_list) {
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date })
+        }
+        return res.json({ success: true, format_order_list, color: "text-green-500" })
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    }
+};
+
+const get_order_detail_to_admin = async (req, res) => {
+    const user_id = req.body.user_id;
+    const Order_id = req.body.Order_id
+    try {
+        if (!user_id) {
+            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+        }
+        if (!Order_id) {
+            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+        }
+        order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
+        if (!order_detail) {
+            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
+        }
+        return res.json({ success: true, order_detail, color: "text-green-500" })
+    }
+    catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    }
+};
+
+
+
+const update_status_order = async (req, res) => {
+    const user_id = req.user.id;
+    const Order_id = req.body.Order_id;
+    const new_status_order = req.body.new_status_order;
+    try {
+        if (!Order_id) {
+            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color })
+        } if (!user_id) {
+            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+        }
+        const order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
+        if (!order_detail) {
+            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
+        }
+        let order_history_check = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
+        if (!order_history_check) {
+            order_history_check = new OrderHistory({
+                user_id: user_id,
+                Order_id: Order_id,
+                status_history: [{
+                    status: order_detail.status,
+                    day_add: order_detail.order_date
+                },
+                {
+                    status: new_status_order,
+                    day_add: Date.now()
+                }]
+            })
+        }
+        else {
+            for (let i of order_history_check.status_history) {
+                if (i.status == new_status_order)
+                    return res.json({ success: false, message: "Trạng thái này đã tồn tại", color: "text-red-500" })
+            }
+            order_history_check.status_history.push({ status: new_status_order, day_add: Date.now() })
+        }
+        await order_history_check.save()
+        order_detail.order_date = new_status_order
+        await order_detail.save()
+        return res.json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-red-500" })
+
+
+    } catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+
+    }
+};
+const get_OrderHistory_log_admin = async (req, res) => {
+    user_id = req.body.user_id;
+    Order_id = req.body.Order_id;
+    {
+        try {
+            if (!user_id) {
+                return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            }
+            if (!Order_id) {
+                return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+            }
+            list_OrderHistory = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
+            if (!list_OrderHistory) {
+                return res.json({ sucess: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
+            }
+            return res.json({ success: true, log: list_OrderHistory.status_history, color: "text-green-500" })
+
+        } catch (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        }
+    }
+};
+
 
 module.exports = {
     add_order,
+    get_order_detail,
+    get_list_detail_user,
+    get_OrderHistory_log,
+
+    ///for admin///
+    get_list_detail_admin,
+    get_order_detail_to_admin,
+    update_status_order,
+
+    get_OrderHistory_log_admin
 }

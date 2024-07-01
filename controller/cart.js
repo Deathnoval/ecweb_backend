@@ -358,7 +358,7 @@ const check_out = async (req, res) => {
   const user_id = req.user.id;
   try {
     if (list_id.length <= 0) {
-      return res.json({ success: false, message: "Chưa chọn sản phẩm để thanh toán" })
+      return res.json({ success: false, message: "Chưa chọn sản phẩm để thanh toán", color: "text-red-500" })
     }
     const user_cart = await Cart.findOne({ user_id: user_id });
     // console.log(user_cart)

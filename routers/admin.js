@@ -1,6 +1,7 @@
 const router = require("express").Router();
 const categoryController = require('../controller/category');
 const productController = require('../controller/product');
+const orderController = require('../controller/order');
 const middlewareController = require('../controller/middleware');
 
 //admin for category
@@ -23,6 +24,12 @@ router.post('/add_product', middlewareController.verifyTokenAdmin, productContro
 router.post('/delete_product', middlewareController.verifyTokenAdmin, productController.delete_product);
 router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
 // router.get('/admin_to_get_product_list/:id', productController.admin_to_get_product_list);
+
+
+router.post('/get_order_detail_to_admin', middlewareController.verifyTokenAdmin, orderController.get_order_detail_to_admin);
+router.post('/get_list_detail_admin', middlewareController.verifyTokenAdmin, orderController.get_list_detail_admin);
+router.post('/update_status_order', middlewareController.verifyTokenAdmin, orderController.update_status_order);
+router.post('/get_OrderHistory_log_admin', middlewareController.verifyTokenAdmin, orderController.get_OrderHistory_log_admin);
 
 
 module.exports = router;
