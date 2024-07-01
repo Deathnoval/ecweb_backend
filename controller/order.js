@@ -378,7 +378,7 @@ const get_full_order_table = async (req, res) => {
         const full_Order_table = await Order.find({})
         let formatted_Order_table = []
         for (let order of full_Order_table) {
-            formatted_Order_table.push({ Order_id: order.Order_id, status: order.status, order_date: order.order_date, total_price: order.total_price })
+            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: order.order_date, total_price: order.total_price })
         }
         return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
