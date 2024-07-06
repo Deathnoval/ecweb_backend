@@ -30,6 +30,6 @@ router.post('/get_order_detail_to_admin', middlewareController.verifyTokenAdmin,
 router.post('/get_list_detail_admin', middlewareController.verifyTokenAdmin, orderController.get_list_detail_admin);
 router.post('/update_status_order', middlewareController.verifyTokenAdmin, orderController.update_status_order);
 router.post('/get_OrderHistory_log_admin', middlewareController.verifyTokenAdmin, orderController.get_OrderHistory_log_admin);
-router.get('/get_full_order_table', middlewareController.verifyTokenAdmin, orderController.get_full_order_table)
+router.post('/get_full_order_table', middlewareController.verifyTokenAdmin, orderController.get_full_order_table)
 
 module.exports = router;
