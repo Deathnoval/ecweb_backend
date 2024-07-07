@@ -296,6 +296,7 @@ const get_order_detail = async (req, res) => {
 const get_list_detail_user = async (req, res) => {
     const user_id = req.user.id;
     const req_status=req.query.status
+     
     try {
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
@@ -435,12 +436,12 @@ const get_full_order_table = async (req, res) => {
 }
 
 const update_status_order = async (req, res) => {
-    const user_id = req.user.id;
+    const user_id = req.body.user_id;
     const Order_id = req.body.Order_id;
     const new_status_order = req.body.new_status_order;
     try {
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color })
+            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color:"text-red-500" })
         }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để cập nhật hóa đơn mua hàng của họ ", color: "text-red-500" })
@@ -472,7 +473,7 @@ const update_status_order = async (req, res) => {
             order_history_check.status_history.push({ status: new_status_order, day_add: Date.now() })
         }
         await order_history_check.save()
-        order_detail.order_date = new_status_order
+        order_detail.status = new_status_order
         await order_detail.save()
         return res.json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-red-500" })
 
