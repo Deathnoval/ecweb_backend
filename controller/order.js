@@ -171,7 +171,7 @@ const add_order = async (req, res) => {
     const user_id = req.user.id;
     const address = req.body.address;
     const phone=req.body.phone;
-    const name=req.body.naem;
+    const name=req.body.name;
     const type_pay = req.body.type_pay;
     let shipping_code=req.body.shipping_code
     try {
