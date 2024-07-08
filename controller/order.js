@@ -170,13 +170,31 @@ const add_order = async (req, res) => {
     const order = req.body.order
     const user_id = req.user.id;
     const address = req.body.address;
+    const phone=req.body.phone;
+    const name=req.body.naem;
     const type_pay = req.body.type_pay;
+    let shipping_code=req.body.shipping_code
     try {
         if (!order) {
             return res.json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
         }
         if (!address) {
             return res.json({ success: false, message: "Vui lòng chọn địa chỉ giao hàng", color: "text-red-500" });
+        }
+        if (!phone)
+        {
+            return res.json({ success: false, message: "Vui lòng nhấp số điện thoại liên lạc", color: "text-red-500" });
+        }
+        if (!name)
+        {
+            return res.json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
+        }
+        if (!shipping_code)
+        {
+            if (type_pay==3)
+            {
+                shipping_code=0
+            }
         }
         if (!(type_pay <= 3 && type_pay >= 0)) {
             return res.json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
@@ -192,7 +210,7 @@ const add_order = async (req, res) => {
 
 
 
-        check_order = await Order.findOne({ Order_id: order.order_id })
+        let check_order = await Order.findOne({ Order_id: order.order_id })
         // console.log(check_order)
         let new_order_id = order.order_id;
         if (check_order) {
@@ -222,6 +240,10 @@ const add_order = async (req, res) => {
             items: order.items,
             total_price: order.total_price,
             address: address,
+            shipping_code:shipping_code,
+            phone:phone,
+            name:name,
+            price_pay:order.total_price+shipping_code,
             type_pay: type_pay,
             status: order_status,
             order_date: Date.now()
@@ -279,6 +301,10 @@ const get_order_detail = async (req, res) => {
             items:order_detail.items,
             total_price:order_detail.total_price,
             address:order_detail.address,
+            shipping_code:order_detail.shipping_code,
+            price_pay:order_detail.total_price+order_detail.shipping_code,
+            phone:order_detail.phone,
+            name:order_detail.name,
             type_pay:order_detail.type_pay,
             status:order_detail.status,
             order_date: date.format(order_detail.order_date,"DD/MM/YYYY")
@@ -296,25 +322,35 @@ const get_order_detail = async (req, res) => {
 const get_list_detail_user = async (req, res) => {
     const user_id = req.user.id;
     const req_status=req.query.status
+    const req_sort=req.query.sort
      
     try {
+        let type_sort
+        if (req_sort!=-1)
+            {type_sort=1}
+        else
+        {
+            type_sort=parseInt(req_sort)
+        }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
         if(req_status==0)
-        { order_list = await Order.find({ user_id: user_id });}
+        { order_list = await Order.find({ user_id: user_id }).sort({"order_date":type_sort});}
         else
         {
-             order_list=await Order.find({ user_id: user_id ,status:req_status});
+             order_list=await Order.find({ user_id: user_id ,status:req_status}).sort({"order_date":type_sort});
         }
+        console.log(order_list)
         if (!order_list) {
             return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), total_price: order.total_price })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
         }
+        
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
     catch (err) {
@@ -352,22 +388,30 @@ const get_OrderHistory_log = async (req, res) => {
 const get_list_detail_admin = async (req, res) => {
     const user_id = req.body.user_id
     const req_status=req.query.status
+    const req_sort=req.query.sort
     try {
+        let type_sort
+        if (req_sort!=-1)
+            {type_sort=1}
+        else
+        {
+            type_sort=parseInt(req_sort)
+        }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
         if (req_status==0)
         {
-             order_list = await Order.find({ user_id: user_id });
+             order_list = await Order.find({ user_id: user_id }).sort({"order_date":type_sort});
         }else
-        { order_list = await Order.find({ user_id: user_id,status:req_status });}
+        { order_list = await Order.find({ user_id: user_id,status:req_status }).sort({"order_date":type_sort});}
         if (!order_list) {
             return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), total_price: order.total_price })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
@@ -398,6 +442,10 @@ const get_order_detail_to_admin = async (req, res) => {
             items:order_detail.items,
             total_price:order_detail.total_price,
             address:order_detail.address,
+            phone: order_detail.phone,
+            name: order_detail.name,
+            shipping_code:order_detail.shipping_code,
+            price_pay:order_detail.total_price+order_detail.shipping_code,
             type_pay:order_detail.type_pay,
             status:order_detail.status,
             order_date: date.format(order_detail.order_date,"DD/MM/YYYY")
@@ -412,20 +460,28 @@ const get_order_detail_to_admin = async (req, res) => {
 
 const get_full_order_table = async (req, res) => {
     const req_status=req.query.status
+    const req_sort=req.query.sort
     try {
+        let type_sort
+        if (req_sort!=-1)
+            {type_sort=1}
+        else
+        {
+            type_sort=parseInt(req_sort)
+        }
         let full_Order_table
         if (req_status==0)
         {
-            full_Order_table=await Order.find({})
+            full_Order_table=await Order.find({}).sort({"order_date":type_sort})
         }
         else
         {
-            full_Order_table = await Order.find({status:req_status})
+            full_Order_table = await Order.find({status:req_status}).sort({"order_date":type_sort})
         }
             
         let formatted_Order_table = []
         for (let order of full_Order_table) {
-            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), total_price: order.total_price })
+            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
         }
         return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
@@ -451,6 +507,7 @@ const update_status_order = async (req, res) => {
             return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
         }
         let order_history_check = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
+        console.log(order_history_check)
         if (!order_history_check) {
             order_history_check = new OrderHistory({
                 user_id: user_id,

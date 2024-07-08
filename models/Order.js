@@ -1,3 +1,4 @@
+const { type } = require('express/lib/response');
 const { boolean, bool, number, required } = require('joi');
 const mongoose = require('mongoose');
 
@@ -51,7 +52,11 @@ const OrderSchema = new mongoose.Schema({
         required: true,
         default: 0
     },
+    shipping_code:{type:Number,required:true,default:0},
+    price_pay:{type:Number,required:true,default:0},
     address: { type: String, required: true },
+    phone:{type:String,required:true},
+    name:{type:String,required:true},
     type_pay: { type: Number, required: true },
     status: { type: Number, required: true, default: 1 },
     order_date: { type: Date, required: true }
