@@ -6,6 +6,7 @@ const Order = require('../models/Order');
 const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
 const { createPayment } = require('../controller/momo_payment');
+const Transaction =require("../models/transaction");
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -335,35 +336,51 @@ const add_order = async (req, res) => {
     }
 };
 const callback= async(req,res) => {
-    console.log("callback")
-    // console.log(req.body.orderId)
+    console.log("callback");
     const { resultCode, orderId } = req.body;
 
-    if (resultCode == 0) {
-        try {
-            console.log("check")
+    try {
+        console.log("check");
 
-            const order = await Order.findOne({ Order_id: orderId });
-            if (!order) {
-                console.log("Order not found")
-                return res.json({ success: false, message: "Order not found" ,color:"text-red-500"});
-            }
-
-            
-            order.status = 2;
-            await order.save();
-
-            console.log("check2")
-
-            
-
-            return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
-        } catch (err) {
-            console.log(err);
-            return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        const order = await Order.findOne({ Order_id: orderId });
+        if (!order) {
+            console.log("Order not found");
+            return res.json({ success: false, message: "Order not found", color: "text-red-500" });
         }
-    } else {
-        return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
+
+        // Đặt trạng thái mới dựa trên kết quả thanh toán
+        let newStatus;
+        if (resultCode == 0) {
+            newStatus = 4; // Thanh toán thành công
+            console.log("Thanh toán thành công");
+        } else {
+            newStatus = 5; // Thanh toán thất bại
+            console.log("Thanh toán thất bại");
+        }
+
+        // Gọi hàm update_status_order
+        const updateReq = {
+            body: {
+                user_id: order.user_id,
+                Order_id: orderId,
+                new_status_order: newStatus
+            }
+        };
+
+        // Tạo một response giả để nhận phản hồi từ update_status_order
+        const updateRes = {
+            json: (data) => {
+                console.log(data);
+                // Trả lại phản hồi từ update_status_order
+                res.json(data);
+            }
+        };
+
+        await update_status_order(updateReq, updateRes);
+
+    } catch (err) {
+        console.log(err);
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 const handleMomoNotification = async (req, res) => {
@@ -638,6 +655,14 @@ const update_status_order = async (req, res) => {
         await order_history_check.save()
         order_detail.status = new_status_order
         await order_detail.save()
+        if (new_status_order === 4) {
+            const transaction = new Transaction({
+                order_id: Order_id,
+                price_pay: order_detail.price_pay, // Giả sử trường này tồn tại trong order_detail
+                create_date: new Date()
+            });
+            await transaction.save();
+        }
         return res.json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-red-500" })
 
 
