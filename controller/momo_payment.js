@@ -11,14 +11,14 @@ const generateSignature = (rawData, secretKey) => {
     return crypto.createHmac('sha256', secretKey).update(rawData).digest('hex');
 };
 
-const createPayment = async (orderId, amount, orderInfo, returnUrl, notifyUrl) => {
-    const requestId = partnerCode + new Date().getTime();
-    orderId=requestId
+const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
+    const requestId = partnerCode + orderId;
+    
     const orderType = 'momo_wallet';
     const requestType = 'captureWallet';
     amount=amount.toString()
     var redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-    var ipnUrl = 'https://aa23-2a09-bac5-d46c-16dc-00-247-63.ngrok-free.app/api/V1/order/callback';
+    var ipnUrl = process.env.INPURL+'/api/V1/order/callback';
     const rawData = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + '' + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
 
     const signature = generateSignature(rawData, secretKey);
@@ -35,7 +35,8 @@ const createPayment = async (orderId, amount, orderInfo, returnUrl, notifyUrl) =
         lang : 'vi',
         extraData: '',
         requestType,
-        signature
+        signature,
+        deliveryInfo
     };
 
     try {

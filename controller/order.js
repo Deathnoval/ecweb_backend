@@ -228,11 +228,21 @@ const add_order = async (req, res) => {
         }else if (type_pay == 1) { // MoMo payment
             const amount = order.total_price + shipping_code;
             const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
-            const returnUrl = 'https://your-website.com/momo/return';
-            const notifyUrl = 'https://your-website.com/momo/notify';
+            
 
-            const paymentResult = await createPayment(new_order_id, amount, orderInfo, returnUrl, notifyUrl);
+            const deliveryInfo = {
+                deliveryAddress: address,
+                deliveryFee: shipping_code.toString(),
+                quantity: order.items.length
+            };
 
+            const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
+            console.log(paymentResult.resultCode)
+            if(paymentResult.resultCode!=0)
+            {   
+                return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
+            }
+            
             // if (paymentResult.errorCode !== 0) {
             //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
             // }
@@ -300,7 +310,7 @@ const add_order = async (req, res) => {
 const callback= async(req,res)=>{
     console.log("callback")
     console.log(req.body)
-    return res.status(200).json(req.body);
+    return req.body
 }
 const handleMomoNotification = async (req, res) => {
     const { partnerCode, orderId, requestId, amount, orderInfo, orderType, transId, resultCode, message, payType, responseTime, extraData, signature } = req.body;
@@ -453,7 +463,7 @@ const get_list_detail_admin = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
+            format_order_list.push({user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
