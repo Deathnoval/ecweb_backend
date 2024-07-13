@@ -11,11 +11,12 @@ require('dotenv/config');
 //const authJwt = require('./helpers/jwt');
 
 
-app.use(cors({
-    origin: 'http://localhost:3000', // thay thế bằng URL của frontend chạy local
-    credentials: true, // cho phép gửi cookie
-    optionsSuccessStatus: 200
-}));
+// app.use(cors({
+//     origin: 'http://localhost:3000', // thay thế bằng URL của frontend chạy local
+//     credentials: true, // cho phép gửi cookie
+//     optionsSuccessStatus: 200
+// }));
+app.use(cors());
 app.options('*', cors());
 
 //middleware
