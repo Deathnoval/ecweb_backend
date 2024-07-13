@@ -5,6 +5,7 @@ const { User, validate } = require('../models/user');
 const Order = require('../models/Order');
 const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
+const { createPayment } = require('../controller/momo_payment');
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -224,9 +225,22 @@ const add_order = async (req, res) => {
         let order_status = 1;
         if (type_pay == 0 || type_pay == 3) {
             order_status = 1;
-        }
-        else {
-            return res.json({ message: "đang phát triển" })
+        }else if (type_pay == 1) { // MoMo payment
+            const amount = order.total_price + shipping_code;
+            const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
+            const returnUrl = 'https://your-website.com/momo/return';
+            const notifyUrl = 'https://your-website.com/momo/notify';
+
+            const paymentResult = await createPayment(new_order_id, amount, orderInfo, returnUrl, notifyUrl);
+
+            // if (paymentResult.errorCode !== 0) {
+            //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
+            // }
+
+            // Redirect user to MoMo payment page
+            return res.json({ success: true, paymentUrl: paymentResult });
+        } else {
+            return res.json({ message: "đang phát triển" });
         }
         for (let item of order.items) {
             let flag_check_quantity = await check_quantity(item.product_id, item.color, item.quantity, item.size);
@@ -283,8 +297,36 @@ const add_order = async (req, res) => {
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
+const callback= async(req,res)=>{
+    console.log("callback")
+    console.log(req.body)
+    return res.status(200).json(req.body);
+}
+const handleMomoNotification = async (req, res) => {
+    const { partnerCode, orderId, requestId, amount, orderInfo, orderType, transId, resultCode, message, payType, responseTime, extraData, signature } = req.body;
 
+    // Verify the signature
+    const rawData = `partnerCode=${partnerCode}&orderId=${orderId}&requestId=${requestId}&amount=${amount}&orderInfo=${orderInfo}&orderType=${orderType}&transId=${transId}&resultCode=${resultCode}&message=${message}&payType=${payType}&responseTime=${responseTime}&extraData=${extraData}`;
+    const expectedSignature = generateSignature(rawData, secretKey);
 
+    if (signature !== expectedSignature) {
+        return res.status(400).json({ message: "Invalid signature" });
+    }
+
+    if (resultCode === 0) {
+        // Payment successful
+        const order = await Order.findOne({ Order_id: orderId });
+        if (order) {
+            order.status = 1; // Update order status to paid
+            await order.save();
+        }
+    } else {
+        // Payment failed
+        console.log("Payment failed:", message);
+    }
+
+    res.status(200).json({ message: "Notification received" });
+};
 
 const get_order_detail = async (req, res) => {
     const user_id = req.user.id
@@ -569,6 +611,8 @@ module.exports = {
     get_order_detail,
     get_list_detail_user,
     get_OrderHistory_log,
+    handleMomoNotification,
+    callback,
 
     ///for admin///
     get_list_detail_admin,

@@ -67,7 +67,7 @@ const loginUser = async (req, res) => {
           httpOnly: false,
           secure: true,
           domain: "localhost",
-          sameSite:"Lax",
+          sameSite:"None",
           
 
 
@@ -105,7 +105,7 @@ const requestRefreshToken = async (req, res) => {
       httpOnly: true,
       secure: false,
       path: "/",
-      sameSite: "strict",
+      sameSite: "None",
     });
     res.status(200).json({
       accessToken: newAccessToken,
