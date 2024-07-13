@@ -223,33 +223,35 @@ const add_order = async (req, res) => {
         }
 
         let order_status = 1;
-        if (type_pay == 0 || type_pay == 3) {
+        if (type_pay == 0 || type_pay == 3 ||type_pay==1 ) {
             order_status = 1;
-        }else if (type_pay == 1) { // MoMo payment
-            const amount = order.total_price + shipping_code;
-            const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
+        }
+        // else if (type_pay == 1) { // MoMo payment
+        //     const amount = order.total_price + shipping_code;
+        //     const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
             
 
-            const deliveryInfo = {
-                deliveryAddress: address,
-                deliveryFee: shipping_code.toString(),
-                quantity: order.items.length
-            };
+        //     const deliveryInfo = {
+        //         deliveryAddress: address,
+        //         deliveryFee: shipping_code.toString(),
+        //         quantity: order.items.length
+        //     };
 
-            const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
-            console.log(paymentResult.resultCode)
-            if(paymentResult.resultCode!=0)
-            {   
-                return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
-            }
+        //     const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
+        //     console.log(paymentResult.resultCode)
+        //     if(paymentResult.resultCode!=0)
+        //     {   
+        //         return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
+        //     }
             
-            // if (paymentResult.errorCode !== 0) {
-            //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
-            // }
+        //     // if (paymentResult.errorCode !== 0) {
+        //     //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
+        //     // }
 
-            // Redirect user to MoMo payment page
-            return res.json({ success: true, paymentUrl: paymentResult });
-        } else {
+        //     // Redirect user to MoMo payment page
+        //     return res.json({ success: true, paymentUrl: paymentResult });
+        // } 
+        else {
             return res.json({ message: "đang phát triển" });
         }
         for (let item of order.items) {
@@ -293,6 +295,31 @@ const add_order = async (req, res) => {
                 0
             );
             await cart_items.save();
+            if (type_pay == 1) { // MoMo payment
+                const amount = order.total_price + shipping_code;
+                const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
+                
+    
+                const deliveryInfo = {
+                    deliveryAddress: address,
+                    deliveryFee: shipping_code.toString(),
+                    quantity: order.items.length
+                };
+    
+                const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
+                console.log(paymentResult.resultCode)
+                if(paymentResult.resultCode!=0)
+                {   
+                    return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
+                }
+                
+                // if (paymentResult.errorCode !== 0) {
+                //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
+                // }
+    
+                // Redirect user to MoMo payment page
+                return res.json({ success: true, paymentUrl: paymentResult });
+            } 
             return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
         }
         else {
@@ -307,11 +334,38 @@ const add_order = async (req, res) => {
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
-const callback= async(req,res)=>{
+const callback= async(req,res) => {
     console.log("callback")
-    console.log(req.body)
-    return req.body
-}
+    // console.log(req.body.orderId)
+    const { resultCode, orderId } = req.body;
+
+    if (resultCode == 0) {
+        try {
+            console.log("check")
+
+            const order = await Order.findOne({ Order_id: orderId });
+            if (!order) {
+                console.log("Order not found")
+                return res.json({ success: false, message: "Order not found" ,color:"text-red-500"});
+            }
+
+            
+            order.status = 2;
+            await order.save();
+
+            console.log("check2")
+
+            
+
+            return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
+        } catch (err) {
+            console.log(err);
+            return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        }
+    } else {
+        return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
+    }
+};
 const handleMomoNotification = async (req, res) => {
     const { partnerCode, orderId, requestId, amount, orderInfo, orderType, transId, resultCode, message, payType, responseTime, extraData, signature } = req.body;
 

@@ -18,7 +18,8 @@ const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
     const requestType = 'captureWallet';
     amount=amount.toString()
     var redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-    var ipnUrl = process.env.INPURL+'/api/V1/order/callback';
+    var ipnUrl = process.env.IPNURL.toString()+'/api/V1/order/callback';
+    console.log(ipnUrl)
     const rawData = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + '' + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
 
     const signature = generateSignature(rawData, secretKey);
