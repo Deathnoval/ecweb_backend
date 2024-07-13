@@ -224,8 +224,11 @@ const add_order = async (req, res) => {
         }
 
         let order_status = 1;
-        if (type_pay == 0 || type_pay == 3 ||type_pay==1 ) {
+        if (type_pay == 0 || type_pay == 3  ) {
             order_status = 1;
+        }else if (type_pay == 1)
+        {
+            order_status = 0;
         }
         // else if (type_pay == 1) { // MoMo payment
         //     const amount = order.total_price + shipping_code;
@@ -319,7 +322,7 @@ const add_order = async (req, res) => {
                 // }
     
                 // Redirect user to MoMo payment page
-                return res.json({ success: true, paymentUrl: paymentResult });
+                return res.json({ success: true, paymentUrl: paymentResult.payUrl });
             } 
             return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
         }
@@ -351,7 +354,7 @@ const callback= async(req,res) => {
         // Đặt trạng thái mới dựa trên kết quả thanh toán
         let newStatus;
         if (resultCode == 0) {
-            newStatus = 4; // Thanh toán thành công
+            newStatus = 1; // Thanh toán thành công
             console.log("Thanh toán thành công");
         } else {
             newStatus = 5; // Thanh toán thất bại
@@ -655,7 +658,7 @@ const update_status_order = async (req, res) => {
         await order_history_check.save()
         order_detail.status = new_status_order
         await order_detail.save()
-        if (new_status_order === 4) {
+        if (new_status_order === 4 || (order_detail.type_pay==1 && new_status_order === 1)) {
             const transaction = new Transaction({
                 order_id: Order_id,
                 price_pay: order_detail.price_pay, // Giả sử trường này tồn tại trong order_detail
