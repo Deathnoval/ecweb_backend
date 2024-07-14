@@ -171,11 +171,13 @@ function generateOrderId() {
 const add_order = async (req, res) => {
     const order = req.body.order
     const user_id = req.user.id;
+    const email=req.user.email;
     const address = req.body.address;
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
     let shipping_code = req.body.shipping_code
+    console.log(email)
     try {
         if (!order) {
             return res.json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
@@ -189,6 +191,7 @@ const add_order = async (req, res) => {
         if (!name) {
             return res.json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
+        
         if (!shipping_code) {
             if (type_pay == 3) {
                 shipping_code = 0
@@ -262,6 +265,7 @@ const add_order = async (req, res) => {
         new_order = new Order({
             Order_id: new_order_id,
             user_id: req.user.id,
+            email:email,
             items: order.items,
             total_price: order.total_price,
             address: address,
@@ -417,6 +421,7 @@ const get_order_detail = async (req, res) => {
         const formatted_order_detail = {
             _id: order_detail._id,
             Order_id: order_detail.Order_id,
+            email:order_detail.email,
             user_id: order_detail.user_id,
             items: order_detail.items,
             total_price: order_detail.total_price,
@@ -523,7 +528,7 @@ const get_list_detail_admin = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
+            format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
@@ -551,6 +556,7 @@ const get_order_detail_to_admin = async (req, res) => {
             _id: order_detail._id,
             Order_id: order_detail.Order_id,
             user_id: order_detail.user_id,
+            emai:order_detail.email,
             items: order_detail.items,
             total_price: order_detail.total_price,
             address: order_detail.address,
@@ -589,7 +595,7 @@ const get_full_order_table = async (req, res) => {
 
         let formatted_Order_table = []
         for (let order of full_Order_table) {
-            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
+            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
         return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
@@ -645,7 +651,7 @@ const update_status_order = async (req, res) => {
                 order_id: Order_id,
                 price_pay: order_detail.price_pay,
                 user_id: user_id,
-                email: '',
+                email: order_detail.email,
                 // Giả sử trường này tồn tại trong order_detail
                 create_date: new Date()
             });

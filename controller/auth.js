@@ -8,6 +8,7 @@ function generateAccessToken(user) {
     {
       id: user.id,
       isAdmin: user.isAdmin,
+      email:user.email,
     },
     process.env.JWT_PRIVATE_KEY,
     { expiresIn: "7d" }
@@ -75,7 +76,7 @@ const loginUser = async (req, res) => {
           expires: new Date(Date.now() + 86400000),
         });
         const { password, ...other } = user._doc;
-        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, accessToken, color: "text-green-500" });
+        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, email:user.email, accessToken, color: "text-green-500" });
       }
     }
   } catch (error) {

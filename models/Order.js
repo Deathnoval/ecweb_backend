@@ -13,6 +13,7 @@ const OrderSchema = new mongoose.Schema({
         ref: "user",
         required: true,
     },
+    email:{type:String,required:true},
 
     items: [{
         product_id: {
