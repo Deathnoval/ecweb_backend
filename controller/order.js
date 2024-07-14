@@ -7,6 +7,7 @@ const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
 const { createPayment } = require('../controller/momo_payment');
 const Transaction = require("../models/transaction");
+const moment = require('moment-timezone');
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -432,7 +433,7 @@ const get_order_detail = async (req, res) => {
             name: order_detail.name,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
-            order_date: date.format(order_detail.order_date, "DD/MM/YYYY")
+            order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
             return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
@@ -469,7 +470,7 @@ const get_list_detail_user = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
 
         return res.json({ success: true, format_order_list, color: "text-green-500" })
@@ -528,7 +529,7 @@ const get_list_detail_admin = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
+            format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
@@ -566,7 +567,7 @@ const get_order_detail_to_admin = async (req, res) => {
             price_pay: order_detail.total_price + order_detail.shipping_code,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
-            order_date: date.format(order_detail.order_date, "DD/MM/YYYY")
+            order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
     }
@@ -595,7 +596,7 @@ const get_full_order_table = async (req, res) => {
 
         let formatted_Order_table = []
         for (let order of full_Order_table) {
-            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
+            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
         return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
