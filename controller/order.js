@@ -469,7 +469,7 @@ const get_list_detail_user = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
 
         return res.json({ success: true, format_order_list, color: "text-green-500" })
