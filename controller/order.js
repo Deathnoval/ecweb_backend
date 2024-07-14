@@ -6,7 +6,7 @@ const Order = require('../models/Order');
 const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
 const { createPayment } = require('../controller/momo_payment');
-const Transaction =require("../models/transaction");
+const Transaction = require("../models/transaction");
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -172,10 +172,10 @@ const add_order = async (req, res) => {
     const order = req.body.order
     const user_id = req.user.id;
     const address = req.body.address;
-    const phone=req.body.phone;
-    const name=req.body.name;
+    const phone = req.body.phone;
+    const name = req.body.name;
     const type_pay = req.body.type_pay;
-    let shipping_code=req.body.shipping_code
+    let shipping_code = req.body.shipping_code
     try {
         if (!order) {
             return res.json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
@@ -183,19 +183,15 @@ const add_order = async (req, res) => {
         if (!address) {
             return res.json({ success: false, message: "Vui lòng chọn địa chỉ giao hàng", color: "text-red-500" });
         }
-        if (!phone)
-        {
+        if (!phone) {
             return res.json({ success: false, message: "Vui lòng nhấp số điện thoại liên lạc", color: "text-red-500" });
         }
-        if (!name)
-        {
+        if (!name) {
             return res.json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
-        if (!shipping_code)
-        {
-            if (type_pay==3)
-            {
-                shipping_code=0
+        if (!shipping_code) {
+            if (type_pay == 3) {
+                shipping_code = 0
             }
         }
         if (!(type_pay <= 3 && type_pay >= 0)) {
@@ -224,16 +220,15 @@ const add_order = async (req, res) => {
         }
 
         let order_status = 1;
-        if (type_pay == 0 || type_pay == 3  ) {
+        if (type_pay == 0 || type_pay == 3) {
             order_status = 1;
-        }else if (type_pay == 1)
-        {
+        } else if (type_pay == 1) {
             order_status = 0;
         }
         // else if (type_pay == 1) { // MoMo payment
         //     const amount = order.total_price + shipping_code;
         //     const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
-            
+
 
         //     const deliveryInfo = {
         //         deliveryAddress: address,
@@ -247,7 +242,7 @@ const add_order = async (req, res) => {
         //     {   
         //         return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
         //     }
-            
+
         //     // if (paymentResult.errorCode !== 0) {
         //     //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
         //     // }
@@ -270,10 +265,10 @@ const add_order = async (req, res) => {
             items: order.items,
             total_price: order.total_price,
             address: address,
-            shipping_code:shipping_code,
-            phone:phone,
-            name:name,
-            price_pay:order.total_price+shipping_code,
+            shipping_code: shipping_code,
+            phone: phone,
+            name: name,
+            price_pay: order.total_price + shipping_code,
             type_pay: type_pay,
             status: order_status,
             order_date: Date.now()
@@ -302,28 +297,27 @@ const add_order = async (req, res) => {
             if (type_pay == 1) { // MoMo payment
                 const amount = order.total_price + shipping_code;
                 const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
-                
-    
+
+
                 const deliveryInfo = {
                     deliveryAddress: address,
                     deliveryFee: shipping_code.toString(),
                     quantity: order.items.length
                 };
-    
+
                 const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
                 console.log(paymentResult.resultCode)
-                if(paymentResult.resultCode!=0)
-                {   
-                    return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
+                if (paymentResult.resultCode != 0) {
+                    return res.json({ success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại " + paymentResult.errorCode, color: "text-red-500" })
                 }
-                
+
                 // if (paymentResult.errorCode !== 0) {
                 //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
                 // }
-    
+
                 // Redirect user to MoMo payment page
                 return res.json({ success: true, paymentUrl: paymentResult.payUrl });
-            } 
+            }
             return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
         }
         else {
@@ -338,7 +332,7 @@ const add_order = async (req, res) => {
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
-const callback= async(req,res) => {
+const callback = async (req, res) => {
     console.log("callback");
     const { resultCode, orderId } = req.body;
 
@@ -420,22 +414,22 @@ const get_order_detail = async (req, res) => {
             return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color })
         }
         const order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
-        const formatted_order_detail ={
-            _id:order_detail._id,
-            Order_id:order_detail.Order_id,
-            user_id:order_detail.user_id,
-            items:order_detail.items,
-            total_price:order_detail.total_price,
-            address:order_detail.address,
-            shipping_code:order_detail.shipping_code,
-            price_pay:order_detail.total_price+order_detail.shipping_code,
-            phone:order_detail.phone,
-            name:order_detail.name,
-            type_pay:order_detail.type_pay,
-            status:order_detail.status,
-            order_date: date.format(order_detail.order_date,"DD/MM/YYYY")
+        const formatted_order_detail = {
+            _id: order_detail._id,
+            Order_id: order_detail.Order_id,
+            user_id: order_detail.user_id,
+            items: order_detail.items,
+            total_price: order_detail.total_price,
+            address: order_detail.address,
+            shipping_code: order_detail.shipping_code,
+            price_pay: order_detail.total_price + order_detail.shipping_code,
+            phone: order_detail.phone,
+            name: order_detail.name,
+            type_pay: order_detail.type_pay,
+            status: order_detail.status,
+            order_date: date.format(order_detail.order_date, "DD/MM/YYYY")
         }
-       if (!order_detail) {
+        if (!order_detail) {
             return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
         }
         return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
@@ -447,26 +441,22 @@ const get_order_detail = async (req, res) => {
 };
 const get_list_detail_user = async (req, res) => {
     const user_id = req.user.id;
-    const req_status=req.query.status
-    const req_sort=req.query.sort
-     
+    const req_status = req.query.status
+    const req_sort = req.query.sort
+
     try {
         let type_sort
-        if (req_sort!=-1)
-            {type_sort=1}
-        else
-        {
-            type_sort=parseInt(req_sort)
+        if (req_sort != -1) { type_sort = 1 }
+        else {
+            type_sort = parseInt(req_sort)
         }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
-        if(req_status==0)
-        { order_list = await Order.find({ user_id: user_id }).sort({"order_date":type_sort});}
-        else
-        {
-             order_list=await Order.find({ user_id: user_id ,status:req_status}).sort({"order_date":type_sort});
+        if (req_status == -1) { order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort }); }
+        else {
+            order_list = await Order.find({ user_id: user_id, status: req_status }).sort({ "order_date": type_sort });
         }
         console.log(order_list)
         if (!order_list) {
@@ -474,9 +464,9 @@ const get_list_detail_user = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
         }
-        
+
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
     catch (err) {
@@ -513,31 +503,27 @@ const get_OrderHistory_log = async (req, res) => {
 ///////////////////////////////////////////////////////for admin////////////////////////////////
 const get_list_detail_admin = async (req, res) => {
     const user_id = req.body.user_id
-    const req_status=req.query.status
-    const req_sort=req.query.sort
+    const req_status = req.query.status
+    const req_sort = req.query.sort
     try {
         let type_sort
-        if (req_sort!=-1)
-            {type_sort=1}
-        else
-        {
-            type_sort=parseInt(req_sort)
+        if (req_sort != -1) { type_sort = 1 }
+        else {
+            type_sort = parseInt(req_sort)
         }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
-        if (req_status==0)
-        {
-             order_list = await Order.find({ user_id: user_id }).sort({"order_date":type_sort});
-        }else
-        { order_list = await Order.find({ user_id: user_id,status:req_status }).sort({"order_date":type_sort});}
+        if (req_status == -1) {
+            order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort });
+        } else { order_list = await Order.find({ user_id: user_id, status: req_status }).sort({ "order_date": type_sort }); }
         if (!order_list) {
             return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
+            format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
         }
         return res.json({ success: true, format_order_list, color: "text-green-500" })
     }
@@ -561,20 +547,20 @@ const get_order_detail_to_admin = async (req, res) => {
         if (!order_detail) {
             return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
         }
-        const formatted_order_detail ={
-            _id:order_detail._id,
-            Order_id:order_detail.Order_id,
-            user_id:order_detail.user_id,
-            items:order_detail.items,
-            total_price:order_detail.total_price,
-            address:order_detail.address,
+        const formatted_order_detail = {
+            _id: order_detail._id,
+            Order_id: order_detail.Order_id,
+            user_id: order_detail.user_id,
+            items: order_detail.items,
+            total_price: order_detail.total_price,
+            address: order_detail.address,
             phone: order_detail.phone,
             name: order_detail.name,
-            shipping_code:order_detail.shipping_code,
-            price_pay:order_detail.total_price+order_detail.shipping_code,
-            type_pay:order_detail.type_pay,
-            status:order_detail.status,
-            order_date: date.format(order_detail.order_date,"DD/MM/YYYY")
+            shipping_code: order_detail.shipping_code,
+            price_pay: order_detail.total_price + order_detail.shipping_code,
+            type_pay: order_detail.type_pay,
+            status: order_detail.status,
+            order_date: date.format(order_detail.order_date, "DD/MM/YYYY")
         }
         return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
     }
@@ -585,29 +571,25 @@ const get_order_detail_to_admin = async (req, res) => {
 };
 
 const get_full_order_table = async (req, res) => {
-    const req_status=req.query.status
-    const req_sort=req.query.sort
+    const req_status = req.query.status
+    const req_sort = req.query.sort
     try {
         let type_sort
-        if (req_sort!=-1)
-            {type_sort=1}
-        else
-        {
-            type_sort=parseInt(req_sort)
+        if (req_sort != -1) { type_sort = 1 }
+        else {
+            type_sort = parseInt(req_sort)
         }
         let full_Order_table
-        if (req_status==0)
-        {
-            full_Order_table=await Order.find({}).sort({"order_date":type_sort})
+        if (req_status == -1) {
+            full_Order_table = await Order.find({}).sort({ "order_date": type_sort })
         }
-        else
-        {
-            full_Order_table = await Order.find({status:req_status}).sort({"order_date":type_sort})
+        else {
+            full_Order_table = await Order.find({ status: req_status }).sort({ "order_date": type_sort })
         }
-            
+
         let formatted_Order_table = []
         for (let order of full_Order_table) {
-            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date,"DD/MM/YYYY"), price_pay: order.price_pay })
+            formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: date.format(order.order_date, "DD/MM/YYYY"), price_pay: order.price_pay })
         }
         return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
@@ -623,7 +605,7 @@ const update_status_order = async (req, res) => {
     const new_status_order = req.body.new_status_order;
     try {
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color:"text-red-500" })
+            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color: "text-red-500" })
         }
         if (!user_id) {
             return res.json({ success: false, message: "Vui lòng chọn người dùng để cập nhật hóa đơn mua hàng của họ ", color: "text-red-500" })
@@ -658,10 +640,13 @@ const update_status_order = async (req, res) => {
         await order_history_check.save()
         order_detail.status = new_status_order
         await order_detail.save()
-        if (new_status_order === 4 || (order_detail.type_pay==1 && new_status_order === 1)) {
+        if (new_status_order === 4 || (order_detail.type_pay == 1 && new_status_order === 1)) {
             const transaction = new Transaction({
                 order_id: Order_id,
-                price_pay: order_detail.price_pay, // Giả sử trường này tồn tại trong order_detail
+                price_pay: order_detail.price_pay,
+                user_id: user_id,
+                email: '',
+                // Giả sử trường này tồn tại trong order_detail
                 create_date: new Date()
             });
             await transaction.save();
