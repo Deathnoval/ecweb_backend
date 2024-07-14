@@ -433,7 +433,7 @@ const get_order_detail = async (req, res) => {
             name: order_detail.name,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
-            order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+            order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
             return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
@@ -567,7 +567,7 @@ const get_order_detail_to_admin = async (req, res) => {
             price_pay: order_detail.total_price + order_detail.shipping_code,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
-            order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+            order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
     }
