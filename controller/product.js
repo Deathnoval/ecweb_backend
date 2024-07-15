@@ -153,7 +153,7 @@ const admin_to_get_product_list = async (req, res) => {
             primary_image: product.primary_image,
             product_id: product.product_id,
             onlShop: product.onlShop,
-            createDate: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
+            createDate: moment(product.createDate).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
 
         }));
 
@@ -253,7 +253,7 @@ const getProductListALL_with_Sattus = async (req, res) => {
             product_id: product.product_id,
             status: product.total_number > 0 ? 'Còn hàng' : 'Hết hàng',
             onlShop: product.onlShop,
-            createDate: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+            createDate: moment(product.createDate).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
 
         })));
         if (productListAll_DataFormat) {
