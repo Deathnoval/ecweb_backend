@@ -563,10 +563,15 @@ const get_OrderHistory_log = async (req, res) => {
 }
 const refund_momo_money=async(req,res)=>{
     const Order_id=req.body.Order_id;
-    const amount=req.body.price_pay;
+    
     const user_id = req.user.id
     const check_order=await Order.findOne({Order_id:Order_id,user_id:user_id})
     try{
+        if (!Order_id)
+        {
+            return res.json({success:false,message:"Mã đơn hàng không đước đễ trống",color:"text-red-500"})
+
+        }
     if(!check_order)
     {
         return res.json({success:false,message:"Mã đơn hàng này không phải của khách hàng hiện tại",color:"text-red-500"})
@@ -575,12 +580,12 @@ const refund_momo_money=async(req,res)=>{
     console.log(paymentResult)
     if (paymentResult.resultCode==0)
     {
+        const amount=check_order.price_pay;
         const payment_refund_result= await refund_money_momo(Order_id,paymentResult.transId,amount)
         console.log(payment_refund_result)
         if (payment_refund_result.resultCode==0)
         {
             let newStatus = 6; // Thanh toán thất bại
-            console.log("Thanh toán thất bại");
 
             // Gọi hàm update_status_order
             const updateReq = {
