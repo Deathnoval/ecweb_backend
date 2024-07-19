@@ -5,9 +5,10 @@ const { User, validate } = require('../models/user');
 const Order = require('../models/Order');
 const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
-const { createPayment, check_status_momo_payment } = require('../controller/momo_payment');
+const { createPayment, check_status_momo_payment,refund_money_momo } = require('../controller/momo_payment');
 const Transaction = require("../models/transaction");
 const moment = require('moment-timezone');
+let order_id_list_momo=[]
 
 const check_quantity = async (product_id, color, quantity, size) => {
     const product = await Product.findOne({ product_id: product_id });
@@ -168,6 +169,52 @@ function generateOrderId() {
     }
     return id;
 }
+const checkAllMomoPayments = async (req,res) => {
+    
+    const order_list= await Order.find({"type_pay":1, "status":0})
+    // console.log(order)
+    try {
+      for (const order of order_list) {
+        console.log("checkAllMomoPayments")
+        const paymentResult = await check_status_momo_payment(order.Order_id);
+        let resultCode=paymentResult.resultCode
+        console.log(
+          `Payment status for order ${order.Order_id}:`,
+          paymentResult.resultCode
+        );
+        let newStatus;
+        if (resultCode == 1005 || resultCode == 1006) {
+          newStatus = 5; // Thanh toán thất bại
+          console.log("Thanh toán thất bại");
+
+          // Gọi hàm update_status_order
+          const updateReq = {
+            body: {
+              user_id: order.user_id,
+              Order_id: order.Order_id,
+              new_status_order: newStatus,
+            },
+          };
+
+          // Tạo một response giả để nhận phản hồi từ update_status_order
+          const updateRes = {
+            json: (data) => {
+                console.log('Response from update_status_order:', data);
+              // Trả lại phản hồi từ update_status_order
+              
+            },
+          };
+
+          await update_status_order(updateReq, updateRes);
+        }
+        // Add any additional logic you need to handle the payment result
+      }
+    } catch (err) {
+      console.error("Error checking MoMo payment statuses:", err);
+    }
+};
+
+
 const check_status_momo_payment_order = async (req, res) => {
     const orderId = req.body.order_id;
     const paymentResult = await check_status_momo_payment(orderId);
@@ -176,16 +223,19 @@ const check_status_momo_payment_order = async (req, res) => {
 
 }
 
+
 const add_order = async (req, res) => {
-    const order = req.body.order
+    const order = req.body.order;
     const user_id = req.user.id;
     const email = req.user.email;
     const address = req.body.address;
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
-    let shipping_code = req.body.shipping_code
-    console.log(email)
+    let shipping_code = req.body.shipping_code;
+
+    console.log(email);
+
     try {
         if (!order) {
             return res.json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
@@ -202,31 +252,26 @@ const add_order = async (req, res) => {
 
         if (!shipping_code) {
             if (type_pay == 3) {
-                shipping_code = 0
+                shipping_code = 0;
             }
         }
         if (!(type_pay <= 3 && type_pay >= 0)) {
             return res.json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
         }
-        const cart_items = await Cart.findOne({ user_id: user_id })
+
+        const cart_items = await Cart.findOne({ user_id: user_id });
         for (let item of order.items) {
             let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
             if (cart_item_Index == -1) {
-                return res.json({ success: false, message: "Sản phẩm này bạn đã bỏ khỏi giỏ hàng nên không thể thực hiện thanh toán", color: "text-red-500" })
+                return res.json({ success: false, message: "Sản phẩm này bạn đã bỏ khỏi giỏ hàng nên không thể thực hiện thanh toán", color: "text-red-500" });
             }
-
         }
 
-
-
-        let check_order = await Order.findOne({ Order_id: order.order_id })
-        // console.log(check_order)
+        let check_order = await Order.findOne({ Order_id: order.order_id });
         let new_order_id = order.order_id;
         if (check_order) {
-
             do {
                 new_order_id = generateOrderId();
-                // console.log(new_product_id);
             } while (await Order.findOne({ Order_id: new_order_id }));
         }
 
@@ -235,115 +280,123 @@ const add_order = async (req, res) => {
             order_status = 1;
         } else if (type_pay == 1) {
             order_status = 0;
-        }
-        // else if (type_pay == 1) { // MoMo payment
-        //     const amount = order.total_price + shipping_code;
-        //     const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
-
-
-        //     const deliveryInfo = {
-        //         deliveryAddress: address,
-        //         deliveryFee: shipping_code.toString(),
-        //         quantity: order.items.length
-        //     };
-
-        //     const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
-        //     console.log(paymentResult.resultCode)
-        //     if(paymentResult.resultCode!=0)
-        //     {   
-        //         return res.json({success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại "+paymentResult.errorCode, color: "text-red-500"})
-        //     }
-
-        //     // if (paymentResult.errorCode !== 0) {
-        //     //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
-        //     // }
-
-        //     // Redirect user to MoMo payment page
-        //     return res.json({ success: true, paymentUrl: paymentResult });
-        // } 
-        else {
+        } else {
             return res.json({ message: "đang phát triển" });
         }
+
         for (let item of order.items) {
             let flag_check_quantity = await check_quantity(item.product_id, item.color, item.quantity, item.size);
-
-
-            if (flag_check_quantity.success == false) { return res.json(flag_check_quantity) }
-        }
-        new_order = new Order({
-            Order_id: new_order_id,
-            user_id: req.user.id,
-            email: email,
-            items: order.items,
-            total_price: order.total_price,
-            address: address,
-            shipping_code: shipping_code,
-            phone: phone,
-            name: name,
-            price_pay: order.total_price + shipping_code,
-            type_pay: type_pay,
-            status: order_status,
-            order_date: Date.now()
-        })
-        let check_add_success = true
-        await new_order.save().catch(err => {
-            console.log(err);
-            check_add_success = false;
-        });
-        if (check_add_success) {
-            const cart_items = await Cart.findOne({ user_id: user_id })
-            for (let item of order.items) {
-                let subtract_quantity = await sub_quantity(item.product_id, item.color, item.quantity, item.size);
-                // console.log(subtract_quantity);
-
-                cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
-                cart_items.items.splice(cart_item_Index, 1);
-
-
+            if (flag_check_quantity.success == false) {
+                return res.json(flag_check_quantity);
             }
-            cart_items.total_price = cart_items.items.reduce(
-                (total, item) => total + item.price_per_one * item.quantity,
-                0
-            );
-            await cart_items.save();
-            if (type_pay == 1) { // MoMo payment
-                const amount = order.total_price + shipping_code;
-                const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
+        }
 
+        if (type_pay == 1) { // MoMo payment
+            const amount = order.total_price + shipping_code;
+            const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
+            const deliveryInfo = {
+                deliveryAddress: address,
+                deliveryFee: shipping_code.toString(),
+                quantity: order.items.length
+            };
 
-                const deliveryInfo = {
-                    deliveryAddress: address,
-                    deliveryFee: shipping_code.toString(),
-                    quantity: order.items.length
-                };
+            const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
+            console.log(paymentResult.resultCode);
 
-                const paymentResult = await createPayment(new_order_id, amount, orderInfo, deliveryInfo);
-                console.log(paymentResult.resultCode)
-                if (paymentResult.resultCode != 0) {
-                    return res.json({ success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại " + paymentResult.errorCode, color: "text-red-500" })
+            if (paymentResult.resultCode != 0) {
+                return res.json({ success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại " + paymentResult.errorCode, color: "text-red-500" });
+            }
+
+            // Save the new order if payment link creation is successful
+            let new_order = new Order({
+                Order_id: new_order_id,
+                user_id: req.user.id,
+                email: email,
+                items: order.items,
+                total_price: order.total_price,
+                address: address,
+                shipping_code: shipping_code,
+                phone: phone,
+                name: name,
+                price_pay: order.total_price + shipping_code,
+                type_pay: type_pay,
+                status: order_status,
+                order_date: Date.now()
+            });
+
+            let check_add_success = true;
+            await new_order.save().catch(err => {
+                console.log(err);
+                check_add_success = false;
+            });
+
+            if (check_add_success) {
+                for (let item of order.items) {
+                    let subtract_quantity = await sub_quantity(item.product_id, item.color, item.quantity, item.size);
+                    let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
+                    cart_items.items.splice(cart_item_Index, 1);
                 }
 
-                // if (paymentResult.errorCode !== 0) {
-                //     return res.json({ success: false, message: "Thanh toán thất bại "+paymentResult.errorCode, color: "text-red-500" });
-                // }
-
-                // Redirect user to MoMo payment page
+                cart_items.total_price = cart_items.items.reduce(
+                    (total, item) => total + item.price_per_one * item.quantity,
+                    0
+                );
+        
+                await cart_items.save();
+                order_id_list_momo.push(new_order_id)
+                console.log(order_id_list_momo)
                 return res.json({ success: true, paymentUrl: paymentResult.payUrl });
+            } else {
+                return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
             }
-            return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
-        }
-        else {
-            return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
-        }
-        // console.log(new_order)
-        // return res.json({ success: true, message: "Thanh toán thành công", color: "text-green-500" });
+        } else {
+            let new_order = new Order({
+                Order_id: new_order_id,
+                user_id: req.user.id,
+                email: email,
+                items: order.items,
+                total_price: order.total_price,
+                address: address,
+                shipping_code: shipping_code,
+                phone: phone,
+                name: name,
+                price_pay: order.total_price + shipping_code,
+                type_pay: type_pay,
+                status: order_status,
+                order_date: Date.now()
+            });
 
-    }
-    catch (err) {
+            let check_add_success = true;
+            await new_order.save().catch(err => {
+                console.log(err);
+                check_add_success = false;
+            });
+
+            if (check_add_success) {
+                for (let item of order.items) {
+                    let subtract_quantity = await sub_quantity(item.product_id, item.color, item.quantity, item.size);
+                    let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
+                    cart_items.items.splice(cart_item_Index, 1);
+                }
+
+                cart_items.total_price = cart_items.items.reduce(
+                    (total, item) => total + item.price_per_one * item.quantity,
+                    0
+                );
+
+                await cart_items.save();
+
+                return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
+            } else {
+                return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
+            }
+        }
+    } catch (err) {
         console.log(err);
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
+
 const callback = async (req, res) => {
     console.log("callback");
     const { resultCode, orderId } = req.body;
@@ -508,9 +561,63 @@ const get_OrderHistory_log = async (req, res) => {
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 }
+const refund_momo_money=async(req,res)=>{
+    const Order_id=req.body.Order_id;
+    const amount=req.body.price_pay;
+    const user_id = req.user.id
+    const check_order=await Order.findOne({Order_id:Order_id,user_id:user_id})
+    try{
+    if(!check_order)
+    {
+        return res.json({success:false,message:"Mã đơn hàng này không phải của khách hàng hiện tại",color:"text-red-500"})
+    }
+    const paymentResult = await check_status_momo_payment(Order_id);
+    console.log(paymentResult)
+    if (paymentResult.resultCode==0)
+    {
+        const payment_refund_result= await refund_money_momo(Order_id,paymentResult.transId,amount)
+        console.log(payment_refund_result)
+        if (payment_refund_result.resultCode==0)
+        {
+            let newStatus = 6; // Thanh toán thất bại
+            console.log("Thanh toán thất bại");
+
+            // Gọi hàm update_status_order
+            const updateReq = {
+                body: {
+                user_id: user_id,
+                Order_id: Order_id,
+                new_status_order: newStatus,
+                },
+            };
+
+            // Tạo một response giả để nhận phản hồi từ update_status_order
+            const updateRes = {
+                json: (data) => {
+                    console.log('Response from update_status_order:', data);
+                // Trả lại phản hồi từ update_status_order
+                
+                },
+            };
+
+            await update_status_order(updateReq, updateRes);
+            return res.json({success:true,message:"Hoàn tiền thành công",color:"text-green-500"})
+        }
+        else
+        {
+            return res.json({success:false,message:"Hoàn tiền thất bại",color:"text-red-500"})
+        }
+    }}
+    catch(err)
+    {
+        console.log(err)
+        return res.josn({success:false,message:"Lỗi truy xuất dữ liệu",color:"text-red-500"})
+    }
+
+}
 
 
-
+setInterval(checkAllMomoPayments, 300000);
 
 
 ///////////////////////////////////////////////////////for admin////////////////////////////////
@@ -705,6 +812,8 @@ module.exports = {
     handleMomoNotification,
     callback,
     check_status_momo_payment_order,
+    checkAllMomoPayments,
+    refund_momo_money,
 
     ///for admin///
     get_list_detail_admin,

@@ -53,7 +53,7 @@ const check_status_momo_payment = async (orderId) => {
     const requestId = partnerCode + orderId;
 
     const rawData = "accessKey=" + accessKey + "&orderId=" + orderId + "&partnerCode=" + partnerCode + "&requestId=" + requestId;
-    console.log(rawData);
+    // console.log(rawData);
     const signature = generateSignature(rawData, secretKey);
     const body = {
         partnerCode: 'MOMO',
@@ -62,7 +62,7 @@ const check_status_momo_payment = async (orderId) => {
         signature: signature,
         lang: 'vi',
     }
-    console.log(body)
+    // console.log(body)
     const url = 'https://test-payment.momo.vn/v2/gateway/api/query'
 
     try {
@@ -70,13 +70,38 @@ const check_status_momo_payment = async (orderId) => {
         return response.data;
     }
     catch (error) {
-        console.error('Error reading momo payment');
+        // console.error('Error reading momo payment');
+        throw error;
+    }
+}
+const refund_money_momo=async(orderId, transId,amount)=>{
+    const requestId=partnerCode+orderId
+    orderId=orderId+Date.now()
+    const rawData = "accessKey=" + accessKey + "&amount=" + amount +  "&description=" + "" + "&orderId=" + orderId + "&partnerCode=" + partnerCode +  "&requestId=" + requestId + "&transId=" + transId;
+    const signature = generateSignature(rawData, secretKey);
+    const body={
+        partnerCode: 'MOMO',
+        requestId,
+        orderId,
+        amount,
+        transId,
+        signature,
+        lang: 'vi',
+    }
+    const url = 'https://test-payment.momo.vn/v2/gateway/api/refund'
+
+    try {
+        const response = await axios.post(url, body)
+        return response.data;
+    }
+    catch (error) {
+        // console.error('Error reading momo payment');
         throw error;
     }
 }
 
-
 module.exports = {
     createPayment,
-    check_status_momo_payment
+    check_status_momo_payment,
+    refund_money_momo
 };
