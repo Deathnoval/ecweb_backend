@@ -5,7 +5,7 @@ const { User, validate } = require('../models/user');
 const Order = require('../models/Order');
 const { type, format, status } = require('express/lib/response');
 const OrderHistory = require('../models/order_history');
-const { createPayment } = require('../controller/momo_payment');
+const { createPayment, check_status_momo_payment } = require('../controller/momo_payment');
 const Transaction = require("../models/transaction");
 const moment = require('moment-timezone');
 
@@ -168,11 +168,18 @@ function generateOrderId() {
     }
     return id;
 }
+const check_status_momo_payment_order = async (req, res) => {
+    const orderId = req.body.order_id;
+    const paymentResult = await check_status_momo_payment(orderId);
+    // console.log(paymentResult)
+    return res.json({ message: paymentResult })
+
+}
 
 const add_order = async (req, res) => {
     const order = req.body.order
     const user_id = req.user.id;
-    const email=req.user.email;
+    const email = req.user.email;
     const address = req.body.address;
     const phone = req.body.phone;
     const name = req.body.name;
@@ -192,7 +199,7 @@ const add_order = async (req, res) => {
         if (!name) {
             return res.json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
-        
+
         if (!shipping_code) {
             if (type_pay == 3) {
                 shipping_code = 0
@@ -266,7 +273,7 @@ const add_order = async (req, res) => {
         new_order = new Order({
             Order_id: new_order_id,
             user_id: req.user.id,
-            email:email,
+            email: email,
             items: order.items,
             total_price: order.total_price,
             address: address,
@@ -422,7 +429,7 @@ const get_order_detail = async (req, res) => {
         const formatted_order_detail = {
             _id: order_detail._id,
             Order_id: order_detail.Order_id,
-            email:order_detail.email,
+            email: order_detail.email,
             user_id: order_detail.user_id,
             items: order_detail.items,
             total_price: order_detail.total_price,
@@ -557,7 +564,7 @@ const get_order_detail_to_admin = async (req, res) => {
             _id: order_detail._id,
             Order_id: order_detail.Order_id,
             user_id: order_detail.user_id,
-            emai:order_detail.email,
+            emai: order_detail.email,
             items: order_detail.items,
             total_price: order_detail.total_price,
             address: order_detail.address,
@@ -697,6 +704,7 @@ module.exports = {
     get_OrderHistory_log,
     handleMomoNotification,
     callback,
+    check_status_momo_payment_order,
 
     ///for admin///
     get_list_detail_admin,

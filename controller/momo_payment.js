@@ -13,12 +13,12 @@ const generateSignature = (rawData, secretKey) => {
 
 const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
     const requestId = partnerCode + orderId;
-    
+
     const orderType = 'momo_wallet';
     const requestType = 'captureWallet';
-    amount=amount.toString()
-    var redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
-    var ipnUrl = process.env.IPNURL.toString()+'/api/V1/order/callback';
+    amount = amount.toString()
+    const redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+    const ipnUrl = process.env.IPNURL.toString() + '/api/V1/order/callback';
     console.log(ipnUrl)
     const rawData = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + '' + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
 
@@ -31,13 +31,14 @@ const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
         amount,
         orderId,
         orderInfo,
-        redirectUrl : redirectUrl,
-        ipnUrl : ipnUrl,
-        lang : 'vi',
+        redirectUrl: redirectUrl,
+        ipnUrl: ipnUrl,
+        lang: 'vi',
         extraData: '',
         requestType,
         signature,
-        deliveryInfo
+        deliveryInfo,
+        orderExpireTime: 10,
     };
 
     try {
@@ -48,7 +49,34 @@ const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
         throw error;
     }
 };
+const check_status_momo_payment = async (orderId) => {
+    const requestId = partnerCode + orderId;
+
+    const rawData = "accessKey=" + accessKey + "&orderId=" + orderId + "&partnerCode=" + partnerCode + "&requestId=" + requestId;
+    console.log(rawData);
+    const signature = generateSignature(rawData, secretKey);
+    const body = {
+        partnerCode: 'MOMO',
+        requestId: requestId,
+        orderId: orderId,
+        signature: signature,
+        lang: 'vi',
+    }
+    console.log(body)
+    const url = 'https://test-payment.momo.vn/v2/gateway/api/query'
+
+    try {
+        const response = await axios.post(url, body)
+        return response.data;
+    }
+    catch (error) {
+        console.error('Error reading momo payment');
+        throw error;
+    }
+}
+
 
 module.exports = {
-    createPayment
+    createPayment,
+    check_status_momo_payment
 };

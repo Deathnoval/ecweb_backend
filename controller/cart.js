@@ -119,7 +119,9 @@ const add_to_cart = async (req, res) => {
       const selectedColor = product.array_color.find(
         (colorObj) => colorObj.name_color === color
       );
-
+      if (!selectedColor) {
+        return res.json({ success: false, message: " Không có màu: " + color, color: "text-red-500" });
+      }
 
       // Find the matching size object within the selected color's array_sizes
       const selectedSize = selectedColor.array_sizes.find(
