@@ -295,7 +295,7 @@ const add_order = async (req, res) => {
             const amount = order.total_price + shipping_code;
             const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
             const deliveryInfo = {
-                deliveryAddress: address,
+                deliveryAddress: address.street +", "+address.wardName+", "+address.districtName+", "+address.provinceName,
                 deliveryFee: shipping_code.toString(),
                 quantity: order.items.length
             };

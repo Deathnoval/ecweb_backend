@@ -40,6 +40,12 @@ const userSchema = new mongoose.Schema({
                 require: true,
             },
             street: { type: String, require: true, },
+            provinceID:{type: String,require:true},
+            provinceName:{type: String,require:true},
+            districtID:{type: String,require:true},
+            districtName:{type: String,require:true},
+            wardCode:{type: String,require:true},
+            wardName:{type: String,require:true},
             number: { type: String, require: true, },
             isDefault: { type: Boolean, default: false },
         }

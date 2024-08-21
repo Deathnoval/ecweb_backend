@@ -301,6 +301,12 @@ const update_address=async function(req, res){
 		const updateAddress ={
 			"name": req.body.name,
             "street": req.body.street,
+			"provinceID":req.body.provinceID,
+            "provinceName":req.body.provinceName,
+            "districtID":req.body.districtID,
+            "districtName":req.body.districtName,
+            "wardCode":req.body.wardCode,
+            "wardName":req.body.wardName,
             "number": req.body.number,
             "isDefault": req.body.isDefault
             
