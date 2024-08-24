@@ -45,15 +45,17 @@ async function changeDefaultAddress(userId, addressId) {
 	
   }
 router.post("/",userController.userRegister);
-router.post("/:id/verify/:token/",userController.verifiedEmail);
-router.post("/forgot-password/",userController.forgot_pass);
-router.post("/:id/resetPass/:token/",userController.reset_Pass);
+// router.post("/:id/verify/:token/",userController.verifiedEmail);
+// router.post("/forgot-password/",userController.forgot_pass);
+// router.post("/:id/resetPass/:token/",userController.reset_Pass);
 router.get("/get_info/",middlewareController.verifyToken,userController.get_info);
 router.get("/get_address/",middlewareController.verifyToken,userController.get_address)
 router.post("/insert_address/",middlewareController.verifyToken,userController.insert_address)
 router.post("/delete_address/:Address_id/",middlewareController.verifyToken,userController.delete_address)
 router.post("/update_address/:address_id/",middlewareController.verifyToken,userController.update_address)
-
+router.post("/:id/verify/",userController.verifiedEmail_otp);
+router.post("/forgot-password/",userController.forgot_pass_otp);
+router.post("/:id/resetPass/",userController.reset_Pass_otp);
 
 // router.post("/forgot-password/",async function(req, res) {
 // 	try {

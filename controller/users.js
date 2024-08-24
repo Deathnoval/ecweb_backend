@@ -6,7 +6,13 @@ const sendEmail = require("../utils/sendEmail");
 const { status } = require("express/lib/response");
 const { isDeepStrictEqual } = require("util");
 const bcrypt = require("bcryptjs");
-
+function generateOTP(length) {
+    let otp = '';
+    for (let i = 0; i < length; i++) {
+        otp += Math.floor(Math.random() * 10); // Thêm một số ngẫu nhiên từ 0 đến 9
+    }
+    return otp;
+}
 
 async function changeDefaultAddress(userId, addressId) {
 	// Kết nối với database MongoDB
@@ -62,9 +68,9 @@ const userRegister= async (req, res) => {
 
 		const token = await new Token({
 			userId: user._id,
-			token: crypto.randomBytes(32).toString("hex"),
+			token: generateOTP(6)//crypto.randomBytes(32).toString("hex"),
 		}).save();
-		const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
+		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
         // const url = `http://localhost:3000/verify/${user.id}/verify/${token.token}`;
 		console.log(url);
 		await sendEmail(user.email, "Verify Email", url);
@@ -74,6 +80,97 @@ const userRegister= async (req, res) => {
 			.send({ message: "An Email sent to your account please verify" });
 	} catch (error) {
 		console.log(error);
+		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
+	}
+};
+
+const verifiedEmail_otp= async (req, res) => {
+	try {
+		const user = await User.findOne({ _id: req.params.id });
+        console.log(req.params.id);
+		if (!user) return res.status(400).send({ message: "Invalid link" });
+
+		const token = await Token.findOne({
+			userId: user._id,
+			token: req.body.token,
+		});
+        console.log(req.params.token);
+		if (!token) return res.status(400).send({ message: "Invalid link" });
+
+		await User.findByIdAndUpdate({ _id: user._id}, {verified: true });
+		await token.deleteOne();
+
+		res.status(200).send({ message: "Email verified successfully" });
+	} catch (error) {
+		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
+        console.log(error);
+	}
+};
+const forgot_pass_otp=async function(req, res) {
+	try {
+		// const { error } = validate(req.body);
+		// if (error)
+		// 	return res.status(400).send({ message: error.details[0].message });
+
+		let user = await User.findOne({ email: req.body.email });
+		if (!user)
+			return res.json({ status: 200, message:"Email Chưa được đăng ký",color: 'text-red-500' });
+		const token = await new Token({
+			userId: user._id,
+			token: generateOTP(6)//crypto.randomBytes(32).toString("hex"),
+			
+		}).save();
+		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
+		// const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
+		await sendEmail(user.email, "Verify Email", url);	
+		return res.json({message:"Đã gữi Email Xác thực",color:"text-green-500"});	
+	}catch (error) {
+		console.log(error);
+		return res.status(500).send({ message: "Internal Server Error" });
+	}
+};
+const reset_Pass_otp=async function(req, res) {
+	try {
+		const id = req.params.id;
+		console.log(id);
+		const oldUser= await User.findOne({_id: id});
+		if(!oldUser) {
+			return res.json({status: 200, message:"Không tìm thấy người dùng",color:"text-red-500"});
+		}
+		const token = await Token.findOne({
+			userId: id,
+			token: req.body.token,
+		});
+		if(!token) {
+			return res.json({status: 200, message:"Sai đường dẫn",color:"text-red-500"});
+		}
+		const password = req.body.password
+		const confirmPassword = req.body.ConfirmPassword
+		if(password==confirmPassword)
+		{
+			const salt = await bcrypt.genSalt(Number(process.env.SALT));
+			const hashPassword = await bcrypt.hashSync(confirmPassword, salt);
+			await User.updateOne(
+				{
+					_id:id,
+				},
+				{
+					$set:{
+						password:hashPassword,
+					},
+				}
+			);
+			await token.deleteOne();
+			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});	
+		}
+		else
+		{
+			return res.json({success:false,message:"Mật Khẩu không trùng",color:"text-red-500"});
+		}
+
+	}
+	catch (err) {
+		console.error(err);
 		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
 	}
 };
@@ -358,6 +455,10 @@ module.exports = {
 	delete_address,
 	update_address,
 	
+	verifiedEmail_otp,
+	reset_Pass_otp,
+	forgot_pass_otp
+
 };
 
 // const router = require("express").Router();
