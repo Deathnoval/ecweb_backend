@@ -74,10 +74,8 @@ const userRegister= async (req, res) => {
         // const url = `http://localhost:3000/verify/${user.id}/verify/${token.token}`;
 		console.log(url);
 		await sendEmail(user.email, "Verify Email", url);
-
-		res
-			.status(201)
-			.send({ message: "An Email sent to your account please verify" });
+		return res.json({success:true,user_id:user._id,message: "An Email sent to your account please verify",color:"text-green-500"})
+		
 	} catch (error) {
 		console.log(error);
 		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
