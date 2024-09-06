@@ -36,17 +36,18 @@ const loginUser = async (req, res) => {
     }
     if (!user.verified) {
       let token = await Token.findOne({ userId: user._id });
-      if (!token) {
-        token = await new Token({
-          userId: user._id,
-          token: crypto.randomBytes(32).toString("hex"),
-        }).save();
-        const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
-        await sendEmail(user.email, "Verify Email", url);
-        res
-          .status(201)
-          .send({ message: "An Email sent to your account please verify" });
-      }
+      return res.json({success:false,message:"Tài Khoản của bạn chưa xác thực",color:"text-red-500"});
+      // if (!token) {
+      //   token = await new Token({
+      //     userId: user._id,
+      //     token: crypto.randomBytes(32).toString("hex"),
+      //   }).save();
+      //   const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
+      //   await sendEmail(user.email, "Verify Email", url);
+      //   res
+      //     .status(201)
+      //     .send({ message: "An Email sent to your account please verify" });
+      // }
     }
 
     else {
@@ -117,8 +118,9 @@ const requestRefreshToken = async (req, res) => {
 const logOut = async function (req, res) {
   accessTokens = accessTokens.filter((token) => token !== req.cookies.token);
   res.clearCookie("accessTokens");
-  res.status(200).json("Logged out successfully!");
   console.log("logout")
+  return res.json({success:true,message:"Logged out successfully!",color:"text-green-500"});
+
 };
 
 

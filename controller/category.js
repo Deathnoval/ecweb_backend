@@ -194,7 +194,7 @@ const insertCategory = async (req, res) => {
         "Unique constraint violation. Name, route, category_id, or sub_category_id might already exist.";
     }
     let errorMessage = "Error creating category";
-    res.status(400).json({
+    res.json({
       success: false,
       message: errorMessage,
       color: "text-red-500",

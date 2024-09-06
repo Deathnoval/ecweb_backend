@@ -53,13 +53,11 @@ const userRegister= async (req, res) => {
 	try {
 		const { error } = validate(req.body);
 		if (error)
-			return res.status(400).send({ message: error.details[0].message });
+			return res.json({ success:false,message: error.details[0].message,color:"text-red-500" });
 
 		let user = await User.findOne({ email: req.body.email });
 		if (user)
-			return res
-				.status(409)
-				.send({ message: "User with given email already Exist!" });
+			return res.json({ success:false,message: "User with given email already Exist!",color:"text-red-500" });
 
 		const salt = await bcrypt.genSalt(Number(process.env.SALT));
 		const hashPassword = await bcrypt.hashSync(req.body.password, salt);
@@ -86,19 +84,19 @@ const verifiedEmail_otp= async (req, res) => {
 	try {
 		const user = await User.findOne({ _id: req.params.id });
         console.log(req.params.id);
-		if (!user) return res.status(400).send({ message: "Invalid link" });
+		if (!user) return  res.json({ success:false,message: "Invalid link",color:"text-red-500" });
 
 		const token = await Token.findOne({
 			userId: user._id,
 			token: req.body.token,
 		});
         console.log(req.params.token);
-		if (!token) return res.status(400).send({ message: "Invalid link" });
+		if (!token) return res.json({ success:false,message: "Sai mã otp",color:"text-red-500" });
 
 		await User.findByIdAndUpdate({ _id: user._id}, {verified: true });
 		await token.deleteOne();
 
-		res.status(200).send({ message: "Email verified successfully" });
+		res.json({ success:true,message: "Email verified successfully",color:"text-green-500" });
 	} catch (error) {
 		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
         console.log(error);
@@ -112,7 +110,7 @@ const forgot_pass_otp=async function(req, res) {
 
 		let user = await User.findOne({ email: req.body.email });
 		if (!user)
-			return res.json({ status: 200, message:"Email Chưa được đăng ký",color: 'text-red-500' });
+			return res.json({ success: false, message:"Email Chưa được đăng ký",color: 'text-red-500' });
 		const token = await new Token({
 			userId: user._id,
 			token: generateOTP(6)//crypto.randomBytes(32).toString("hex"),
@@ -121,10 +119,10 @@ const forgot_pass_otp=async function(req, res) {
 		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
 		// const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
 		await sendEmail(user.email, "Verify Email", url);	
-		return res.json({message:"Đã gữi Email Xác thực",color:"text-green-500"});	
+		return res.json({success:true,user_id:user._id,message:"Đã gữi Email Xác thực",color:"text-green-500"});	
 	}catch (error) {
 		console.log(error);
-		return res.status(500).send({ message: "Internal Server Error" });
+		return res.json({ success:false,message: "Lỗi truy xuất dữ liệu",color:"text-red-500" });
 	}
 };
 const reset_Pass_otp=async function(req, res) {
@@ -133,14 +131,14 @@ const reset_Pass_otp=async function(req, res) {
 		console.log(id);
 		const oldUser= await User.findOne({_id: id});
 		if(!oldUser) {
-			return res.json({status: 200, message:"Không tìm thấy người dùng",color:"text-red-500"});
+			return res.json({success:false, message:"Không tìm thấy người dùng",color:"text-red-500"});
 		}
 		const token = await Token.findOne({
 			userId: id,
 			token: req.body.token,
 		});
 		if(!token) {
-			return res.json({status: 200, message:"Sai đường dẫn",color:"text-red-500"});
+			return res.json({success:false, message:"Sai đường mã OTP",color:"text-red-500"});
 		}
 		const password = req.body.password
 		const confirmPassword = req.body.ConfirmPassword
@@ -177,7 +175,7 @@ const verifiedEmail= async (req, res) => {
 	try {
 		const user = await User.findOne({ _id: req.params.id });
         console.log(req.params.id);
-		if (!user) return res.status(400).send({ message: "Invalid link" });
+		if (!user) return res.json({ success:false,message: "Invalid link",color:"text-red-500" });
 
 		const token = await Token.findOne({
 			userId: user._id,
@@ -189,7 +187,7 @@ const verifiedEmail= async (req, res) => {
 		await User.findByIdAndUpdate({ _id: user._id}, {verified: true });
 		await token.deleteOne();
 
-		res.status(200).send({ message: "Email verified successfully" });
+		res.json({success:true ,message: "Email verified successfully",color:"text-green-500" });
 	} catch (error) {
 		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
         console.log(error);
