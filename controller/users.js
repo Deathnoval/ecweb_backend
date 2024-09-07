@@ -118,7 +118,7 @@ const forgot_pass_otp=async function(req, res) {
 		}).save();
 		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
 		// const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
-		await sendEmail(user.email, "Verify Email", url);	
+		await sendEmail(user.email, "OTP to reset password", url);	
 		return res.json({success:true,user_id:user._id,message:"Đã gữi Email Xác thực",color:"text-green-500"});	
 	}catch (error) {
 		console.log(error);
