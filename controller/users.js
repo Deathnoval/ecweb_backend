@@ -69,7 +69,7 @@ async function changeDefaultAddress(userId, addressId) {
                     token.token = generateOTP(6); // Update with new OTP
                     await token.save();
 
-                    const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
+                    const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
                     await sendEmail(user.email, "Resend OTP", url);
 
                     return res.json({ success: true, message: "A new OTP has been sent to your email account.", color: "text-green-500" });
@@ -80,7 +80,7 @@ async function changeDefaultAddress(userId, addressId) {
                         token: generateOTP(6)
                     }).save();
 
-                    const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${newToken.token}`;
+                    const url = newToken.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${newToken.token}`;
                     await sendEmail(user.email, "Resend OTP", url);
 
                     return res.json({ success: true, message: "A new OTP has been sent to your email account.", color: "text-green-500" });
@@ -99,7 +99,7 @@ async function changeDefaultAddress(userId, addressId) {
             token: generateOTP(6)
         }).save();
 
-        const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
+        const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
         await sendEmail(user.email, "Verify Email", url);
 
         return res.json({ success: true, user_id: user._id, message: "An email has been sent to your account. Please verify it.", color: "text-green-500" });
