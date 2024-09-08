@@ -49,36 +49,67 @@ async function changeDefaultAddress(userId, addressId) {
 	
   }
 
-const userRegister= async (req, res) => {
-	try {
-		const { error } = validate(req.body);
-		if (error)
-			return res.json({ success:false,message: error.details[0].message,color:"text-red-500" });
+  const userRegister = async (req, res) => {
+    try {
+        const { error } = validate(req.body);
+        if (error)
+            return res.json({ success: false, message: error.details[0].message, color: "text-red-500" });
 
-		let user = await User.findOne({ email: req.body.email });
-		if (user)
-			return res.json({ success:false,message: "User with given email already Exist!",color:"text-red-500" });
+        let user = await User.findOne({ email: req.body.email });
 
-		const salt = await bcrypt.genSalt(Number(process.env.SALT));
-		const hashPassword = await bcrypt.hashSync(req.body.password, salt);
+        if (user) {
+            // Check if the user is already verified
+            if (user.isVerified) {
+                return res.json({ success: false, message: "User with given email is already verified!", color: "text-red-500" });
+            } else {
+                // User exists but is not verified, so resend OTP
+                const token = await Token.findOne({ userId: user._id });
+                if (token) {
+                    // Generate new OTP and update the existing token
+                    token.token = generateOTP(6); // Update with new OTP
+                    await token.save();
 
-		user = await new User({ ...req.body, password: hashPassword }).save();
+                    const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
+                    await sendEmail(user.email, "Resend OTP", url);
 
-		const token = await new Token({
-			userId: user._id,
-			token: generateOTP(6)//crypto.randomBytes(32).toString("hex"),
-		}).save();
-		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
-        // const url = `http://localhost:3000/verify/${user.id}/verify/${token.token}`;
-		console.log(url);
-		await sendEmail(user.email, "Verify Email", url);
-		return res.json({success:true,user_id:user._id,message: "An Email sent to your account please verify",color:"text-green-500"})
-		
-	} catch (error) {
-		console.log(error);
-		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
-	}
+                    return res.json({ success: true, message: "A new OTP has been sent to your email account.", color: "text-green-500" });
+                } else {
+                    // If no token exists, create a new one
+                    const newToken = await new Token({
+                        userId: user._id,
+                        token: generateOTP(6)
+                    }).save();
+
+                    const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${newToken.token}`;
+                    await sendEmail(user.email, "Resend OTP", url);
+
+                    return res.json({ success: true, message: "A new OTP has been sent to your email account.", color: "text-green-500" });
+                }
+            }
+        }
+
+        // If user does not exist, proceed with the registration process
+        const salt = await bcrypt.genSalt(Number(process.env.SALT));
+        const hashPassword = await bcrypt.hash(req.body.password, salt);
+
+        user = await new User({ ...req.body, password: hashPassword }).save();
+
+        const token = await new Token({
+            userId: user._id,
+            token: generateOTP(6)
+        }).save();
+
+        const url = `${process.env.BASE_URL}${process.env.API_URL}/users/${user._id}/verify/${token.token}`;
+        await sendEmail(user.email, "Verify Email", url);
+
+        return res.json({ success: true, user_id: user._id, message: "An email has been sent to your account. Please verify it.", color: "text-green-500" });
+
+    } catch (error) {
+        console.log(error);
+        res.json({ success: false, message: "An error occurred while processing your request.", color: "text-red-500" });
+    }
 };
+
 
 const verifiedEmail_otp= async (req, res) => {
 	try {
