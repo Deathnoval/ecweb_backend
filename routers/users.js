@@ -56,6 +56,7 @@ router.post("/update_address/:address_id/",middlewareController.verifyToken,user
 router.post("/:id/verify/",userController.verifiedEmail_otp);
 router.post("/forgot-password/",userController.forgot_pass_otp);
 router.post("/:id/resetPass/",userController.reset_Pass_otp);
+router.post("/:id/verify-otp-resetpassword",userController.verify_otp_reset_password)
 
 // router.post("/forgot-password/",async function(req, res) {
 // 	try {

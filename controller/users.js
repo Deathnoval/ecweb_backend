@@ -102,74 +102,150 @@ const verifiedEmail_otp= async (req, res) => {
         console.log(error);
 	}
 };
-const forgot_pass_otp=async function(req, res) {
+const forgot_pass_otp = async function (req, res) {
 	try {
+		// Uncomment and implement validation if necessary
 		// const { error } = validate(req.body);
 		// if (error)
 		// 	return res.status(400).send({ message: error.details[0].message });
 
 		let user = await User.findOne({ email: req.body.email });
-		if (!user)
-			return res.json({ success: false, message:"Email Chưa được đăng ký",color: 'text-red-500' });
-		const token = await new Token({
-			userId: user._id,
-			token: generateOTP(6)//crypto.randomBytes(32).toString("hex"),
-			
-		}).save();
-		const url = token.token//`${process.env.BASE_URL}${process.env.API_URL}/users/${user.id}/verify/${token.token}`;
-		// const url = `http://localhost:3000/resetPass/${user.id}/resetPass/${token.token}`;
-		await sendEmail(user.email, "OTP to reset password", url);	
-		return res.json({success:true,user_id:user._id,message:"Đã gữi Email Xác thực",color:"text-green-500"});	
-	}catch (error) {
-		console.log(error);
-		return res.json({ success:false,message: "Lỗi truy xuất dữ liệu",color:"text-red-500" });
-	}
-};
-const reset_Pass_otp=async function(req, res) {
-	try {
-		const id = req.params.id;
-		console.log(id);
-		const oldUser= await User.findOne({_id: id});
-		if(!oldUser) {
-			return res.json({success:false, message:"Không tìm thấy người dùng",color:"text-red-500"});
-		}
-		const token = await Token.findOne({
-			userId: id,
-			token: req.body.token,
-		});
-		if(!token) {
-			return res.json({success:false, message:"Sai đường mã OTP",color:"text-red-500"});
-		}
-		const password = req.body.password
-		const confirmPassword = req.body.ConfirmPassword
-		if(password==confirmPassword)
-		{
-			const salt = await bcrypt.genSalt(Number(process.env.SALT));
-			const hashPassword = await bcrypt.hashSync(confirmPassword, salt);
-			await User.updateOne(
-				{
-					_id:id,
-				},
-				{
-					$set:{
-						password:hashPassword,
-					},
-				}
-			);
-			await token.deleteOne();
-			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});	
-		}
-		else
-		{
-			return res.json({success:false,message:"Mật Khẩu không trùng",color:"text-red-500"});
+		if (!user) {
+			return res.json({ success: false, message: "Email chưa được đăng ký", color: 'text-red-500' });
 		}
 
-	}
-	catch (err) {
-		console.error(err);
-		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
+		// Generate OTP and save token
+		const token = await new Token({
+			userId: user._id,
+			token: generateOTP(6), // Ensure this is secure
+			verified_Email_otp:false,
+			password_is_change:false,
+			createdAt: Date.now(),  // Optionally add a timestamp
+			expiresAt: Date.now() + 5 * 60 * 1000 // Optional expiration of 15 mins
+		}).save();
+
+		const url = token.token;
+		await sendEmail(user.email, "OTP to reset password", url);
+
+		return res.json({ success: true, user_id: user._id, message: "Đã gửi Email xác thực", color: "text-green-500" });
+	} catch (error) {
+		// Log error in a more robust way if necessary
+		console.log(error);
+		return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
 	}
 };
+const verify_otp_reset_password = async function (req, res) {
+	try {
+		const {  otp } = req.body;
+		const {id}=req.params
+		// Find the token by userId and OTP
+		const token = await Token.findOne({ userId:id, token: otp });
+
+		if (!token) {
+			return res.json({ success: false, message: "Sai mã OTP", color: "text-red-500" });
+		}
+
+		// Check if the OTP has expired
+		if (token.expiresAt < Date.now()) {
+			await token.deleteOne();  // Clean up expired token
+			return res.json({ success: false, message: "Mã OTP đã hết hạn", color: "text-red-500" });
+		}
+
+		// Mark OTP as verified
+		token.verified_Email_otp = true;
+		await token.save();
+
+		return res.json({ success: true, message: "OTP đã được xác thực", color: "text-green-500" });
+	} catch (error) {
+		console.error(error);
+		return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+	}
+};
+const reset_Pass_otp = async function (req, res) {
+	try {
+		const {id}=req.params
+		const {  password, ConfirmPassword } = req.body;
+
+		// Check if the token is verified
+		const token = await Token.findOne({ userId:id, verified_Email_otp: true });
+
+		if (!token) {
+			return res.json({ success: false, message: "OTP chưa được xác thực", color: "text-red-500" });
+		}
+
+		// Validate that the passwords match
+		if (password !== ConfirmPassword) {
+			return res.json({ success: false, message: "Mật khẩu không trùng khớp", color: "text-red-500" });
+		}
+
+		// Ensure password meets strength requirements (if any)
+		// if (newPassword.length < 8) {
+		// 	return res.json({ success: false, message: "Mật khẩu phải có ít nhất 8 ký tự", color: "text-red-500" });
+		// }
+		// Hash the new password
+		
+		const salt = await bcrypt.genSalt(Number(process.env.SALT));
+		const hashPassword = await bcrypt.hash(password, salt);
+
+		// Update user's password in the database
+		await User.updateOne({ _id: token.userId }, { $set: { password: hashPassword } });
+
+		// Mark password as changed and delete the token
+		token.password_is_change = true;
+		await token.deleteOne();
+
+		return res.json({ success: true, message: "Cập nhật mật khẩu thành công", color: "text-green-500" });
+	} catch (error) {
+		console.error(error);
+		return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+	}
+};
+
+// const reset_Pass_otp=async function(req, res) {
+// 	try {
+// 		const id = req.params.id;
+// 		console.log(id);
+// 		const oldUser= await User.findOne({_id: id});
+// 		if(!oldUser) {
+// 			return res.json({success:false, message:"Không tìm thấy người dùng",color:"text-red-500"});
+// 		}
+// 		const token = await Token.findOne({
+// 			userId: id,
+// 			token: req.body.token,
+// 		});
+// 		if(!token) {
+// 			return res.json({success:false, message:"Sai đường mã OTP",color:"text-red-500"});
+// 		}
+// 		const password = req.body.password
+// 		const confirmPassword = req.body.ConfirmPassword
+// 		if(password==confirmPassword)
+// 		{
+// 			const salt = await bcrypt.genSalt(Number(process.env.SALT));
+// 			const hashPassword = await bcrypt.hashSync(confirmPassword, salt);
+// 			await User.updateOne(
+// 				{
+// 					_id:id,
+// 				},
+// 				{
+// 					$set:{
+// 						password:hashPassword,
+// 					},
+// 				}
+// 			);
+// 			await token.deleteOne();
+// 			return res.json({success:true,message:"Cập Nhập Mật Khẩu thành công",color:"text-green-500"});	
+// 		}
+// 		else
+// 		{
+// 			return res.json({success:false,message:"Mật Khẩu không trùng",color:"text-red-500"});
+// 		}
+
+// 	}
+// 	catch (err) {
+// 		console.error(err);
+// 		res.json({success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500"});
+// 	}
+// };
 
 const verifiedEmail= async (req, res) => {
 	try {
@@ -453,7 +529,8 @@ module.exports = {
 	
 	verifiedEmail_otp,
 	reset_Pass_otp,
-	forgot_pass_otp
+	forgot_pass_otp,
+	verify_otp_reset_password
 
 };
 
