@@ -10,6 +10,7 @@ router.post('/check_status_momo_payment', orderController.check_status_momo_paym
 router.post('/refund_momo_money',middlewareController.verifyToken,orderController.refund_momo_money);
 router.post('/momo/notify', middlewareController.verifyToken, orderController.handleMomoNotification);
 router.post('/callback', orderController.callback);
+router.post('/cancer_order',middlewareController.verifyToken,orderController.cancer_order)
 // router.post('/get_order_detail_to_admin', middlewareController.verifyToken, orderController.get_order_detail_to_admin);
 // router.post('/get_list_detail_user', middlewareController.verifyToken, orderController.get_list_detail_user);
 // router.post('/update_status_order', middlewareController.verifyToken, orderController.update_status_order);

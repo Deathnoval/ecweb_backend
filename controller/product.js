@@ -448,143 +448,277 @@ const delete_product = async (req, res) => {
     }
 };
 
+// const update_product = async (req, res) => {
+//     try {
+//         let { product_id, name, total, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, description, codeProduct } = req.body;
+//         console.log({ name, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, codeProduct })
+//         if (!name) {
+//             return res.json({ success: false, message: "Tên sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!price) {
+//             return res.json({ success: false, message: "Giá sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!total) {
+//             return res.json({ success: false, message: "Số lượng  sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!array_image) {
+//             return res.json({ success: false, message: "Danh sác ảnh sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!imagePrimaryAndHover) {
+//             return res.json({ success: false, message: "vui lòng chọn ảnh chính và ảnh review", color: "text-red-500" });
+//         }
+//         if (!category_id) {
+//             return res.json({ success: false, message: "Danh mục chính sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!sub_category_id) {
+//             return res.json({ success: false, message: "Danh mục phụ sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!description) {
+//             return res.json({ success: false, message: "Mô tả sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!codeProduct) {
+//             return res.json({ success: false, message: "Mã sản phẩm không được để trống", color: "text-red-500" });
+//         }
+//         if (!product_id)
+//             return res.json({ success: false, message: "ID sản phẩm không được để trống", color: "text-red-500" });
+
+
+//         else {
+//             const check_product_id = await Product.findOne({ product_id: product_id });
+//             if (check_product_id) {
+//                 // const checkProduct_code = await Product.findOne({ code: codeProduct });
+//                 // console.log(checkProduct_code);
+//                 const checkProduct_category = await Category.findOne({ category_id: category_id });
+
+//                 if (check_product_id.code != codeProduct) {
+//                     const checkProduct_code = await Product.findOne({ code: codeProduct });
+//                     if (checkProduct_code != null)
+//                         return res.json({ success: false, message: "Mã sãn phẫm đã tồn tại", color: "text-red-500" })
+//                 }
+//                 if (!checkProduct_category) {
+//                     return res.json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" })
+//                 }
+//                 else {
+//                     const checkProduct_sub_category = checkProduct_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
+//                     if (checkProduct_sub_category === -1) {
+//                         return res.json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" })
+//                     }
+//                 }
+//                 let total_number
+//                 let hasError = false
+//                 if (array_color.length > 0) {
+//                     total_number = 0;
+//                     array_color.forEach(color => {
+//                         let total_number_with_color = 0;
+//                         color.array_sizes.forEach(size => {
+//                             total_number_with_color += parseInt(size.total_number_with_size);
+
+//                         });
+//                         if (color.total_number_with_color != total_number_with_color) {
+
+//                         } else {
+//                             total_number += parseInt(color.total_number_with_color)
+//                             hasError = true
+//                             console.log(color.array_sizes)
+
+//                         }
+//                     });
+//                     if (hasError == false)
+//                         return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm ", color: "text-red-500" });
+
+//                     if (parseInt(total_number) != total) {
+//                         return res.json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm ", color: "text-red-500" });
+//                     };
+//                 }
+
+//                 const update_product = await Product.findOneAndUpdate({ product_id: product_id }, {
+//                     name,
+//                     price,
+//                     total_number: total,
+//                     array_color,
+//                     array_image,
+//                     primary_image: imagePrimaryAndHover.primary_image,
+//                     image_hover: imagePrimaryAndHover.image_hover,
+//                     category_id,
+//                     sub_category_id,
+//                     description,
+//                     onlShop,
+
+//                     createdAt: Date.now(),
+//                     code: codeProduct
+//                 }, { new: true })
+
+//                 // const newProduct = new Product({
+//                 //     name,
+//                 //     price,
+//                 //     total_number: total,
+//                 //     array_color,
+//                 //     array_image,
+//                 //     primary_image: imagePrimaryAndHover.primary_image,
+//                 //     image_hover: imagePrimaryAndHover.image_hover,
+//                 //     category_id,
+//                 //     sub_category_id,
+//                 //     description,
+//                 //     onlShop: false,
+//                 //     product_id: new_product_id,
+//                 //     createdAt: Date.now(),
+//                 //     code: codeProduct
+//                 // });
+
+//                 // Save the product to the database
+
+//                 if (update_product) {
+//                     return res.json({ success: true, message: "Cập nhật sản phẩm thành công", color: "text-green-500" });
+//                 }
+//                 else {
+//                     return res.json({ success: false, message: "Cập nhật sản phẩm thất bại", color: "text-red-500" });
+//                 }
+//             }
+//             else {
+//                 return res.json({ success: false, message: "id sản phẩm không tồn tại ", color: "text-red-500" });
+//             }
+
+//         }
+//     } catch (err) {
+//         console.log(err);
+//         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+//     }
+// }
+
 const update_product = async (req, res) => {
     try {
-        let { product_id, name, total, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, description, codeProduct } = req.body;
-        console.log({ name, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, codeProduct })
-        if (!name) {
-            return res.json({ success: false, message: "Tên sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!price) {
-            return res.json({ success: false, message: "Giá sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!total) {
-            return res.json({ success: false, message: "Số lượng  sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!array_image) {
-            return res.json({ success: false, message: "Danh sác ảnh sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!imagePrimaryAndHover) {
-            return res.json({ success: false, message: "vui lòng chọn ảnh chính và ảnh review", color: "text-red-500" });
-        }
-        if (!category_id) {
-            return res.json({ success: false, message: "Danh mục chính sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!sub_category_id) {
-            return res.json({ success: false, message: "Danh mục phụ sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!description) {
-            return res.json({ success: false, message: "Mô tả sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!codeProduct) {
-            return res.json({ success: false, message: "Mã sản phẩm không được để trống", color: "text-red-500" });
-        }
-        if (!product_id)
-            return res.json({ success: false, message: "ID sản phẩm không được để trống", color: "text-red-500" });
+        let { 
+            product_id, 
+            name, 
+            total, 
+            price, 
+            array_color, 
+            array_image, 
+            imagePrimaryAndHover, 
+            category_id, 
+            sub_category_id, 
+            description, 
+            codeProduct 
+        } = req.body;
 
+        // Trim and parse total to remove any extra spaces and convert to number
+        total = parseInt(total.trim(), 10);
+        
+        console.log({ name, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, codeProduct });
 
-        else {
-            const check_product_id = await Product.findOne({ product_id: product_id });
-            if (check_product_id) {
-                // const checkProduct_code = await Product.findOne({ code: codeProduct });
-                // console.log(checkProduct_code);
-                const checkProduct_category = await Category.findOne({ category_id: category_id });
+        // Validate input fields
+        const requiredFields = [
+            { field: name, message: "Tên sản phẩm không được để trống" },
+            { field: price, message: "Giá sản phẩm không được để trống" },
+            { field: total, message: "Số lượng sản phẩm không được để trống" },
+            { field: array_image, message: "Danh sách ảnh sản phẩm không được để trống" },
+            { field: imagePrimaryAndHover, message: "Vui lòng chọn ảnh chính và ảnh review" },
+            { field: category_id, message: "Danh mục chính sản phẩm không được để trống" },
+            { field: sub_category_id, message: "Danh mục phụ sản phẩm không được để trống" },
+            { field: description, message: "Mô tả sản phẩm không được để trống" },
+            { field: codeProduct, message: "Mã sản phẩm không được để trống" },
+            { field: product_id, message: "ID sản phẩm không được để trống" }
+        ];
 
-                if (check_product_id.code != codeProduct) {
-                    const checkProduct_code = await Product.findOne({ code: codeProduct });
-                    if (checkProduct_code != null)
-                        return res.json({ success: false, message: "Mã sãn phẫm đã tồn tại", color: "text-red-500" })
-                }
-                if (!checkProduct_category) {
-                    return res.json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" })
-                }
-                else {
-                    const checkProduct_sub_category = checkProduct_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
-                    if (checkProduct_sub_category === -1) {
-                        return res.json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" })
+        for (const { field, message } of requiredFields) {
+            if (!field) {
+                return res.json({ success: false, message, color: "text-red-500" });
+            }
+        }
+
+        // Check if product exists
+        const check_product_id = await Product.findOne({ product_id });
+        if (!check_product_id) {
+            return res.json({ success: false, message: "ID sản phẩm không tồn tại", color: "text-red-500" });
+        }
+
+        // Check if product code is unique
+        if (check_product_id.code !== codeProduct) {
+            const checkProduct_code = await Product.findOne({ code: codeProduct });
+            if (checkProduct_code) {
+                return res.json({ success: false, message: "Mã sản phẩm đã tồn tại", color: "text-red-500" });
+            }
+        }
+
+        // Check category and sub-category
+        const checkProduct_category = await Category.findOne({ category_id });
+        if (!checkProduct_category) {
+            return res.json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" });
+        }
+
+        const checkProduct_sub_category = checkProduct_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
+        if (checkProduct_sub_category === -1) {
+            return res.json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" });
+        }
+
+        // Check total numbers for colors and sizes if array_color is provided
+        if (array_color && array_color.length > 0) {
+            let total_number = 0;
+            let hasMismatchError = false;
+
+            array_color.forEach(color => {
+                const total_number_with_color = parseInt(color.total_number_with_color.trim(), 10);
+
+                // Add up total numbers for all colors
+                total_number += total_number_with_color;
+
+                // If array_sizes exists, validate sizes
+                if (color.array_sizes && color.array_sizes.length > 0) {
+                    let total_number_with_sizes = 0;
+
+                    color.array_sizes.forEach(size => {
+                        total_number_with_sizes += parseInt(size.total_number_with_size, 10);
+                    });
+
+                    if (total_number_with_sizes !== total_number_with_color) {
+                        hasMismatchError = true;
                     }
                 }
-                let total_number
-                let hasError = false
-                if (array_color.length > 0) {
-                    total_number = 0;
-                    array_color.forEach(color => {
-                        let total_number_with_color = 0;
-                        color.array_sizes.forEach(size => {
-                            total_number_with_color += parseInt(size.total_number_with_size);
+            });
 
-                        });
-                        if (color.total_number_with_color != total_number_with_color) {
-
-                        } else {
-                            total_number += parseInt(color.total_number_with_color)
-                            hasError = true
-                            console.log(color.array_sizes)
-
-                        }
-                    });
-                    if (hasError == false)
-                        return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm ", color: "text-red-500" });
-
-                    if (parseInt(total_number) != total) {
-                        return res.json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm ", color: "text-red-500" });
-                    };
-                }
-
-                const update_product = await Product.findOneAndUpdate({ product_id: product_id }, {
-                    name,
-                    price,
-                    total_number: total,
-                    array_color,
-                    array_image,
-                    primary_image: imagePrimaryAndHover.primary_image,
-                    image_hover: imagePrimaryAndHover.image_hover,
-                    category_id,
-                    sub_category_id,
-                    description,
-                    onlShop: false,
-
-                    createdAt: Date.now(),
-                    code: codeProduct
-                }, { new: true })
-
-                // const newProduct = new Product({
-                //     name,
-                //     price,
-                //     total_number: total,
-                //     array_color,
-                //     array_image,
-                //     primary_image: imagePrimaryAndHover.primary_image,
-                //     image_hover: imagePrimaryAndHover.image_hover,
-                //     category_id,
-                //     sub_category_id,
-                //     description,
-                //     onlShop: false,
-                //     product_id: new_product_id,
-                //     createdAt: Date.now(),
-                //     code: codeProduct
-                // });
-
-                // Save the product to the database
-
-                if (update_product) {
-                    return res.json({ success: true, message: "Cập nhật sản phẩm thành công", color: "text-green-500" });
-                }
-                else {
-                    return res.json({ success: false, message: "Cập nhật sản phẩm thất bại", color: "text-red-500" });
-                }
-            }
-            else {
-                return res.json({ success: false, message: "id sản phẩm không tồn tại ", color: "text-red-500" });
+            // If there is a mismatch in size totals
+            if (hasMismatchError) {
+                return res.json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm", color: "text-red-500" });
             }
 
+            // If total color number doesn't match overall total
+            if (total_number !== total) {
+                return res.json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm", color: "text-red-500" });
+            }
         }
+
+        // Update product
+        const updated_product = await Product.findOneAndUpdate(
+            { product_id },
+            {
+                name,
+                price,
+                total_number: total,
+                array_color,
+                array_image,
+                primary_image: imagePrimaryAndHover.primary_image,
+                image_hover: imagePrimaryAndHover.image_hover,
+                category_id,
+                sub_category_id,
+                description,
+                onlShop: false,
+                createdAt: Date.now(),
+                code: codeProduct
+            },
+            { new: true }
+        );
+
+        if (updated_product) {
+            return res.json({ success: true, message: "Cập nhật sản phẩm thành công", color: "text-green-500" });
+        } else {
+            return res.json({ success: false, message: "Cập nhật sản phẩm thất bại", color: "text-red-500" });
+        }
+
     } catch (err) {
-        console.log(err);
+        console.error(err);
         return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
-}
-
+};
 
 module.exports = {
     getProductListALL,

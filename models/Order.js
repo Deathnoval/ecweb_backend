@@ -67,6 +67,7 @@ const OrderSchema = new mongoose.Schema({
   type_pay: { type: Number, required: true },
   status: { type: Number, required: true, default: 1 },
   order_date: { type: Date, required: true },
+  paymentUrl:{type:String,required:false,default:""}
 });
 
 const Order = mongoose.model("Order", OrderSchema, "Order");
