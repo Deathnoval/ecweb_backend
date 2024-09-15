@@ -701,7 +701,6 @@ const update_product = async (req, res) => {
                 category_id,
                 sub_category_id,
                 description,
-                onlShop: false,
                 createdAt: Date.now(),
                 code: codeProduct
             },
