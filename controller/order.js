@@ -669,6 +669,7 @@ const get_order_detail = async (req, res) => {
             name: order_detail.name,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
+            paymentUrl:order_detail.paymentUrl,
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
@@ -706,7 +707,7 @@ const get_list_detail_user = async (req, res) => {
         }
         let format_order_list = []
         for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
+            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay,paymentUrl:order.paymentUrl })
         }
 
         return res.json({ success: true, format_order_list, color: "text-green-500" })
@@ -730,7 +731,9 @@ const get_OrderHistory_log = async (req, res) => {
         if (!list_OrderHistory) {
             return res.json({ success: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
         }
-        return res.json({ success: true, log: list_OrderHistory.status_history, color: "text-green-500" })
+        const log_list_OrderHistory={status:list_OrderHistory.status_history.status,
+            day_add:moment(list_OrderHistory.status_history.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")}
+        return res.json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {
         console.log(err);
@@ -822,7 +825,7 @@ const cancer_order=async(req,res)=>{
     //     console.log(payment_refund_result)
         // if (payment_refund_result.resultCode==0)
         // {
-        if (check_order.type_pay!=1)
+        if (check_order.type_pay!=0)
         {
             return res.json({success:false,message:"Sai phương thức huỷ đơn",color:"text-red-500"})
         }
@@ -1199,7 +1202,9 @@ const get_OrderHistory_log_admin = async (req, res) => {
         if (!list_OrderHistory) {
             return res.json({ sucess: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
         }
-        return res.json({ success: true, log: list_OrderHistory.status_history, color: "text-green-500" })
+        const log_list_OrderHistory={status:list_OrderHistory.status_history.status,
+            day_add:moment(list_OrderHistory.status_history.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")}
+        return res.json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {
         console.log(err);
