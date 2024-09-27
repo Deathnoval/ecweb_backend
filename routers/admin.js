@@ -3,6 +3,7 @@ const categoryController = require('../controller/category');
 const productController = require('../controller/product');
 const orderController = require('../controller/order');
 const middlewareController = require('../controller/middleware');
+const userController=require('../controller/users')
 
 //admin for category
 router.get('/Admin_get_all_category', categoryController.Admin_get_all_category);
@@ -32,4 +33,10 @@ router.post('/update_status_order', middlewareController.verifyTokenAdmin, order
 router.post('/get_OrderHistory_log_admin', middlewareController.verifyTokenAdmin, orderController.get_OrderHistory_log_admin);
 router.post('/get_full_order_table', middlewareController.verifyTokenAdmin, orderController.get_full_order_table)
 router.post('/refund_momo_money_admin',middlewareController.verifyTokenAdmin,orderController.refund_momo_money_admin)
+
+
+//admin for user
+
+router.post("/grant-admin/:id",middlewareController.verifyTokenAdmin,userController.grantAdmin )
+router.get("/find-by-email/:email",middlewareController.verifyTokenAdmin,userController.findUserByEmail);
 module.exports = router;

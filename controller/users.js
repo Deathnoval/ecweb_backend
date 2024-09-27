@@ -705,7 +705,80 @@ const update_address = async function (req, res) {
     });
   }
 };
+const grantAdmin = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Không tìm thấy user",
+        color: "text-red-500",
+      });
+    }
 
+    // Check if the user is already an admin
+    if (user.isAdmin) {
+      return res.json({
+        success: false,
+        message: "User này đã có quyền admin",
+        color: "text-red-500",
+      });
+    }
+
+    // Check if the user is verified
+    if (!user.verified) {
+      return res.json({
+        success: false,
+        message: "User này chưa xác thực tài khoản",
+        color: "text-red-500",
+      });
+    }
+
+    // If user is not an admin and is verified, grant admin rights
+    user.isAdmin = true;
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: `Quyền admin đã được cập cho tài khoản ${user.email}`,
+      color: "text-green-500",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.json({
+      success: false,
+      message: "Lỗi truy xuất dữ liệu",
+      color: "text-red-500",
+    });
+  }
+};
+const findUserByEmail = async (req, res) => {
+  try {
+    const email = req.params.email;
+    const user = await User.findOne({ email: email });
+
+    if (!user) {
+      return res.json({
+        success: false,
+        message: "Không tìm thấy người dùng",
+        color: "text-red-500",
+      });
+    }
+
+    return res.json({
+      success: true,
+      user: user, // Return the entire user object
+      color: "text-green-500",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.json({
+      success: false,
+      message: "Lỗi truy xuất dữ liệu",
+      color: "text-red-500",
+    });
+  }
+};
 module.exports = {
   userRegister,
   verifiedEmail,
@@ -721,6 +794,8 @@ module.exports = {
   reset_Pass_otp,
   forgot_pass_otp,
   verify_otp_reset_password,
+  grantAdmin,
+  findUserByEmail
 };
 
 // const router = require("express").Router();

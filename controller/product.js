@@ -719,6 +719,40 @@ const update_product = async (req, res) => {
     }
 };
 
+const searchProductsByName = async (req, res) => {
+    const { name } = req.body; // Getting the name parameter from the URL
+    try {
+        // Use a regular expression to find products with names that match the search term
+        const products = await Product.find({
+            name: { $regex: name, $options: 'i' } // 'i' makes the search case-insensitive
+        });
+
+        if (products.length > 0) {
+            // Format the product list similar to the getProductListALL function
+            const formattedProducts = products.map(product => ({
+                id: product.product_id,
+                name: product.name,
+                price: product.price,
+                image: product.primary_image,
+                imageHover: product.image_hover,
+                color: product.array_color.map(arrayColor => ({
+                    name_color: arrayColor.name_color,
+                    code_color: arrayColor.code_color,
+                    image: arrayColor.image,
+                })),
+            }));
+
+            res.json({ success: true, products: formattedProducts });
+        } else {
+            res.json({ success: false, message: "Không tìm thấy sản phẩm nào", color: "text-red-500" });
+        }
+    } catch (err) {
+        console.error(err);
+        res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    }
+};
+
+
 module.exports = {
     getProductListALL,
     getProductDetail,
@@ -727,5 +761,6 @@ module.exports = {
     add_product,
     delete_product,
     admin_to_get_product_list,
-    update_product
+    update_product,
+    searchProductsByName
 }
