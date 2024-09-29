@@ -1,6 +1,8 @@
 const router = require("express").Router();
 const { User, validate } = require("../models/user");
 const Token = require("../models/token");
+const Cart=require("../models/cart")
+const Blacklist=require("../models/blacklist")
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { status } = require("express/lib/response");
@@ -779,6 +781,70 @@ const findUserByEmail = async (req, res) => {
     });
   }
 };
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("-password"); // Exclude passwords
+    res.json({ success: true, users ,color: "text-green-500"});
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: "Lỗi truy xuất dữ liệu",color: "text-red-500" });
+  }
+};
+const deleteUserAndCart = async (req, res) => {
+  try {
+    const userId = req.params.id;
+
+    // Delete the user
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.json({ success: false, message: "Không tìm thấy người dùng cần thiết để xoá",color: "text-red-500" });
+    }
+
+    // Delete the associated cart if it exists
+    const cart = await Cart.findOneAndDelete({ user_id: userId });
+    
+    return res.json({
+      success: true,
+      message:"Xoá tài khoản thành công ",
+      color: "text-green-500"
+    });
+  } catch (error) {
+    console.error(error);
+    res.json({ success: false, message: "Lỗi truy xuất dữ liệu",color: "text-red-500" });
+  }
+};
+const addToBlacklist = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // Step 1: Check if the email exists in the User collection
+    const user = await User.findOne({ email });
+
+    if (user) {
+      // Step 2: If the user exists, directly call deleteUserAndCart
+      await User.findByIdAndDelete(user._id);
+      await Cart.findOneAndDelete({ user_id: user._id });
+      
+    }
+
+    // Step 3: Add the email to the blacklist
+    const blacklistedEmail = new Blacklist({ email });
+    await blacklistedEmail.save();
+
+    return res.json({
+      success: true,
+      message: `${email} đã được thêm vào blacklist`,
+      color: "text-green-500",
+    });
+  } catch (error) {
+    console.error(error);
+    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+  }
+};
+
+
+
+
 module.exports = {
   userRegister,
   verifiedEmail,
@@ -795,7 +861,10 @@ module.exports = {
   forgot_pass_otp,
   verify_otp_reset_password,
   grantAdmin,
-  findUserByEmail
+  findUserByEmail,
+  getAllUsers,
+  deleteUserAndCart,
+  addToBlacklist
 };
 
 // const router = require("express").Router();
