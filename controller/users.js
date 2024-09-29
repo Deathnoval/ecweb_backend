@@ -754,10 +754,10 @@ const grantAdmin = async (req, res) => {
     });
   }
 };
-const findUserByEmail = async (req, res) => {
+const findUserById = async (req, res) => {
   try {
-    const email = req.params.email;
-    const user = await User.findOne({ email: email });
+    const userId = req.body.userId;
+    const user = await User.findOne({ _id: userId }).select("-password");
 
     if (!user) {
       return res.json({
@@ -783,13 +783,24 @@ const findUserByEmail = async (req, res) => {
 };
 const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select("-password"); // Exclude passwords
-    res.json({ success: true, users ,color: "text-green-500"});
+    const query = {}; // Initialize query object
+
+    // If there's an email query parameter, use a regular expression for partial matching
+    if (req.query.email) {
+      query.email = { $regex: req.query.email, $options: "i" }; // Case-insensitive partial match
+    }
+
+    // Find users based on the query and select specific fields
+    const users = await User.find(query).select("ho ten email _id"); // Only return ho, ten, email, id
+
+    res.json({ success: true, users, color: "text-green-500" });
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Lỗi truy xuất dữ liệu",color: "text-red-500" });
+    res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 };
+
+
 const deleteUserAndCart = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -861,7 +872,7 @@ module.exports = {
   forgot_pass_otp,
   verify_otp_reset_password,
   grantAdmin,
-  findUserByEmail,
+  findUserById,
   getAllUsers,
   deleteUserAndCart,
   addToBlacklist
