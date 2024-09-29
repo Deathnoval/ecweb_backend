@@ -756,7 +756,7 @@ const grantAdmin = async (req, res) => {
 };
 const findUserById = async (req, res) => {
   try {
-    const userId = req.body.userId;
+    const userId = req.params.id;
     const user = await User.findOne({ _id: userId }).select("-password");
 
     if (!user) {
