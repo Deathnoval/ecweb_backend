@@ -803,7 +803,7 @@ const getAllUsers = async (req, res) => {
 
 const deleteUserAndCart = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const userId = req.body.userId;
 
     // Delete the user
     const user = await User.findByIdAndDelete(userId);
