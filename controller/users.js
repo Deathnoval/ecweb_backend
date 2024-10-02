@@ -707,53 +707,86 @@ const update_address = async function (req, res) {
     });
   }
 };
-const grantAdmin = async (req, res) => {
+const grantRoles = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const { userId, role } = req.body; // role ở đây là một mảng các vai trò
+
+    // Tìm user theo ID
+    const user = await User.findById(userId);
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "Không tìm thấy user",
         color: "text-red-500",
       });
     }
 
-    // Check if the user is already an admin
-    if (user.isAdmin) {
-      return res.json({
-        success: false,
-        message: "User này đã có quyền admin",
-        color: "text-red-500",
-      });
-    }
-
-    // Check if the user is verified
+    // Kiểm tra nếu user chưa xác thực tài khoản
     if (!user.verified) {
-      return res.json({
+      return res.status(400).json({
         success: false,
         message: "User này chưa xác thực tài khoản",
         color: "text-red-500",
       });
     }
 
-    // If user is not an admin and is verified, grant admin rights
-    user.isAdmin = true;
+    // Kiểm tra nếu role không phải là mảng
+    if (!Array.isArray(role)) {
+      return res.status(400).json({
+        success: false,
+        message: "Role phải là một mảng",
+        color: "text-red-500",
+      });
+    }
+
+    // Kiểm tra các role hợp lệ
+    const validRoles = ['admin', 'user', 'moderator']; // Bạn có thể chỉnh sửa danh sách role này
+    const newRoles = [];
+
+    for (let r of role) {
+      if (!validRoles.includes(r)) {
+        return res.status(400).json({
+          success: false,
+          message: `Role không hợp lệ: ${r}`,
+          color: "text-red-500",
+        });
+      }
+
+      // Kiểm tra nếu user đã có role đó chưa
+      if (!user.role.includes(r)) {
+        newRoles.push(r);
+      }
+    }
+
+    // Nếu không có role nào mới cần thêm
+    if (newRoles.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "User đã có tất cả các quyền được yêu cầu",
+        color: "text-red-500",
+      });
+    }
+
+    // Thêm các role mới vào user
+    user.role = [...user.role, ...newRoles];
     await user.save();
 
-    return res.json({
+    return res.status(200).json({
       success: true,
-      message: `Quyền admin đã được cập cho tài khoản ${user.email}`,
+      message: `Các quyền ${newRoles.join(', ')} đã được cấp cho tài khoản ${user.email}`,
       color: "text-green-500",
     });
   } catch (error) {
     console.error(error);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
     });
   }
 };
+
+
 const findUserById = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -805,53 +838,64 @@ const deleteUserAndCart = async (req, res) => {
   try {
     const userId = req.body.userId;
 
-    // Delete the user
+    // Xóa người dùng
     const user = await User.findByIdAndDelete(userId);
     if (!user) {
-      return res.json({ success: false, message: "Không tìm thấy người dùng cần thiết để xoá",color: "text-red-500" });
+      return res.status(404).json({
+        success: false,
+        message: "Không tìm thấy người dùng cần thiết để xoá",
+        color: "text-red-500"
+      });
     }
 
-    // Delete the associated cart if it exists
+    // Xóa giỏ hàng liên quan nếu có
     const cart = await Cart.findOneAndDelete({ user_id: userId });
-    
-    return res.json({
+
+    return res.status(200).json({
       success: true,
-      message:"Xoá tài khoản thành công ",
+      message: "Xoá tài khoản thành công",
       color: "text-green-500"
     });
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Lỗi truy xuất dữ liệu",color: "text-red-500" });
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi truy xuất dữ liệu",
+      color: "text-red-500"
+    });
   }
 };
+
 const addToBlacklist = async (req, res) => {
   try {
     const { email } = req.body;
 
-    // Step 1: Check if the email exists in the User collection
+    // Bước 1: Kiểm tra xem email có tồn tại trong bảng User không
     const user = await User.findOne({ email });
 
     if (user) {
-      // Step 2: If the user exists, directly call deleteUserAndCart
       await User.findByIdAndDelete(user._id);
       await Cart.findOneAndDelete({ user_id: user._id });
-      
     }
 
-    // Step 3: Add the email to the blacklist
     const blacklistedEmail = new Blacklist({ email });
     await blacklistedEmail.save();
 
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: `${email} đã được thêm vào blacklist`,
-      color: "text-green-500",
+      color: "text-green-500"
     });
   } catch (error) {
     console.error(error);
-    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi truy xuất dữ liệu",
+      color: "text-red-500"
+    });
   }
 };
+
 
 
 
@@ -871,7 +915,7 @@ module.exports = {
   reset_Pass_otp,
   forgot_pass_otp,
   verify_otp_reset_password,
-  grantAdmin,
+  grantRoles,
   findUserById,
   getAllUsers,
   deleteUserAndCart,
