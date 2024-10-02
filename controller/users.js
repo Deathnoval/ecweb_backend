@@ -740,7 +740,7 @@ const grantRoles = async (req, res) => {
     }
 
     // Kiểm tra các role hợp lệ
-    const validRoles = ['admin', 'user', 'moderator']; // Bạn có thể chỉnh sửa danh sách role này
+    const validRoles = ['user','ql_order','ql_user','ql_product','ql_transaction']; // Bạn có thể chỉnh sửa danh sách role này
     const newRoles = [];
 
     for (let r of role) {
@@ -895,7 +895,23 @@ const addToBlacklist = async (req, res) => {
     });
   }
 };
-
+const getAllBlacklistedEmails = async (req, res) => {
+  try {
+      const blacklistedEmails = await Blacklist.find().select('email');
+      return res.status(200).json({
+          success: true,
+          message: blacklistedEmails,
+          color: "text-green-500",
+      });
+  } catch (error) {
+      console.error(error);
+      return res.status(500).json({
+          success: false,
+          message: "Lỗi truy xuất dữ liệu",
+          color: "text-red-500",
+      });
+  }
+};
 
 
 
@@ -919,7 +935,8 @@ module.exports = {
   findUserById,
   getAllUsers,
   deleteUserAndCart,
-  addToBlacklist
+  addToBlacklist,
+  getAllBlacklistedEmails
 };
 
 // const router = require("express").Router();
