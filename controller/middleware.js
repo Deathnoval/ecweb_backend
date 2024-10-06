@@ -10,7 +10,7 @@ const verifyToken = async (req, res, next) => {
             if (err) {
                 return res.status(403).json({ 
                     success: false, 
-                    message: "Token không hợp lệ", 
+                    message: "Token is invalid", 
                     color: "text-red-500" 
                 });
             }
@@ -20,7 +20,7 @@ const verifyToken = async (req, res, next) => {
     } else {
         return res.status(401).json({ 
             success: false, 
-            message: "Bạn chưa được xác thực", 
+            message: "You're not authenticate", 
             color: "text-red-500" 
         });
     }
