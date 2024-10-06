@@ -759,13 +759,13 @@ const grantRoles = async (req, res) => {
     }
 
     // Nếu không có role nào mới cần thêm
-    if (newRoles.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "User đã có tất cả các quyền được yêu cầu",
-        color: "text-red-500",
-      });
-    }
+    // if (newRoles.length === 0) {
+    //   return res.status(400).json({
+    //     success: false,
+    //     message: "User đã có tất cả các quyền được yêu cầu",
+    //     color: "text-red-500",
+    //   });
+    // }
 
     // Thêm các role mới vào user
     user.role = [...user.role, ...newRoles];
