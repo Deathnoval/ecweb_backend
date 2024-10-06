@@ -741,7 +741,7 @@ const grantRoles = async (req, res) => {
 
     // Kiểm tra các role hợp lệ
     const validRoles = ['user','ql_order','ql_user','ql_product','ql_transaction']; // Bạn có thể chỉnh sửa danh sách role này
-    const newRoles = [];
+    // const newRoles = [];
 
     for (let r of role) {
       if (!validRoles.includes(r)) {
@@ -753,9 +753,9 @@ const grantRoles = async (req, res) => {
       }
 
       // Kiểm tra nếu user đã có role đó chưa
-      if (!user.role.includes(r)) {
-        newRoles.push(r);
-      }
+      // if (!user.role.includes(r)) {
+      //   newRoles.push(r);
+      // }
     }
 
     // Nếu không có role nào mới cần thêm
@@ -768,7 +768,7 @@ const grantRoles = async (req, res) => {
     // }
 
     // Thêm các role mới vào user
-    user.role = [...user.role, ...newRoles];
+    user.role = role
     await user.save();
 
     return res.status(200).json({
