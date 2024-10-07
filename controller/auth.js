@@ -8,7 +8,8 @@ function generateAccessToken(user) {
     {
       id: user.id,
       isAdmin: user.isAdmin,
-      email:user.email,
+      email: user.email,
+      role: user.role
     },
     process.env.JWT_PRIVATE_KEY,
     { expiresIn: "7d" }
@@ -36,7 +37,7 @@ const loginUser = async (req, res) => {
     }
     if (!user.verified) {
       let token = await Token.findOne({ userId: user._id });
-      return res.json({success:false,message:"Tài Khoản của bạn chưa xác thực",color:"text-red-500"});
+      return res.json({ success: false, message: "Tài Khoản của bạn chưa xác thực", color: "text-red-500" });
       // if (!token) {
       //   token = await new Token({
       //     userId: user._id,
@@ -69,15 +70,15 @@ const loginUser = async (req, res) => {
           httpOnly: false,
           secure: true,
           domain: "localhost",
-          sameSite:"None",
-          
+          sameSite: "None",
+
 
 
 
           expires: new Date(Date.now() + 86400000),
         });
         const { password, ...other } = user._doc;
-        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin,role:user.role, email:user.email, accessToken, color: "text-green-500" });
+        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, role: user.role, email: user.email, accessToken, color: "text-green-500" });
       }
     }
   } catch (error) {
@@ -119,7 +120,7 @@ const logOut = async function (req, res) {
   accessTokens = accessTokens.filter((token) => token !== req.cookies.token);
   res.clearCookie("accessTokens");
   console.log("logout")
-  return res.json({success:true,message:"Logged out successfully!",color:"text-green-500"});
+  return res.json({ success: true, message: "Logged out successfully!", color: "text-green-500" });
 
 };
 
