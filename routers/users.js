@@ -307,7 +307,7 @@ router.post("/:id/verify-otp-resetpassword",userController.verify_otp_reset_pass
 
 		  
 	
-// 		  res.json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" });
+// 		  res.status(200).json({ success: true, message: "Địa chỉ đã cập nhật thành công", color: "text-green-500" });
 // 		} catch (error) {
 // 		  console.error(error);
 // 		  return res.json({ success: false, message: "Error updating address", color: "text-red-500" });

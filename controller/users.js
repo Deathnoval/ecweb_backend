@@ -62,7 +62,7 @@ const userRegister = async (req, res) => {
   try {
     const { error } = validate(req.body);
     if (error)
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: error.details[0].message,
         color: "text-red-500",
@@ -148,7 +148,7 @@ const verifiedEmail_otp = async (req, res) => {
     const user = await User.findOne({ _id: req.params.id });
     console.log(req.params.id);
     if (!user)
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Invalid link",
         color: "text-red-500",
@@ -160,7 +160,7 @@ const verifiedEmail_otp = async (req, res) => {
     });
     console.log(req.params.token);
     if (!token)
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Sai mã otp",
         color: "text-red-500",
@@ -192,7 +192,7 @@ const forgot_pass_otp = async function (req, res) {
 
     let user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Email chưa được đăng ký",
         color: "text-red-500",
@@ -244,7 +244,7 @@ const verify_otp_reset_password = async function (req, res) {
     const token = await Token.findOne({ userId: id, token: otp });
 
     if (!token) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Sai mã OTP",
         color: "text-red-500",
@@ -254,7 +254,7 @@ const verify_otp_reset_password = async function (req, res) {
     // Check if the OTP has expired
     if (token.expiresAt < Date.now()) {
       await token.deleteOne(); // Clean up expired token
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Mã OTP đã hết hạn",
         color: "text-red-500",
@@ -288,7 +288,7 @@ const reset_Pass_otp = async function (req, res) {
     const token = await Token.findOne({ userId: id, verified_Email_otp: true });
 
     if (!token) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "OTP chưa được xác thực",
         color: "text-red-500",
@@ -297,7 +297,7 @@ const reset_Pass_otp = async function (req, res) {
 
     // Validate that the passwords match
     if (password !== ConfirmPassword) {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Mật khẩu không trùng khớp",
         color: "text-red-500",
@@ -306,7 +306,7 @@ const reset_Pass_otp = async function (req, res) {
 
     // Ensure password meets strength requirements (if any)
     // if (newPassword.length < 8) {
-    // 	return res.json({ success: false, message: "Mật khẩu phải có ít nhất 8 ký tự", color: "text-red-500" });
+    // 	return res.status(500).json({ success: false, message: "Mật khẩu phải có ít nhất 8 ký tự", color: "text-red-500" });
     // }
     // Hash the new password
 
@@ -389,7 +389,7 @@ const verifiedEmail = async (req, res) => {
     const user = await User.findOne({ _id: req.params.id });
     console.log(req.params.id);
     if (!user)
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Invalid link",
         color: "text-red-500",
@@ -488,13 +488,13 @@ const reset_Pass = async function (req, res) {
         }
       );
       await token.deleteOne();
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: "Cập Nhập Mật Khẩu thành công",
         color: "text-green-500",
       });
     } else {
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Mật Khẩu không trùng",
         color: "text-red-500",
@@ -576,14 +576,14 @@ const insert_address = async function (req, res) {
       user.save();
 
       console.log("Address added successfully");
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: "Thêm thành công",
         color: "text-green-500",
       });
     } catch (err) {
       console.error(err);
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Thêm không thành công",
         color: "text-red-500",
@@ -644,7 +644,7 @@ const update_address = async function (req, res) {
     const userId = req.user.id;
     const user = await User.findById(userId);
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "User not found",
         color: "text-red-500",
@@ -685,14 +685,14 @@ const update_address = async function (req, res) {
       );
       //   await user.save();
 
-      res.json({
+      return res.status(200).json({
         success: true,
         message: "Địa chỉ đã cập nhật thành công",
         color: "text-green-500",
       });
     } catch (error) {
       console.error(error);
-      return res.json({
+      return res.status(500).json({
         success: false,
         message: "Lỗi cập nhật địa chỉ ",
         color: "text-red-500",
@@ -793,7 +793,7 @@ const findUserById = async (req, res) => {
     const user = await User.findOne({ _id: userId }).select("-password");
 
     if (!user) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "Không tìm thấy người dùng",
         color: "text-red-500",
@@ -826,10 +826,10 @@ const getAllUsers = async (req, res) => {
     // Find users based on the query and select specific fields
     const users = await User.find(query).select("ho ten email _id"); // Only return ho, ten, email, id
 
-    res.json({ success: true, users, color: "text-green-500" });
+    res.status(200).json({ success: true, users, color: "text-green-500" });
   } catch (error) {
     console.error(error);
-    res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 };
 

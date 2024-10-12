@@ -256,7 +256,7 @@ const check_status_momo_payment_order = async (req, res) => {
 //             }
 //         }
 //         if (!(type_pay <= 3 && type_pay >= 0)) {
-//             return res.json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
+//             return res.status(200).json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
 //         }
 
 //         const cart_items = await Cart.findOne({ user_id: user_id });
@@ -345,7 +345,7 @@ const check_status_momo_payment_order = async (req, res) => {
 //                 await cart_items.save();
 //                 order_id_list_momo.push(new_order_id)
 //                 console.log(order_id_list_momo)
-//                 return res.json({ success: true, paymentUrl: paymentResult.payUrl });
+//                 return res.status(200).json({ success: true, paymentUrl: paymentResult.payUrl });
 //             } else {
 //                 return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
 //             }
@@ -386,7 +386,7 @@ const check_status_momo_payment_order = async (req, res) => {
 
 //                 await cart_items.save();
 
-//                 return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
+//                 return res.status(200).json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
 //             } else {
 //                 return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
 //             }
@@ -412,16 +412,16 @@ const add_order = async (req, res) => {
 
     try {
         if (!order) {
-            return res.json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Chưa có sản phẩm để thanh toán", color: "text-red-500" });
         }
         if (!address) {
-            return res.json({ success: false, message: "Vui lòng chọn địa chỉ giao hàng", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Vui lòng chọn địa chỉ giao hàng", color: "text-red-500" });
         }
         if (!phone) {
-            return res.json({ success: false, message: "Vui lòng nhấp số điện thoại liên lạc", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Vui lòng nhấp số điện thoại liên lạc", color: "text-red-500" });
         }
         if (!name) {
-            return res.json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
 
         if (!shipping_code) {
@@ -430,14 +430,14 @@ const add_order = async (req, res) => {
             }
         }
         if (!(type_pay <= 3 && type_pay >= 0)) {
-            return res.json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
+            return res.status(200).json({ success: true, message: "Vui lòng chọn phương thức thanh toán", color: "text-red-500" });
         }
 
         const cart_items = await Cart.findOne({ user_id: user_id });
         for (let item of order.items) {
             let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
             if (cart_item_Index == -1) {
-                return res.json({ success: false, message: "Sản phẩm này bạn đã bỏ khỏi giỏ hàng nên không thể thực hiện thanh toán", color: "text-red-500" });
+                return res.status(400).json({ success: false, message: "Sản phẩm này bạn đã bỏ khỏi giỏ hàng nên không thể thực hiện thanh toán", color: "text-red-500" });
             }
         }
 
@@ -478,7 +478,7 @@ const add_order = async (req, res) => {
             console.log(paymentResult.resultCode);
 
             if (paymentResult.resultCode != 0) {
-                return res.json({ success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại " + paymentResult.errorCode, color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Khởi Tạo Thanh Toán MOMO thất bại " + paymentResult.errorCode, color: "text-red-500" });
             }
 
             // Save the new order if payment link creation is successful
@@ -520,9 +520,9 @@ const add_order = async (req, res) => {
                 await cart_items.save();
                 order_id_list_momo.push(new_order_id)
                 console.log(order_id_list_momo)
-                return res.json({ success: true, paymentUrl: paymentResult.payUrl });
+                return res.status(200).json({ success: true, paymentUrl: paymentResult.payUrl });
             } else {
-                return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
             }
         } else {
             let new_order = new Order({
@@ -561,14 +561,14 @@ const add_order = async (req, res) => {
 
                 await cart_items.save();
 
-                return res.json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
+                return res.status(200).json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
             } else {
-                return res.json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Thanh toán thất bại", color: "text-red-500" });
             }
         }
     } catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -583,7 +583,7 @@ const callback = async (req, res) => {
         const order = await Order.findOne({ Order_id: orderId });
         if (!order) {
             console.log("Order not found");
-            return res.json({ success: false, message: "Order not found", color: "text-red-500" });
+            return res.status(404).json({ success: false, message: "Order not found", color: "text-red-500" });
         }
 
         // Đặt trạng thái mới dựa trên kết quả thanh toán
@@ -618,7 +618,7 @@ const callback = async (req, res) => {
 
     } catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 const handleMomoNotification = async (req, res) => {
@@ -652,7 +652,7 @@ const get_order_detail = async (req, res) => {
     const Order_id = req.body.Order_id
     try {
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color })
         }
         const order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
         const formatted_order_detail = {
@@ -673,13 +673,13 @@ const get_order_detail = async (req, res) => {
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
-            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
         }
-        return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
+        return res.status(200).json({ success: true, formatted_order_detail, color: "text-green-500" })
     }
     catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 const get_list_detail_user = async (req, res) => {
@@ -694,7 +694,7 @@ const get_list_detail_user = async (req, res) => {
             type_sort = parseInt(req_sort)
         }
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
         if (req_status == -1) { order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort }); }
@@ -703,18 +703,18 @@ const get_list_detail_user = async (req, res) => {
         }
         console.log(order_list)
         if (!order_list) {
-            return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
         let format_order_list = []
         for (let order of order_list) {
             format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay,paymentUrl:order.paymentUrl })
         }
 
-        return res.json({ success: true, format_order_list, color: "text-green-500" })
+        return res.status(200).json({ success: true, format_order_list, color: "text-green-500" })
     }
     catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 const get_OrderHistory_log = async (req, res) => {
@@ -722,22 +722,22 @@ const get_OrderHistory_log = async (req, res) => {
     const Order_id = req.body.Order_id;
     try {
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
         }
         const list_OrderHistory = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
         if (!list_OrderHistory) {
-            return res.json({ success: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
         }
         const log_list_OrderHistory={status:list_OrderHistory.status_history.status,
             day_add:moment(list_OrderHistory.status_history.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")}
-        return res.json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
+        return res.status(200).json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 }
 const refund_momo_money=async(req,res)=>{
@@ -944,24 +944,24 @@ const get_list_detail_admin = async (req, res) => {
             type_sort = parseInt(req_sort)
         }
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
         if (req_status == -1) {
             order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort });
         } else { order_list = await Order.find({ user_id: user_id, status: req_status }).sort({ "order_date": type_sort }); }
         if (!order_list) {
-            return res.json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
         let format_order_list = []
         for (let order of order_list) {
             format_order_list.push({ user_id: user_id, Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay,paymentUrl:order.paymentUrl })
         }
-        return res.json({ success: true, format_order_list, color: "text-green-500" })
+        return res.status(200).json({ success: true, format_order_list, color: "text-green-500" })
     }
     catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -970,14 +970,14 @@ const get_order_detail_to_admin = async (req, res) => {
     const Order_id = req.body.Order_id
     try {
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
         }
         const order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
         if (!order_detail) {
-            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" })
         }
         const formatted_order_detail = {
             _id: order_detail._id,
@@ -995,11 +995,11 @@ const get_order_detail_to_admin = async (req, res) => {
             status: order_detail.status,
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
-        return res.json({ success: true, formatted_order_detail, color: "text-green-500" })
+        return res.status(200).json({ success: true, formatted_order_detail, color: "text-green-500" })
     }
     catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -1024,11 +1024,11 @@ const get_full_order_table = async (req, res) => {
         for (let order of full_Order_table) {
             formatted_Order_table.push({ user_id: order.user_id, Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay })
         }
-        return res.json({ success: true, formatted_Order_table, color: "text-green-500" })
+        return res.status(200).json({ success: true, formatted_Order_table, color: "text-green-500" })
     }
     catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 }
 
@@ -1084,7 +1084,7 @@ const get_full_order_table = async (req, res) => {
 //             });
 //             await transaction.save();
 //         }
-//         return res.json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-red-500" })
+//         return res.status(200).json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-red-500" })
 
 
 //     } catch (err) {
@@ -1101,15 +1101,15 @@ const update_status_order = async (req, res) => {
 
     try {
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn cập nhật", color: "text-red-500" });
         }
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để cập nhật hóa đơn mua hàng của họ", color: "text-red-500" });
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để cập nhật hóa đơn mua hàng của họ", color: "text-red-500" });
         }
 
         const order_detail = await Order.findOne({ user_id: user_id, Order_id: Order_id });
         if (!order_detail) {
-            return res.json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" });
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng mà bạn muốn xem", color: "text-red-500" });
         }
 
         let order_history_check = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id });
@@ -1179,11 +1179,11 @@ const update_status_order = async (req, res) => {
             await transaction.save();
         }
 
-        return res.json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-green-500" });
+        return res.status(200).json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-green-500" });
 
     } catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -1193,10 +1193,10 @@ const get_OrderHistory_log_admin = async (req, res) => {
     const Order_id = req.body.Order_id;
     try {
         if (!user_id) {
-            return res.json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         if (!Order_id) {
-            return res.json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
+            return res.status(400).json({ success: false, message: "Vui lòng chọn hóa đơn mà bạn muốn xem chi tiết", color: "text-red-500" })
         }
         const list_OrderHistory = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
         if (!list_OrderHistory) {
@@ -1204,11 +1204,11 @@ const get_OrderHistory_log_admin = async (req, res) => {
         }
         const log_list_OrderHistory={status:list_OrderHistory.status_history.status,
             day_add:moment(list_OrderHistory.status_history.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")}
-        return res.json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
+        return res.status(200).json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {
         console.log(err);
-        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 

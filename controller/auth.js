@@ -33,11 +33,11 @@ const loginUser = async (req, res) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
-      return res.json({ success: false, message: "Tài khoản không tồn tại", color: "text-red-500" });
+      return res.status(404).json({ success: false, message: "Tài khoản không tồn tại", color: "text-red-500" });
     }
     if (!user.verified) {
       let token = await Token.findOne({ userId: user._id });
-      return res.json({ success: false, message: "Tài Khoản của bạn chưa xác thực", color: "text-red-500" });
+      return res.status(500).json({ success: false, message: "Tài Khoản của bạn chưa xác thực", color: "text-red-500" });
       // if (!token) {
       //   token = await new Token({
       //     userId: user._id,
@@ -57,7 +57,7 @@ const loginUser = async (req, res) => {
       // console.log(user.password);
       // console.log(validPassword);
       if (!validPassword) {
-        return res.json({ success: false, message: "Sai mật khẩu", color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Sai mật khẩu", color: "text-red-500" });
       }
       else {
         accessTokens = []
@@ -78,12 +78,12 @@ const loginUser = async (req, res) => {
           expires: new Date(Date.now() + 86400000),
         });
         const { password, ...other } = user._doc;
-        return res.json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, role: user.role, email: user.email, accessToken, color: "text-green-500" });
+        return res.status(200).json({ success: true, message: "Đăng nhập thành công", id: user.id, isAdmin: user.isAdmin, role: user.role, email: user.email, accessToken, color: "text-green-500" });
       }
     }
   } catch (error) {
     console.error(error);
-    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
+    return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", colo: "text-red-500" });
   }
 
 };
@@ -120,7 +120,7 @@ const logOut = async function (req, res) {
   accessTokens = accessTokens.filter((token) => token !== req.cookies.token);
   res.clearCookie("accessTokens");
   console.log("logout")
-  return res.json({ success: true, message: "Logged out successfully!", color: "text-green-500" });
+  return res.status(200).json({ success: true, message: "Logged out successfully!", color: "text-green-500" });
 
 };
 

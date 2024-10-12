@@ -109,7 +109,7 @@ const add_to_cart = async (req, res) => {
   try {
     const product = await Product.findOne({ product_id: product_id });
     if (!product) {
-      return res.json({
+      return res.status(404).json({
         success: false,
         message: "Không tìm thấy sản phẩm",
         color: "text-red-500",
@@ -120,7 +120,7 @@ const add_to_cart = async (req, res) => {
         (colorObj) => colorObj.name_color === color
       );
       if (!selectedColor) {
-        return res.json({ success: false, message: " Không có màu: " + color, color: "text-red-500" });
+        return res.status(404).json({ success: false, message: " Không có màu: " + color, color: "text-red-500" });
       }
 
       // Find the matching size object within the selected color's array_sizes
@@ -128,20 +128,20 @@ const add_to_cart = async (req, res) => {
         (sizeObj) => sizeObj.name_size === size
       );
       if (!selectedSize) {
-        return res.json({ success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" });
+        return res.status(404).json({ success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" });
       }
 
 
       // Check stock availability for the chosen color and size
       if (selectedSize.total_number_with_size < quantity) {
-        return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+        return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
 
       }
     }
     if (!color || !size) {
       const check_color_product = product.array_color.length
       if (check_color_product > 0 && !color) {
-        return res.json({ success: false, message: "Vui lòng chọn màu cho sản phẩm", color: "text-red-500" })
+        return res.status(404).json({ success: false, message: "Vui lòng chọn màu cho sản phẩm", color: "text-red-500" })
       }
       if (color) {
         const selectedColor = product.array_color.find(
@@ -149,17 +149,17 @@ const add_to_cart = async (req, res) => {
         );
         if (selectedColor.array_sizes.length > 0) {
           if (!size) {
-            return res.json({ success: false, message: "Vui lòng chọn size sẩn phẩm", color: "text-red-500" })
+            return res.status(404).json({ success: false, message: "Vui lòng chọn size sẩn phẩm", color: "text-red-500" })
           }
         }
 
         if (selectedColor.total_number_with_color < quantity) {
-          return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+          return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
         }
       }
       else {
         if (product.total_number < quantity) {
-          return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+          return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
 
         }
       }
@@ -188,7 +188,7 @@ const add_to_cart = async (req, res) => {
         0
       );
       await newCart.save();
-      return res.json({
+      return res.status(200).json({
         success: true,
         message: "Thêm vào giỏ hàng thành công",
         color: "text-green-500",
@@ -241,9 +241,9 @@ const cart_show = async (req, res) => {
   try {
     const cart = await Cart.findOne({ user_id: user_id });
     if (!cart) {
-      return res.json({ success: true, items: [], total_price: 0 });
+      return res.status(200).json({ success: true, items: [], total_price: 0 });
     }
-    res.json({ success: true, items: cart.items, total_price: cart.total_price });
+    res.status(200).json({ success: true, items: cart.items, total_price: cart.total_price });
   } catch (err) {
     return res.json({
       success: false,
@@ -281,14 +281,14 @@ const delete_items_in_cart = async (req, res) => {
   // console.log(id)
   try {
     if (!id) {
-      return res.json({ success: false, message: "Mã sản phẩm trong giỏ hàng không được để trống", color: "text-red-500" })
+      return res.status(400).json({ success: false, message: "Mã sản phẩm trong giỏ hàng không được để trống", color: "text-red-500" })
     }
     const product_cart = await Cart.findOne({ user_id: user_id })
     // console.log(product_cart)
     const productIndex = product_cart.items.findIndex(item => item._id.toString() == id);
     // console.log(productIndex)
     if (productIndex === -1) {
-      return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
+      return res.status(500).json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
     }
     product_cart.items.splice(productIndex, 1);
 
@@ -298,11 +298,11 @@ const delete_items_in_cart = async (req, res) => {
       0
     );
     await product_cart.save();
-    return res.json({ success: true, message: "Bỏ sản phẩm khỏi giỏ hàng thành công", color: "text-green-500" });
+    return res.status(200).json({ success: true, message: "Bỏ sản phẩm khỏi giỏ hàng thành công", color: "text-green-500" });
 
   } catch (err) {
     console.log(err)
-    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 };
 
@@ -312,12 +312,12 @@ const update_items_in_cart = async (req, res) => {
   const quantity = req.body.quantity
   try {
     if (!id) {
-      return res.json({ success: false, message: "Mã sản phẩm trong giỏ hàng không được để trống" });
+      return res.status(400).json({ success: false, message: "Mã sản phẩm trong giỏ hàng không được để trống" });
     }
     const product_cart = await Cart.findOne({ user_id: user_id })
     const productIndex = product_cart.items.findIndex(item => item._id.toString() == id);
     if (productIndex === -1) {
-      return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
+      return res.status(500).json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
     }
     if (quantity == 0) {
       product_cart.items.splice(productIndex, 1);
@@ -326,7 +326,7 @@ const update_items_in_cart = async (req, res) => {
 
       const flag_check_quantity = await check_quantity(product_cart.items[productIndex].product_id, product_cart.items[productIndex].color, quantity, product_cart.items[productIndex].size)
       console.log(flag_check_quantity)
-      if (flag_check_quantity.success == false) { return res.json(flag_check_quantity) }
+      if (flag_check_quantity.success == false) { return res.status(500).json(flag_check_quantity) }
       product_cart.items[productIndex].quantity = quantity;
       product_cart.items[productIndex].price_per_item = product_cart.items[productIndex].price_per_one * quantity;
     }
@@ -336,12 +336,12 @@ const update_items_in_cart = async (req, res) => {
     );
     await product_cart.save();
     console.log(product_cart)
-    return res.json({ success: true, message: "Cập nhật giỏ hàng thành công", color: "text-green-500" });
+    return res.status(200).json({ success: true, message: "Cập nhật giỏ hàng thành công", color: "text-green-500" });
 
   }
   catch (err) {
     console.log(err);
-    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 };
 
@@ -361,7 +361,7 @@ const check_out = async (req, res) => {
   const user_id = req.user.id;
   try {
     if (list_id.length <= 0) {
-      return res.json({ success: false, message: "Chưa chọn sản phẩm để thanh toán", color: "text-red-500" })
+      return res.status(404).json({ success: false, message: "Chưa chọn sản phẩm để thanh toán", color: "text-red-500" })
     }
     const user_cart = await Cart.findOne({ user_id: user_id });
     // console.log(user_cart)
@@ -370,26 +370,26 @@ const check_out = async (req, res) => {
     for (let item_id of list_id) {
       const productIndex = user_cart.items.findIndex(item => item._id.toString() == item_id._id.toString());
       if (productIndex === -1) {
-        return res.json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
+        return res.status(404).json({ success: false, message: "Sản phẩm này đã được bỏ khỏi giỏ hàng của bạn", color: "text-green-500" })
       }
       let item = user_cart.items[productIndex];
       total_price_user_choice += user_cart.items[productIndex].price_per_item;
       let flag_check_quantity = await check_quantity(user_cart.items[productIndex].product_id, user_cart.items[productIndex].color, user_cart.items[productIndex].quantity, user_cart.items[productIndex].size)
       // console.log(flag_check_quantity)
-      if (flag_check_quantity.success == false) { return res.json(flag_check_quantity) }
+      if (flag_check_quantity.success == false) { return res.status(500).json(flag_check_quantity) }
       else {
         items_user_choice.push(item);
       }// console.log(item)
     }
     if (items_user_choice.length <= 0)
-      return res.json({ success: false, message: "Sản phẩm không tồn tại trong giỏ hàng của của bạn", color: "text-red-500" })
+      return res.status(404).json({ success: false, message: "Sản phẩm không tồn tại trong giỏ hàng của của bạn", color: "text-red-500" })
 
 
-    return res.json({ success: true, order: { order_id: order_id, items: items_user_choice, total_price: total_price_user_choice }, color: "text-green-500" })
+    return res.status(200).json({ success: true, order: { order_id: order_id, items: items_user_choice, total_price: total_price_user_choice }, color: "text-green-500" })
   }
   catch (err) {
     console.log(err);
-    return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+    return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
   }
 }
 
