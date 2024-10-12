@@ -65,10 +65,10 @@ const getProductListALL = async (req, res) => {
         if (productListAll_DataFormat.length > 0) {
             return res.status(200).json({ success: true, productListAll_DataFormat });
         } else {
-            return res.status(404).json({ success: false, message: "No products found", color: "text-red-500" });
+            return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
         }
     } catch (err) {
-        return res.status(500).json({ success: false, message: err.message, color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -81,10 +81,10 @@ const getProductDetail = async (req, res) => {
         if (product) {
             return res.status(200).json({ success: true, product });
         } else {
-            return res.status(404).json({ success: false, message: "Product not found", color: "text-red-500" });
+            return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
         }
     } catch (err) {
-        return res.status(500).json({ success: false, message: err.message, color: "text-red-500" });
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
 
@@ -118,7 +118,88 @@ const admin_to_get_product_list = async (req, res) => {
         return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
+const getProductListALL_with_Sattus = async (req, res) => {
+    const type_get = req.params.type_get
+    const value_sort = req.params.value_sort
+    console.log(value_sort)
+    let sortField = "createdAt"
+    let sortOrder = "desc"
 
+    if (value_sort == "1") {
+        sortField = "price"
+        sortOrder = "asc"
+    }
+    else if (value_sort == "2") {
+        sortField = "price"
+        sortOrder = "desc"
+    }
+    else if (value_sort == "3") {
+        sortField = "name"
+        sortOrder = "asc"
+    }
+    else if (value_sort == "4") {
+        sortField = "name"
+        sortOrder = "desc"
+    }
+
+
+
+    const sortOptions = {};
+    sortOptions[sortField] = sortOrder;
+    console.log(sortOptions);
+    try {
+        productListAll = await Product.find().sort(sortOptions);
+        if (type_get != "all") {
+
+            productListAll = await Product.find({
+                category_id: type_get
+
+
+
+
+            }).sort(sortOptions);
+            console.log(productListAll);
+            if (!(productListAll.length > 0)) {
+                console.log('Product');
+                productListAll = await Product.find({
+                    sub_category_id: type_get
+
+                }).sort(sortOptions);
+            }
+            console.log(productListAll)
+
+        }
+
+        const productListAll_DataFormat = await Promise.all(productListAll.map(async product => ({
+
+            name: product.name,
+            price: product.price,
+            total_number: product.total_number,
+            primary_image: product.primary_image,
+            category_id: product.category_id,
+            sub_category_id: product.sub_category_id,
+            name_sub_category: await getNameSubCategor(product.category_id, product.sub_category_id),
+            product_id: product.product_id,
+            status: product.total_number > 0 ? 'Còn hàng' : 'Hết hàng',
+            onlShop: product.onlShop,
+            createDate: moment(product.createDate).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+
+        })));
+        if (productListAll_DataFormat) {
+            res.status(200).json({ success: true, productListAll_DataFormat });
+        }
+        else {
+            res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
+        }
+
+
+
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: 'text-red-500' })
+    }
+};
 const update_onlShop_product = async (req, res) => {
     const id = req.body.id;
     const onlShop = req.body.onlShop;
@@ -332,10 +413,12 @@ const searchProductsByName = async (req, res) => {
 module.exports = {
     getProductListALL,
     getProductDetail,
-    admin_to_get_product_list,
+    getProductListALL_with_Sattus,
     update_onlShop_product,
     add_product,
     delete_product,
+    admin_to_get_product_list,
+
     update_product,
     searchProductsByName
 };
