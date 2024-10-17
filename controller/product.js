@@ -48,6 +48,13 @@ const getProductListALL = async (req, res) => {
                 onlShop: true
             }).sort(sortOptions);
         }
+        if (!productListAll || productListAll.length === 0) {
+            productListAll = await Product.find({
+                sub_category_id: type_get,
+                total_number: { $gt: 0 },
+                onlShop: true
+            }).sort(sortOptions);
+        }
 
         const productListAll_DataFormat = productListAll.map(product => ({
             id: product.product_id,
@@ -61,12 +68,14 @@ const getProductListALL = async (req, res) => {
                 image: arrayColor.image,
             })),
         }));
+        
+        return res.status(200).json({ success: true, productListAll_DataFormat,color: "text-green-500" });
 
-        if (productListAll_DataFormat.length > 0) {
-            return res.status(200).json({ success: true, productListAll_DataFormat });
-        } else {
-            return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
-        }
+        // if (productListAll_DataFormat.length > 0) {
+        //     return res.status(200).json({ success: true, productListAll_DataFormat,color: "text-green-500" });
+        // } else {
+        //     return res.status(404).json({ success: true, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
+        // }
     } catch (err) {
         return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
