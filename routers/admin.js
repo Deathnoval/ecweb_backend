@@ -21,6 +21,7 @@ router.post('/update_product', middlewareController.verifyToken_ql_product, prod
 router.post('/add_product', middlewareController.verifyToken_ql_product, productController.add_product);
 router.post('/delete_product', middlewareController.verifyToken_ql_product, productController.delete_product);
 router.get('/admin_to_get_product_list/:id', middlewareController.verifyToken_ql_product, productController.admin_to_get_product_list);
+router.get('/getProductDetail/:id',middlewareController.verifyToken_ql_product, productController.getProductDetail);
 
 // Quản lý đơn hàng (order) - chỉ admin hoặc quản lý đơn hàng mới có quyền truy cập
 router.post('/get_order_detail_to_admin', middlewareController.verifyToken_ql_order, orderController.get_order_detail_to_admin);
