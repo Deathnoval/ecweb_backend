@@ -27,7 +27,7 @@ router.post('/get_order_detail_to_admin', middlewareController.verifyToken_ql_or
 router.post('/get_list_detail_admin', middlewareController.verifyToken_ql_order, orderController.get_list_detail_admin);
 router.post('/update_status_order', middlewareController.verifyToken_ql_order, orderController.update_status_order);
 router.post('/get_OrderHistory_log_admin', middlewareController.verifyToken_ql_order, orderController.get_OrderHistory_log_admin);
-router.post('/get_full_order_table', middlewareController.verifyToken_ql_order, orderController.get_full_order_table);
+router.get('/get_full_order_table', middlewareController.verifyToken_ql_order, orderController.get_full_order_table);
 router.post('/refund_momo_money_admin', middlewareController.verifyToken_ql_order, orderController.refund_momo_money_admin);
 
 
