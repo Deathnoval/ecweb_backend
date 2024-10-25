@@ -45,6 +45,8 @@ async function changeDefaultAddress(userId, addressId) {
 	
   }
 router.post("/",userController.userRegister);
+router.post("/resend-otp", userController.resendOtp);
+
 // router.post("/:id/verify/:token/",userController.verifiedEmail);
 // router.post("/forgot-password/",userController.forgot_pass);
 // router.post("/:id/resetPass/:token/",userController.reset_Pass);

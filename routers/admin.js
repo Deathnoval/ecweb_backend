@@ -4,6 +4,7 @@ const productController = require('../controller/product');
 const orderController = require('../controller/order');
 const middlewareController = require('../controller/middleware');
 const userController = require('../controller/users');
+const transactionController=require('../controller/transaction')
 
 // Quản lý danh mục (category) - chỉ admin mới có quyền truy cập
 router.get('/Admin_get_all_category', middlewareController.verifyToken_ql_product, categoryController.Admin_get_all_category);
@@ -39,6 +40,13 @@ router.get("/getAllUsers",middlewareController.verifyToken_ql_user, userControll
 router.post("/deleteUser",middlewareController.verifyToken_ql_user, userController.deleteUserAndCart);
 router.post("/add_to_blacklist",middlewareController.verifyToken_ql_user, userController.addToBlacklist);
 router.get("/getAllBlacklistedEmails",middlewareController.verifyToken_ql_user, userController.getAllBlacklistedEmails);
+
+//admin for transaction
+router.get("/getAllTransaction",middlewareController.verifyToken_ql_transaction,transactionController.getAllTransaction)
+router.get("/getListTransactionsWithConditions",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionWithCondition)
+router.get("/getTransactionsAdd",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionAdd)
+router.get("/getTransactionsMinus",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionMinus)
+
 
 
 module.exports = router;

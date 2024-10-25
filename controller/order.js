@@ -1165,6 +1165,14 @@ const update_status_order = async (req, res) => {
                     await product_data.save();
                 }
             }
+            const transaction_refund = new Transaction({
+                order_id: Order_id,
+                price_pay: -order_detail.price_pay,
+                user_id: user_id,
+                email: order_detail.email,
+                create_date: new Date()
+            });
+            await transaction_refund.save();
         }
 
         // Handle transactions when status is 4 (completed) or payment is pending (new_status_order === 1)
@@ -1178,6 +1186,7 @@ const update_status_order = async (req, res) => {
             });
             await transaction.save();
         }
+        
 
         return res.status(200).json({ success: true, message: "Cập nhật trạng thái thành công", color: "text-green-500" });
 
