@@ -1,12 +1,13 @@
 const jwt = require('jsonwebtoken');
-
+const blacklist=require('../models/blacklist')
 // Xác thực token cơ bản
 const verifyToken = async (req, res, next) => {
     const token = req.headers.token;
 
     if (token) {
         const accessToken = token.toString();
-        jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY, (err, user) => {
+        
+        jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY, async (err, user) => {
             if (err) {
                 return res.status(403).json({ 
                     success: false, 
@@ -14,13 +15,32 @@ const verifyToken = async (req, res, next) => {
                     color: "text-red-500" 
                 });
             }
-            req.user = user; // Lưu thông tin người dùng vào req.user
-            next();
+
+            try {
+                // Check if user is in the blacklist
+                const isBlacklisted = await blacklist.findOne({ email: user.email });
+                if (isBlacklisted) {
+                    return res.status(403).json({ 
+                        success: false, 
+                        message: "Your account has been banned", 
+                        color: "text-red-500" 
+                    });
+                }
+                
+                req.user = user; // Store user info in req.user
+                next();
+            } catch (dbError) {
+                return res.status(500).json({ 
+                    success: false, 
+                    message: "Database error", 
+                    color: "text-red-500" 
+                });
+            }
         });
     } else {
         return res.status(401).json({ 
             success: false, 
-            message: "You're not authenticate", 
+            message: "You're not authenticated", 
             color: "text-red-500" 
         });
     }
