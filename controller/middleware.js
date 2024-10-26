@@ -1,5 +1,35 @@
 const jwt = require('jsonwebtoken');
 const blacklist=require('../models/blacklist')
+const productController = require('../controller/product'); // Import productController
+
+let lastApiCallTimestamp = Date.now();
+
+async function callGetAllProductList() {
+    try {
+        // Gọi trực tiếp hàm getProductListALL từ productController
+        await productController.getProductListALL({ 
+            params: { type_get: 'all', value_sort: '1' } 
+        }, { 
+            json: (data) => console.log("Dữ liệu nhận được:", data) 
+        });
+        console.log("Hàm getProductListALL đã được gọi tự động sau 1 tiếng không hoạt động.");
+    } catch (error) {
+        console.error("Lỗi khi gọi hàm getProductListALL:", error);
+    }
+}
+
+const checkInactivity = () => (req, res, next) => {
+    const currentTime = Date.now();
+    const oneHour = 3600000; // 1 tiếng
+
+    if (currentTime - lastApiCallTimestamp >= oneHour) {
+        callGetAllProductList();
+    }
+
+    lastApiCallTimestamp = currentTime; // Cập nhật thời gian gọi API cuối cùng
+    next();
+};
+
 // Xác thực token cơ bản
 const verifyToken = async (req, res, next) => {
     const token = req.headers.token;
@@ -99,5 +129,6 @@ module.exports = {
     verifyToken_ql_order, 
     verifyToken_ql_user, 
     verifyToken_ql_product, 
-    verifyToken_ql_transaction 
+    verifyToken_ql_transaction,
+    checkInactivity
 };

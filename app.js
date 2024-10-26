@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const { checkInactivity } = require('./controller/middleware'); // Import checkInactivity
 
 require('dotenv/config');
 //const authJwt = require('./helpers/jwt');
@@ -30,7 +31,8 @@ app.use(bodyParser.json());
 
 app.use(morgan('tiny'));
 //app.use(authJwt());
-
+// Middleware kiểm tra không hoạt động
+app.use(checkInactivity());
 
 const authRoutes = require('./routers/auth')
 const userRouter = require('./routers/users')
