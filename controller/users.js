@@ -801,7 +801,7 @@ const grantRoles = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      message: `Các quyền ${newRoles.join(', ')} đã được cấp cho tài khoản ${user.email}`,
+      message: `Các quyền ${role.join(', ')} đã được cấp cho tài khoản ${user.email}`,
       color: "text-green-500",
     });
   } catch (error) {

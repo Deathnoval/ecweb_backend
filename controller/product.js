@@ -60,6 +60,7 @@ const getProductListALL = async (req, res) => {
             id: product.product_id,
             name: product.name,
             price: product.price,
+            quantityBought:product.quantityBought,
             image: product.primary_image,
             imageHover: product.image_hover,
             color: product.array_color.map(arrayColor => ({
@@ -116,6 +117,7 @@ const admin_to_get_product_list = async (req, res) => {
             code: product.code,
             price: product.price,
             total_number: product.total_number,
+            quantityBought:product.quantityBought,
             primary_image: product.primary_image,
             product_id: product.product_id,
             onlShop: product.onlShop,
@@ -184,6 +186,7 @@ const getProductListALL_with_Sattus = async (req, res) => {
             name: product.name,
             price: product.price,
             total_number: product.total_number,
+            quantityBought:product.quantityBought,
             primary_image: product.primary_image,
             category_id: product.category_id,
             sub_category_id: product.sub_category_id,
@@ -401,6 +404,7 @@ const searchProductsByName = async (req, res) => {
                 id: product.product_id,
                 name: product.name,
                 price: product.price,
+                quantityBought:product.quantityBought,
                 image: product.primary_image,
                 imageHover: product.image_hover,
                 color: product.array_color.map(arrayColor => ({

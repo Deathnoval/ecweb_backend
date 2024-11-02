@@ -507,6 +507,13 @@ const add_order = async (req, res) => {
 
             if (check_add_success) {
                 for (let item of order.items) {
+                    let product = await Product.findOne({ product_id: item.product_id });
+        
+                    if (product) {
+                        // Tăng số lượng mua cho sản phẩm
+                        product.quantityBought += item.quantity;
+                        await product.save();
+                    }
                     let subtract_quantity = await sub_quantity(item.product_id, item.color, item.quantity, item.size);
                     let cart_item_Index = cart_items.items.findIndex(item_cart => item_cart._id.toString() == item._id.toString());
                     cart_items.items.splice(cart_item_Index, 1);
@@ -731,8 +738,10 @@ const get_OrderHistory_log = async (req, res) => {
         if (!list_OrderHistory) {
             return res.status(404).json({ success: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
         }
-        const log_list_OrderHistory={status:list_OrderHistory.status_history.status,
-            day_add:moment(list_OrderHistory.status_history.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")}
+        const log_list_OrderHistory = list_OrderHistory.status_history.filter(item => item.status !== 0).map(item => ({
+            status: item.status,
+            day_add: moment(item.day_add.$date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+        }));
         return res.status(200).json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {

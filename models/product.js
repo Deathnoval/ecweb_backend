@@ -5,6 +5,7 @@ const productSchema = mongoose.Schema({
     name: String,
     price: Number,
     total_number: Number,
+    quantityBought :{type:Number, default:0},
     array_color: [
         {
             name_color: String,
