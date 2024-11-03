@@ -34,7 +34,7 @@ router.post('/refund_momo_money_admin', middlewareController.verifyToken_ql_orde
 
 
 //admin for user
-router.post("/grantRoles",middlewareController.verifyTokenAdmin,userController.grantRoles )
+router.post("/grantRoles",middlewareController.verifyToken_ql_user,userController.grantRoles )
 router.get("/find-by-id/:id",middlewareController.verifyToken_ql_user,userController.findUserById);
 router.get("/getAllUsers",middlewareController.verifyToken_ql_user, userController.getAllUsers);
 router.post("/deleteUser",middlewareController.verifyToken_ql_user, userController.deleteUserAndCart);
