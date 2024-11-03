@@ -229,16 +229,17 @@ const forgot_pass_otp = async function (req, res) {
     let token = await Token.findOne({ userId: user._id });
 	let url
     if (!token) {
+      const new_token_code=generateOTP(6)
       // Generate OTP and save token
       let newtoken = await new Token({
         userId: user._id,
-        token: generateOTP(6), // Ensure this is secure
+        token: new_token_code, // Ensure this is secure
         verified_Email_otp: false,
         password_is_change: false,
         createdAt: Date.now(), // Optionally add a timestamp
-        expiresAt: Date.now() + 5 * 60 * 1000, // Optional expiration of 15 mins
+        expiresAt: Date.now() + 5 * 60 * 1000, // Optional expiration of 5 mins
       }).save();
-	  url= token;
+	  url= new_token_code;
     } 
 	else{
 		url=token.token
