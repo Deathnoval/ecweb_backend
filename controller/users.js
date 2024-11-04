@@ -1,8 +1,8 @@
 const router = require("express").Router();
 const { User, validate } = require("../models/user");
 const Token = require("../models/token");
-const Cart=require("../models/cart")
-const Blacklist=require("../models/blacklist")
+const Cart = require("../models/cart")
+const Blacklist = require("../models/blacklist")
 const crypto = require("crypto");
 const sendEmail = require("../utils/sendEmail");
 const { status } = require("express/lib/response");
@@ -83,6 +83,10 @@ const userRegister = async (req, res) => {
         message: "User already exists but is not verified.",
         color: "text-red-500",
       });
+    }
+    check_blackmail = await Blacklist.findOne({ email: req.body.email });
+    if (check_blackmail) {
+      return res.status(400).json({ success: false, message: "Your account is already blacklisted", color: "text-red-500" })
     }
 
     // Register new user
@@ -227,9 +231,9 @@ const forgot_pass_otp = async function (req, res) {
       });
     }
     let token = await Token.findOne({ userId: user._id });
-	let url
+    let url
     if (!token) {
-      const new_token_code=generateOTP(6)
+      const new_token_code = generateOTP(6)
       // Generate OTP and save token
       let newtoken = await new Token({
         userId: user._id,
@@ -239,13 +243,13 @@ const forgot_pass_otp = async function (req, res) {
         createdAt: Date.now(), // Optionally add a timestamp
         expiresAt: Date.now() + 5 * 60 * 1000, // Optional expiration of 5 mins
       }).save();
-	  url= new_token_code;
-    } 
-	else{
-		url=token.token
-	}
-      
-    
+      url = new_token_code;
+    }
+    else {
+      url = token.token
+    }
+
+
 
     await sendEmail(user.email, "OTP to reset password", url);
 
@@ -769,7 +773,7 @@ const grantRoles = async (req, res) => {
     }
 
     // Kiểm tra các role hợp lệ
-    const validRoles = ['user','ql_order','ql_user','ql_product','ql_transaction']; // Bạn có thể chỉnh sửa danh sách role này
+    const validRoles = ['user', 'ql_order', 'ql_user', 'ql_product', 'ql_transaction']; // Bạn có thể chỉnh sửa danh sách role này
     // const newRoles = [];
 
     for (let r of role) {
@@ -926,19 +930,19 @@ const addToBlacklist = async (req, res) => {
 };
 const getAllBlacklistedEmails = async (req, res) => {
   try {
-      const blacklistedEmails = await Blacklist.find().select('email');
-      return res.status(200).json({
-          success: true,
-          message: blacklistedEmails,
-          color: "text-green-500",
-      });
+    const blacklistedEmails = await Blacklist.find().select('email');
+    return res.status(200).json({
+      success: true,
+      message: blacklistedEmails,
+      color: "text-green-500",
+    });
   } catch (error) {
-      console.error(error);
-      return res.status(500).json({
-          success: false,
-          message: "Lỗi truy xuất dữ liệu",
-          color: "text-red-500",
-      });
+    console.error(error);
+    return res.status(500).json({
+      success: false,
+      message: "Lỗi truy xuất dữ liệu",
+      color: "text-red-500",
+    });
   }
 };
 
