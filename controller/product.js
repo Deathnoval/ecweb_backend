@@ -339,7 +339,7 @@ const update_product = async (req, res) => {
             let hasMismatchError = false;
 
             array_color.forEach(color => {
-                const total_number_with_color = parseInt(color.total_number_with_color.trim(), 10);
+                const total_number_with_color = color?.total_number_with_color;
                 total_number += total_number_with_color;
 
                 if (color.array_sizes && color.array_sizes.length > 0) {
@@ -363,7 +363,6 @@ const update_product = async (req, res) => {
                 return res.status(400).json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm", color: "text-red-500" });
             }
         }
-
         const updated_product = await Product.findOneAndUpdate(
             { product_id },
             {
@@ -389,6 +388,7 @@ const update_product = async (req, res) => {
             return res.status(500).json({ success: false, message: "Cập nhật sản phẩm thất bại", color: "text-red-500" });
         }
     } catch (err) {
+        console.log("error: " + err);
         return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
