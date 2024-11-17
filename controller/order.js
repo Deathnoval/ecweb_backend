@@ -799,7 +799,7 @@ const refund_momo_money = async (req, res) => {
     }
     catch (err) {
         console.log(err)
-        return res.josn({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
     }
 
 }
@@ -860,7 +860,7 @@ const cancer_order = async (req, res) => {
 
     catch (err) {
         console.log(err)
-        return res.josn({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
     }
 
 }
@@ -919,7 +919,7 @@ const refund_momo_money_admin = async (req, res) => {
     }
     catch (err) {
         console.log(err)
-        return res.josn({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+        return res.json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
     }
 
 }
