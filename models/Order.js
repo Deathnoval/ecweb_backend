@@ -67,7 +67,12 @@ const OrderSchema = new mongoose.Schema({
   type_pay: { type: Number, required: true },
   status: { type: Number, required: true, default: 1 },
   order_date: { type: Date, required: true },
-  paymentUrl:{type:String,required:false,default:""}
+  paymentUrl:{type:String,required:false,default:""},
+  refund_request: {
+    list_image: { type: [String], required: false }, // URL ảnh minh chứng
+    description: { type: String, required: false },   // Lý do yêu cầu hoàn tiền
+    refund_date: { type: Date, required: false },
+  },
 });
 
 const Order = mongoose.model("Order", OrderSchema, "Order");
