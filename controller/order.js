@@ -865,7 +865,45 @@ const cancer_order = async (req, res) => {
 
 }
 
-
+const add_description_fop_refund=async (req,res)=>{
+    const Order_id= req.body.Order_id;
+    const list_image=req.body.list_image;
+    const description=req.body.description;
+    const user_id = req.user.id;
+    try{
+        if (!Order_id){
+            return res.status(400).json({ success: false, message: "Mã đơn hàng không đước đễ trống", color: "text-red-500" })
+        }
+        if (!list_image){
+            return res.status(400).json({ success: false, message: "Danh sách ảnh minh chứng không đước đễ trống", color: "text-red-500" })
+        }
+        if(!description){
+            return res.status(400).json({ success: false, message: "Lý do yêu cầu hoàn tiền không đước đễ trống", color: "text-red-500" })
+        }
+        const order = await Order.findOne({ Order_id, user_id });
+        if (!order) {
+            return res.status(404).json({ success: false, message: "Không tìm thấy đơn hàng" });
+        }
+        if (!order.refund_request) {
+            order.refund_request = {};
+        }
+        const refund_date = new Date();
+        order.refund_request = { list_image, description,refund_date };
+        order.status=8
+        await order.save().then(() => {
+            res.status(200).json({ success: true, message: "Yêu cầu hoàn tiền đã được gửi",color: "text-green-500" });
+        })
+        .catch((err) => {
+            console.error("Error saving order:", err);
+            res.status(500).json({ success: false, message: "Lỗi khi lưu yêu cầu hoàn tiền" ,color: "text-red-500"});
+        });
+    }
+    catch (err)
+    {
+        console.log(err)
+        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
+    }
+}
 
 
 
@@ -988,6 +1026,9 @@ const get_order_detail_to_admin = async (req, res) => {
             price_pay: order_detail.total_price + order_detail.shipping_code,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
+            list_image:order_detail.refund_request.list_image,
+            description:order_detail.refund_request.description,
+            refund_date:moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         return res.status(200).json({ success: true, formatted_order_detail, color: "text-green-500" })
@@ -1330,6 +1371,7 @@ module.exports = {
     checkAllMomoPayments,
     refund_momo_money,
     cancer_order,
+    add_description_fop_refund,
 
     ///for admin///
     get_list_detail_admin,
