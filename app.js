@@ -7,6 +7,8 @@ const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const { checkInactivity } = require('./controller/middleware'); // Import checkInactivity
+const { updateExpiredVouchers } = require('./schedule/voucher');
+const schedule = require('node-schedule');
 
 require('dotenv/config');
 //const authJwt = require('./helpers/jwt');
@@ -41,6 +43,7 @@ const productRouter = require('./routers/products')
 const adminRouter = require('./routers/admin')
 const cartRouter = require('./routers/cart')
 const orderRouter = require('./routers/order')
+const voucherRouter = require('./routers/voucher')
 const api = process.env.API_URL;
 
 
@@ -52,8 +55,9 @@ app.use(`${api}/product`, productRouter)
 app.use(`${api}/admin`, adminRouter)
 app.use(`${api}/cart`, cartRouter)
 app.use(`${api}/order`, orderRouter)
+app.use(`${api}/voucher`, voucherRouter)
 
-
+schedule.scheduleJob('1 0 * * *', updateExpiredVouchers);
 
 mongoose.connect(process.env.CONNECTION_STRING, {
     useNewUrlParser: true
@@ -65,6 +69,6 @@ mongoose.connect(process.env.CONNECTION_STRING, {
         console.log(err);
     });
 
-app.listen(3000, () => {
+app.listen(4000, () => {
     console.log('server is running http://localhost:3000');
 })

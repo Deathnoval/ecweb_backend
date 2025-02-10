@@ -106,6 +106,7 @@ const verifyToken_ql_order = verifyRole(['ql_order']);
 const verifyToken_ql_user = verifyRole(['ql_user']);
 const verifyToken_ql_product = verifyRole(['ql_product']);
 const verifyToken_ql_transaction = verifyRole(['ql_transaction']);
+const verifyToken_ql_voucher = verifyRole(['ql_voucher']);
 
 // Xác thực quyền truy cập của người dùng đến tài khoản của chính họ hoặc quyền admin
 const verifyTokenAndUserAuthorization = (req, res, next) => {
@@ -130,5 +131,6 @@ module.exports = {
     verifyToken_ql_user, 
     verifyToken_ql_product, 
     verifyToken_ql_transaction,
+    verifyToken_ql_voucher,
     checkInactivity
 };
