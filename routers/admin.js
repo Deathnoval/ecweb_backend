@@ -5,6 +5,8 @@ const orderController = require('../controller/order');
 const middlewareController = require('../controller/middleware');
 const userController = require('../controller/users');
 const transactionController=require('../controller/transaction')
+const voucherController = require('../controller/voucher');
+
 
 // Quản lý danh mục (category) - chỉ admin mới có quyền truy cập
 router.get('/Admin_get_all_category', middlewareController.verifyToken_ql_product, categoryController.Admin_get_all_category);
@@ -46,6 +48,14 @@ router.get("/getAllTransaction",middlewareController.verifyToken_ql_transaction,
 router.get("/getListTransactionsWithConditions",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionWithCondition)
 router.get("/getTransactionsAdd",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionAdd)
 router.get("/getTransactionsMinus",middlewareController.verifyToken_ql_transaction,transactionController.getTransactionMinus)
+
+//admin for voucher
+router.post('/createVoucher', middlewareController.verifyToken_ql_voucher, voucherController.createVoucher);
+router.post('/updateVoucher', middlewareController.verifyToken_ql_voucher, voucherController.updateVoucher);
+router.post('/deleteVoucher', middlewareController.verifyToken_ql_voucher, voucherController.deleteVoucher);
+router.post('/updateStatus', middlewareController.verifyToken_ql_voucher, voucherController.updateStatus);
+router.get('/getVouchers', middlewareController.verifyToken_ql_voucher, voucherController.getVouchers);
+router.get('/getDetail', middlewareController.verifyToken_ql_voucher, voucherController.getDetail);
 
 
 
