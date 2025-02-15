@@ -677,6 +677,9 @@ const get_order_detail = async (req, res) => {
             type_pay: order_detail.type_pay,
             status: order_detail.status,
             paymentUrl: order_detail.paymentUrl,
+            list_image:order_detail.refund_request.list_image,
+            description:order_detail.refund_request.description,
+            refund_date:moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
@@ -736,17 +739,18 @@ const get_OrderHistory_log = async (req, res) => {
         }
         const list_OrderHistory = await OrderHistory.findOne({ user_id: user_id, Order_id: Order_id })
         if (!list_OrderHistory) {
-            return res.status(404).json({ success: false, message: "Bạn đã nhập sai id user, order id hoặc đơn hàng này chưa tồn tại", color: "text-red-500" })
+            return res.status(200).json({ success: true, log: [], color: "text-green-500" })
         }
+        
         const log_list_OrderHistory = list_OrderHistory.status_history.filter(item => item.status !== 0).map(item => ({
             status: item.status,
-            day_add: moment(item.day_add.$date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
+            day_add: moment(item.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }));
         return res.status(200).json({ success: true, log: log_list_OrderHistory, color: "text-green-500" })
 
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
+        return res.status(200).json({ success: true, log: [], color: "text-green-500" });
     }
 }
 const refund_momo_money = async (req, res) => {
@@ -890,6 +894,12 @@ const add_description_fop_refund=async (req,res)=>{
         const refund_date = new Date();
         order.refund_request = { list_image, description,refund_date };
         order.status=8
+
+        let orderHistory = await OrderHistory.findOne({ user_id, Order_id });
+
+        orderHistory?.status_history?.push({ status: 8, day_add: refund_date });
+        await orderHistory.save();
+
         await order.save().then(() => {
             res.status(200).json({ success: true, message: "Yêu cầu hoàn tiền đã được gửi",color: "text-green-500" });
         })
@@ -1042,6 +1052,7 @@ const get_order_detail_to_admin = async (req, res) => {
 const get_full_order_table = async (req, res) => {
     const req_status = req.query.status
     const req_sort = req.query.sort
+    const orderId = req.query.orderId
     try {
         let type_sort
         if (req_sort != -1) { type_sort = 1 }
@@ -1053,7 +1064,11 @@ const get_full_order_table = async (req, res) => {
             full_Order_table = await Order.find({}).sort({ "order_date": type_sort })
         }
         else {
-            full_Order_table = await Order.find({ status: req_status }).sort({ "order_date": type_sort })
+            if(orderId){
+                full_Order_table = await Order.find({ Order_id: orderId }).sort({ "order_date": type_sort })
+            }else{
+                full_Order_table = await Order.find({ status: req_status }).sort({ "order_date": type_sort })
+            }
         }
 
         let formatted_Order_table = []
