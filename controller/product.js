@@ -5,6 +5,8 @@ const Category = require('../models/category');
 const { string } = require('joi');
 const { json } = require('body-parser');
 const moment = require('moment-timezone');
+const { isValidObjectId } = require('mongoose');
+const { v4: uuidv4 } = require('uuid');
 
 function generateProductId() {
     const chars = '1234567890';
@@ -86,7 +88,16 @@ const getProductDetail = async (req, res) => {
     const { id } = req.params;
 
     try {
-        const product = await Product.findOne({ product_id: id });
+        let query = { product_id: id };
+        if(isValidObjectId(id)){
+            query = {
+                $or: [
+                    { _id: id},
+                    { product_id: id }
+                ]
+            };
+        }
+        const product = await Product.findOne(query);
 
         if (product) {
             return res.status(200).json({ success: true, product });
@@ -94,6 +105,7 @@ const getProductDetail = async (req, res) => {
             return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
         }
     } catch (err) {
+        console.log(err);
         return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" });
     }
 };
@@ -253,7 +265,7 @@ const add_product = async (req, res) => {
 
         let new_product_id;
         do {
-            new_product_id = generateProductId();
+            new_product_id = uuidv4();
         } while (await Product.findOne({ product_id: new_product_id }));
 
         const newProduct = new Product({

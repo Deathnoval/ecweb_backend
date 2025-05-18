@@ -44,6 +44,7 @@ const adminRouter = require('./routers/admin')
 const cartRouter = require('./routers/cart')
 const orderRouter = require('./routers/order')
 const voucherRouter = require('./routers/voucher')
+const chatbotRouter = require('./routers/chatbot')
 const api = process.env.API_URL;
 
 
@@ -56,6 +57,7 @@ app.use(`${api}/admin`, adminRouter)
 app.use(`${api}/cart`, cartRouter)
 app.use(`${api}/order`, orderRouter)
 app.use(`${api}/voucher`, voucherRouter)
+app.use(`${api}/chatbot`, chatbotRouter)
 
 schedule.scheduleJob('1 0 * * *', updateExpiredVouchers);
 

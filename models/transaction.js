@@ -6,7 +6,8 @@ const TransactionSchema = new Schema({
     price_pay: { type: Number, required: true },
     user_id: { type: String, required: true },
     email: { type: String, required: true },
-    create_date: { type: Date, default: Date.now }
+    create_date: { type: Date, default: Date.now() },
+    createAt: { type: Number, default: Date.now() },
 });
 
 const Transaction = mongoose.model('Transaction', TransactionSchema);

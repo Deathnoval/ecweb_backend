@@ -6,6 +6,7 @@ const middlewareController = require('../controller/middleware');
 const userController = require('../controller/users');
 const transactionController=require('../controller/transaction')
 const voucherController = require('../controller/voucher');
+const statisticalController = require('../controller/statistical');
 
 
 // Quản lý danh mục (category) - chỉ admin mới có quyền truy cập
@@ -56,6 +57,10 @@ router.post('/deleteVoucher', middlewareController.verifyToken_ql_voucher, vouch
 router.post('/updateStatus', middlewareController.verifyToken_ql_voucher, voucherController.updateStatus);
 router.get('/getVouchers', middlewareController.verifyToken_ql_voucher, voucherController.getVouchers);
 router.get('/getDetail', middlewareController.verifyToken_ql_voucher, voucherController.getDetail);
+
+//admin statistical
+router.get('/statistical', middlewareController.verifyTokenAdmin, statisticalController.statistical);
+router.get('/revenueStatistics',middlewareController.verifyTokenAdmin, statisticalController.revenueStatistics);
 
 
 
