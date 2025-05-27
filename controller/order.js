@@ -408,6 +408,8 @@ const add_order = async (req, res) => {
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
+    let checkout_price= req.body.checkout_price;
+
     let shipping_code = req.body.shipping_code;
 
     console.log(email);
@@ -425,6 +427,8 @@ const add_order = async (req, res) => {
         if (!name) {
             return res.status(400).json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
+        
+        
 
         if (!shipping_code) {
             if (type_pay == 3) {
@@ -468,7 +472,7 @@ const add_order = async (req, res) => {
         }
 
         if (type_pay == 1) { // MoMo payment
-            const amount = order.total_price + shipping_code;
+            const amount = checkout_price+ shipping_code;
             const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
             const deliveryInfo = {
                 deliveryAddress: address.street + ", " + address.wardName + ", " + address.districtName + ", " + address.provinceName,
