@@ -7,26 +7,32 @@ const userSchema = new mongoose.Schema({
     ho: {
         type: String,
         required: true,
+        trim: true,
     },
     ten: {
         type: String,
         required: true,
+        trim: true,
     },
     gender: {
         type: String,
         required: true,
+        trim: true,
     },
     birthday: {
         type: String,
         required: true,
+        trim: true,
     },
     email: {
         type: String,
         required: true,
+        trim: true,
     },
     password: {
         type: String,
         required: true,
+        trim: true,
     },
     isAdmin: {
         type: Boolean,
@@ -37,16 +43,17 @@ const userSchema = new mongoose.Schema({
         {
             name: {
                 type: String,
-                require: true,
+                required: true,
+                trim: true,
             },
-            street: { type: String, require: true, },
-            provinceID:{type: String,require:true},
-            provinceName:{type: String,require:true},
-            districtID:{type: String,require:true},
-            districtName:{type: String,require:true},
-            wardCode:{type: String,require:true},
-            wardName:{type: String,require:true},
-            number: { type: String, require: true, },
+            street: { type: String, require: true,trim: true },
+            provinceID: { type: String, require: true,trim: true },
+            provinceName: { type: String, require: true,trim: true },
+            districtID: { type: String, require: true,trim: true },
+            districtName: { type: String, require: true,trim: true },
+            wardCode: { type: String, require: true,trim: true },
+            wardName: { type: String, require: true,trim: true },
+            number:  { type: String, require: true,trim: true },
             isDefault: { type: Boolean, default: false },
         }
     ],

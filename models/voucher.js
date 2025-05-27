@@ -6,10 +6,11 @@ const voucherSchema = new mongoose.Schema({
     status: {
         type: String,
         default: "unreleased",
+        trim: true,
     },
     discount: Number,
     minPrice: Number,
-    type: String,
+    type:  { type: String,trim: true },
     createdAt: Number,
     expiredAt: Number,
 });

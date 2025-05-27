@@ -196,7 +196,7 @@ const formatProductInfo = (products) => {
                                         "rawUrl": `${products[0]?.primary_image?.url}`
                                     }
                                 },
-                                "actionLink": `http://localhost:3000/product-detail/${products[0]?._id}`
+                                "actionLink": process.env.URLFRONTEND+`/product-detail/${products[0]?._id}`
                             }
                         ]
                     ]
@@ -224,13 +224,13 @@ const formatCategoryInfo = (category) => {
     // Chip cho danh mục chính
     const categoryChip = {
         text: `${category?.name}`,
-        link: `http://localhost:3000/products/${category?.category_id}`
+        link: process.env.URLFRONTEND+`/products/${category?.category_id}`
     };
 
     // Chips cho subcategories
     const subcategoryChips = category?.sub_category.map(sub => ({
         text: `${sub?.name}`,
-        link: `http://localhost:3000/products/${sub?.sub_category_id}`
+        link: process.env.URLFRONTEND+`/products/${sub?.sub_category_id}`
     }));
 
     return {

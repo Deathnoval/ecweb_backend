@@ -3,7 +3,11 @@ const { boolean, bool, number, required } = require('joi');
 const mongoose = require('mongoose');
 
 const OrderHistorySchema = new mongoose.Schema({
-    Order_id: { type: String, required: true },
+    Order_id: { 
+        type: String, 
+        required: true,
+        trim: true
+    },
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "user",

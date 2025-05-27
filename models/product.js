@@ -13,14 +13,16 @@ const productSchema = mongoose.Schema({
             total_number_with_color: Number,
             image: {
                 uid: String,
-                url: { type: String, required: true }
+                url: { type: String, required: true,
+                    trim: true
+                }
 
 
             },
             _id: String,
             array_sizes: [
                 {
-                    name_size: String,
+                    name_size: {type: String,trim: true},
                     total_number_with_size: Number,
                     _id: String,
                 }
@@ -30,31 +32,34 @@ const productSchema = mongoose.Schema({
     array_image: [
         {
             uid: String,
-            url: { type: String, required: true }
+            url: { type: String, required: true,
+                trim: true
+            },
 
         }
     ],
     primary_image: {
         uid: String,
-        url: { type: String, required: true }
+        url: { type: String, required: true,trim: true }
 
 
     },
     image_hover: {
         uid: String,
-        url: { type: String, required: true }
+        url: { type: String, required: true,trim: true }
 
     },
-    category_id: String,
-    sub_category_id: String,
+    category_id: {type: String,trim: true},
+    sub_category_id: {type: String,trim: true},
     product_id: {
         type: String,
         unique: true,
+        trim: true
     },
-    description: String,
+    description: {type: String,trim: true},
     onlShop: { type: Boolean, default: false, },
     createDate: { type: Date, default: Date.now, },
-    code: { type: String, require: true }
+    code: { type: String, require: true, trim: true }
 
 
 });

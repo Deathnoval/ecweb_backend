@@ -11,10 +11,13 @@ const cartSchema = new mongoose.Schema({
         product_id: {
             type: String,
             required: true,
+            trim: true
         },
         product_name: {
             type: String,
             required: true,
+            trim: true
+
         },
         quantity: {
             type: Number,
@@ -23,15 +26,21 @@ const cartSchema = new mongoose.Schema({
         },
         color: {
             type: String,
+            trim: true
         },
         size: {
             type: String,
+            trim: true
         },
         image_hover: {
             type: String,
             required: true,
+            trim: true
         },
-        code: { type: String, required: true },
+        code: { type: String, 
+            required: true ,
+            trim: true
+        },
         selected_buy: {
             type: Boolean,
             required: true,
