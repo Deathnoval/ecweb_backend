@@ -243,8 +243,85 @@ const cart_show = async (req, res) => {
     if (!cart) {
       return res.status(200).json({ success: true, items: [], total_price: 0 });
     }
-    res.status(200).json({ success: true, items: cart.items, total_price: cart.total_price });
+
+    const updatedItems = [];
+    const invalidItems = [];
+
+    for (let item of cart.items) {
+      const product = await Product.findOne({ product_id: item.product_id });
+      if (!product) {
+        invalidItems.push({
+          ...item._doc,
+          reason: "Sản phẩm không còn tồn tại"
+        });
+        continue;
+      }
+
+      let maxAvailable = product.total_number;
+      let reason = "";
+
+      if (item.color && item.size) {
+        const colorObj = product.array_color.find(c => c.name_color === item.color);
+        if (colorObj) {
+          const sizeObj = colorObj.array_sizes.find(s => s.name_size === item.size);
+          if (sizeObj) {
+            maxAvailable = sizeObj.total_number_with_size;
+          } else {
+            reason = `Màu "${item.color}" không có size "${item.size}"`;
+            maxAvailable = 0;
+          }
+        } else {
+          reason = `Không tìm thấy màu "${item.color}"`;
+          maxAvailable = 0;
+        }
+      } else if (item.color) {
+        const colorObj = product.array_color.find(c => c.name_color === item.color);
+        if (colorObj) {
+          maxAvailable = colorObj.total_number_with_color;
+        } else {
+          reason = `Không tìm thấy màu "${item.color}"`;
+          maxAvailable = 0;
+        }
+      }
+
+      if (maxAvailable <= 0) {
+        invalidItems.push({
+          ...item._doc,
+          reason: reason || "Sản phẩm đã hết hàng"
+        });
+        continue;
+      }
+
+      if (item.quantity > maxAvailable) {
+        // Cập nhật số lượng trong cart
+        item.quantity = maxAvailable;
+        item.price_per_item = item.price_per_one * maxAvailable;
+
+        invalidItems.push({
+          ...item._doc,
+          reason: `Số lượng trong giỏ đã được điều chỉnh còn ${maxAvailable} vì tồn kho không đủ`
+        });
+      }
+
+      updatedItems.push(item);
+    }
+
+    // Cập nhật lại cart
+    cart.items = updatedItems;
+    cart.total_price = updatedItems.reduce(
+      (total, item) => total + item.price_per_one * item.quantity,
+      0
+    );
+    await cart.save();
+
+    return res.status(200).json({
+      success: true,
+      items: updatedItems,
+      total_price: cart.total_price,
+      warnings: invalidItems.length > 0 ? invalidItems : null
+    });
   } catch (err) {
+    console.log(err);
     return res.json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
@@ -252,6 +329,8 @@ const cart_show = async (req, res) => {
     });
   }
 };
+
+
 
 const show_number_items_in_cart = async (req, res) => {
   const user_id = req.user.id;
