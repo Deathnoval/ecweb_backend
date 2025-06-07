@@ -18,6 +18,7 @@ function generateProductId() {
 }
 
 const getProductListALL = async (req, res) => {
+    const name = req.query.name;
     const type_get = req.params.type_get;
     const value_sort = req.params.value_sort;
     let sortField = "createdAt";
@@ -40,21 +41,28 @@ const getProductListALL = async (req, res) => {
     let sortOptions = {};
     sortOptions[sortField] = sortOrder;
 
+    let filter = {
+        total_number: { $gt: 0 },
+        onlShop: true
+    }
+
+    if (name && name?.trim() !== "") {
+        filter.name = { $regex: name, $options: "i" };
+    }
+
     try {
-        let productListAll = await Product.find({ total_number: { $gt: 0 }, onlShop: true }).sort(sortOptions);
+        let productListAll = await Product.find(filter).sort(sortOptions);
 
         if (type_get !== "all") {
             productListAll = await Product.find({
+                ...filter, 
                 category_id: type_get,
-                total_number: { $gt: 0 },
-                onlShop: true
             }).sort(sortOptions);
         }
         if (!productListAll || productListAll.length === 0) {
             productListAll = await Product.find({
+                ...filter, 
                 sub_category_id: type_get,
-                total_number: { $gt: 0 },
-                onlShop: true
             }).sort(sortOptions);
         }
 
@@ -62,7 +70,7 @@ const getProductListALL = async (req, res) => {
             id: product.product_id,
             name: product.name,
             price: product.price,
-            quantityBought:product.quantityBought,
+            quantityBought: product.quantityBought,
             image: product.primary_image,
             imageHover: product.image_hover,
             color: product.array_color.map(arrayColor => ({
@@ -71,8 +79,8 @@ const getProductListALL = async (req, res) => {
                 image: arrayColor.image,
             })),
         }));
-        
-        return res.status(200).json({ success: true, productListAll_DataFormat,color: "text-green-500" });
+
+        return res.status(200).json({ success: true, productListAll_DataFormat, color: "text-green-500" });
 
         // if (productListAll_DataFormat.length > 0) {
         //     return res.status(200).json({ success: true, productListAll_DataFormat,color: "text-green-500" });
@@ -89,10 +97,10 @@ const getProductDetail = async (req, res) => {
 
     try {
         let query = { product_id: id };
-        if(isValidObjectId(id)){
+        if (isValidObjectId(id)) {
             query = {
                 $or: [
-                    { _id: id},
+                    { _id: id },
                     { product_id: id }
                 ]
             };
@@ -129,7 +137,7 @@ const admin_to_get_product_list = async (req, res) => {
             code: product.code,
             price: product.price,
             total_number: product.total_number,
-            quantityBought:product.quantityBought,
+            quantityBought: product.quantityBought,
             primary_image: product.primary_image,
             product_id: product.product_id,
             onlShop: product.onlShop,
@@ -198,7 +206,7 @@ const getProductListALL_with_Sattus = async (req, res) => {
             name: product.name,
             price: product.price,
             total_number: product.total_number,
-            quantityBought:product.quantityBought,
+            quantityBought: product.quantityBought,
             primary_image: product.primary_image,
             category_id: product.category_id,
             sub_category_id: product.sub_category_id,
@@ -416,7 +424,7 @@ const searchProductsByName = async (req, res) => {
                 id: product.product_id,
                 name: product.name,
                 price: product.price,
-                quantityBought:product.quantityBought,
+                quantityBought: product.quantityBought,
                 image: product.primary_image,
                 imageHover: product.image_hover,
                 color: product.array_color.map(arrayColor => ({

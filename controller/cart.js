@@ -15,6 +15,7 @@ const check_quantity = async (product_id, color, quantity, size) => {
       color: "text-red-500",
     };
   }
+  const nameProduct = product?.name;
   if (color && size) {
     const selectedColor = product.array_color.find(
       (colorObj) => colorObj.name_color === color
@@ -29,11 +30,13 @@ const check_quantity = async (product_id, color, quantity, size) => {
       return { success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" };
     }
 
+    if(selectedSize.total_number_with_size === 0){
+      return { success: false, message: "Sản phẩm " + nameProduct + " màu " + color + " size " + size + " đã hết hàng", color: "text-red-500" }
+    }
 
     // Check stock availability for the chosen color and size
     if (selectedSize.total_number_with_size < quantity) {
-      return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
-
+      return { success: false, message: "Số lượng sản phẩm " + nameProduct + " màu " + color + " size " + size +  " còn lại không đủ", color: "text-red-500" }
     }
   }
   if (!color || !size) {
@@ -51,13 +54,17 @@ const check_quantity = async (product_id, color, quantity, size) => {
         }
       }
 
+      if (selectedColor.total_number_with_color === 0) {
+        return { success: false, message: "Sản phẩm " + nameProduct + " màu " + color + " đã hết hàng", color: "text-red-500" }
+      }
+
       if (selectedColor.total_number_with_color < quantity) {
-        return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+        return { success: false, message: "Số lượng sản phẩm " + nameProduct + " màu " + color + " còn lại không đủ", color: "text-red-500" }
       }
     }
     else {
       if (product.total_number < quantity) {
-        return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+        return { success: false, message: "Sản phẩm " + nameProduct +  " đã hết hàng", color: "text-red-500" }
 
       }
     }
@@ -109,7 +116,7 @@ const add_to_cart = async (req, res) => {
   try {
     const product = await Product.findOne({ product_id: product_id });
     if (!product) {
-      return res.status(404).json({
+      return res.json({
         success: false,
         message: "Không tìm thấy sản phẩm",
         color: "text-red-500",
@@ -120,7 +127,7 @@ const add_to_cart = async (req, res) => {
         (colorObj) => colorObj.name_color === color
       );
       if (!selectedColor) {
-        return res.status(404).json({ success: false, message: " Không có màu: " + color, color: "text-red-500" });
+        return res.json({ success: false, message: " Không có màu: " + color, color: "text-red-500" });
       }
 
       // Find the matching size object within the selected color's array_sizes
@@ -128,20 +135,20 @@ const add_to_cart = async (req, res) => {
         (sizeObj) => sizeObj.name_size === size
       );
       if (!selectedSize) {
-        return res.status(404).json({ success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" });
+        return res.json({ success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" });
       }
 
 
       // Check stock availability for the chosen color and size
       if (selectedSize.total_number_with_size < quantity) {
-        return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+        return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
 
       }
     }
     if (!color || !size) {
       const check_color_product = product.array_color.length
       if (check_color_product > 0 && !color) {
-        return res.status(404).json({ success: false, message: "Vui lòng chọn màu cho sản phẩm", color: "text-red-500" })
+        return res.json({ success: false, message: "Vui lòng chọn màu cho sản phẩm", color: "text-red-500" })
       }
       if (color) {
         const selectedColor = product.array_color.find(
@@ -149,17 +156,17 @@ const add_to_cart = async (req, res) => {
         );
         if (selectedColor.array_sizes.length > 0) {
           if (!size) {
-            return res.status(404).json({ success: false, message: "Vui lòng chọn size sẩn phẩm", color: "text-red-500" })
+            return res.json({ success: false, message: "Vui lòng chọn size sẩn phẩm", color: "text-red-500" })
           }
         }
 
         if (selectedColor.total_number_with_color < quantity) {
-          return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+          return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
         }
       }
       else {
         if (product.total_number < quantity) {
-          return res.status(500).json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
+          return res.json({ success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" })
 
         }
       }

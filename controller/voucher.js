@@ -51,12 +51,12 @@ const getDetail = async (req, res) => {
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
-} 
+}
 
 const getVouchers = async (req, res) => {
     const type = req.query.type;
     const status = req.query.status;
-    
+
     try {
         let vouchers;
         if (type && status) {
@@ -76,10 +76,11 @@ const getVouchers = async (req, res) => {
 }
 
 const getReleasedVouchers = async (req, res) => {
+    const { userId } = req.query;
     try {
-        const projection = {_id:0, code: 1, name: 1};
-        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount' }).select(projection);
-        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping' }).select(projection);
+        const projection = { _id: 0, code: 1, name: 1 };
+        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
+        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
         res.status(200).json({ success: true, dicountVouchers, shippingVouchers });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -136,8 +137,8 @@ const applyVoucher = async (req, res) => {
         let discountedPrice = price;
         let discountedShippingFee = shippingFee;
 
-        for(let item of code) {
-                const voucher = await Voucher.findOne({ code: item });
+        for (let item of code) {
+            const voucher = await Voucher.findOne({ code: item });
             if (!voucher) {
                 continue;
             }
@@ -147,6 +148,10 @@ const applyVoucher = async (req, res) => {
             }
             if (price < voucher.minPrice) {
                 continue;
+            }
+
+            if (voucher.expiredAt && voucher.expiredAt < Date.now()) {
+                res.status(500).json({ success: true, message: voucher?.name + " đã hết hạn" });
             }
 
             if (voucher.type === 'discount') {

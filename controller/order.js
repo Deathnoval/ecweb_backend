@@ -21,6 +21,7 @@ const check_quantity = async (product_id, color, quantity, size) => {
             color: "text-red-500",
         };
     }
+    const nameProduct = product?.name;
     if (color && size) {
         const selectedColor = product.array_color.find(
             (colorObj) => colorObj.name_color === color
@@ -35,10 +36,14 @@ const check_quantity = async (product_id, color, quantity, size) => {
             return { success: false, message: "Màu " + color + " không có size " + size, color: "text-red-500" };
         }
 
+        if (selectedSize.total_number_with_size === 0) {
+            return { success: false, message: "Sản phẩm " + nameProduct + " màu " + color + " size " + size + " đã hết hàng", color: "text-red-500" }
+        }
+
 
         // Check stock availability for the chosen color and size
         if (selectedSize.total_number_with_size < quantity) {
-            return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+            return { success: false, message: "Số lượng sản phẩm " + nameProduct + " màu " + color + " size " + size + " còn lại không đủ", color: "text-red-500" }
 
         }
     }
@@ -57,13 +62,17 @@ const check_quantity = async (product_id, color, quantity, size) => {
                 }
             }
 
+            if (selectedColor.total_number_with_color === 0) {
+                return { success: false, message: "Sản phẩm " + nameProduct + " màu " + color + " đã hết hàng", color: "text-red-500" }
+            }
+
             if (selectedColor.total_number_with_color < quantity) {
-                return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+                return { success: false, message: "Số lượng sản phẩm " + nameProduct + " màu " + color + " còn lại không đủ", color: "text-red-500" }
             }
         }
         else {
             if (product.total_number < quantity) {
-                return { success: false, message: "Số lượng sản phẩm còn lại không đủ", color: "text-red-500" }
+                return { success: false, message: "Sản phẩm " + nameProduct +  " đã hết hàng", color: "text-red-500" }
 
             }
         }
@@ -408,7 +417,7 @@ const add_order = async (req, res) => {
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
-    let checkout_price= req.body.checkout_price;
+    let checkout_price = req.body.checkout_price;
 
     let shipping_code = req.body.shipping_code;
 
@@ -427,8 +436,8 @@ const add_order = async (req, res) => {
         if (!name) {
             return res.status(400).json({ success: false, message: "Vui lòng nhập tên người liên lạc", color: "text-red-500" });
         }
-        
-        
+
+
 
         if (!shipping_code) {
             if (type_pay == 3) {
@@ -467,12 +476,12 @@ const add_order = async (req, res) => {
         for (let item of order.items) {
             let flag_check_quantity = await check_quantity(item.product_id, item.color, item.quantity, item.size);
             if (flag_check_quantity.success == false) {
-                return res.json(flag_check_quantity);
+                return res.status(500).json(flag_check_quantity);
             }
         }
 
         if (type_pay == 1) { // MoMo payment
-            const amount = checkout_price+ shipping_code;
+            const amount = checkout_price + shipping_code;
             const orderInfo = 'Thanh toán đơn hàng ' + new_order_id;
             const deliveryInfo = {
                 deliveryAddress: address.street + ", " + address.wardName + ", " + address.districtName + ", " + address.provinceName,
@@ -683,9 +692,9 @@ const get_order_detail = async (req, res) => {
             type_pay: order_detail.type_pay,
             status: order_detail.status,
             paymentUrl: order_detail.paymentUrl,
-            list_image:order_detail.refund_request.list_image,
-            description:order_detail.refund_request.description,
-            refund_date:moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
+            list_image: order_detail.refund_request.list_image,
+            description: order_detail.refund_request.description,
+            refund_date: moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         if (!order_detail) {
@@ -747,7 +756,7 @@ const get_OrderHistory_log = async (req, res) => {
         if (!list_OrderHistory) {
             return res.status(200).json({ success: true, log: [], color: "text-green-500" })
         }
-        
+
         const log_list_OrderHistory = list_OrderHistory.status_history.filter(item => item.status !== 0).map(item => ({
             status: item.status,
             day_add: moment(item.day_add).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
@@ -875,19 +884,19 @@ const cancer_order = async (req, res) => {
 
 }
 
-const add_description_fop_refund=async (req,res)=>{
-    const Order_id= req.body.Order_id;
-    const list_image=req.body.list_image;
-    const description=req.body.description;
+const add_description_fop_refund = async (req, res) => {
+    const Order_id = req.body.Order_id;
+    const list_image = req.body.list_image;
+    const description = req.body.description;
     const user_id = req.user.id;
-    try{
-        if (!Order_id){
+    try {
+        if (!Order_id) {
             return res.status(400).json({ success: false, message: "Mã đơn hàng không đước đễ trống", color: "text-red-500" })
         }
-        if (!list_image){
+        if (!list_image) {
             return res.status(400).json({ success: false, message: "Danh sách ảnh minh chứng không đước đễ trống", color: "text-red-500" })
         }
-        if(!description){
+        if (!description) {
             return res.status(400).json({ success: false, message: "Lý do yêu cầu hoàn tiền không đước đễ trống", color: "text-red-500" })
         }
         const order = await Order.findOne({ Order_id, user_id });
@@ -898,8 +907,8 @@ const add_description_fop_refund=async (req,res)=>{
             order.refund_request = {};
         }
         const refund_date = new Date();
-        order.refund_request = { list_image, description,refund_date };
-        order.status=8
+        order.refund_request = { list_image, description, refund_date };
+        order.status = 8
 
         let orderHistory = await OrderHistory.findOne({ user_id, Order_id });
 
@@ -907,15 +916,14 @@ const add_description_fop_refund=async (req,res)=>{
         await orderHistory.save();
 
         await order.save().then(() => {
-            res.status(200).json({ success: true, message: "Yêu cầu hoàn tiền đã được gửi",color: "text-green-500" });
+            res.status(200).json({ success: true, message: "Yêu cầu hoàn tiền đã được gửi", color: "text-green-500" });
         })
-        .catch((err) => {
-            console.error("Error saving order:", err);
-            res.status(500).json({ success: false, message: "Lỗi khi lưu yêu cầu hoàn tiền" ,color: "text-red-500"});
-        });
+            .catch((err) => {
+                console.error("Error saving order:", err);
+                res.status(500).json({ success: false, message: "Lỗi khi lưu yêu cầu hoàn tiền", color: "text-red-500" });
+            });
     }
-    catch (err)
-    {
+    catch (err) {
         console.log(err)
         return res.status(500).json({ success: false, message: "Lỗi truy xuất dữ liệu", color: "text-red-500" })
     }
@@ -1042,9 +1050,9 @@ const get_order_detail_to_admin = async (req, res) => {
             price_pay: order_detail.total_price + order_detail.shipping_code,
             type_pay: order_detail.type_pay,
             status: order_detail.status,
-            list_image:order_detail.refund_request.list_image,
-            description:order_detail.refund_request.description,
-            refund_date:moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
+            list_image: order_detail.refund_request.list_image,
+            description: order_detail.refund_request.description,
+            refund_date: moment(order_detail.refund_request.refund_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
             order_date: moment(order_detail.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss")
         }
         return res.status(200).json({ success: true, formatted_order_detail, color: "text-green-500" })
@@ -1070,9 +1078,9 @@ const get_full_order_table = async (req, res) => {
             full_Order_table = await Order.find({}).sort({ "order_date": type_sort })
         }
         else {
-            if(orderId){
+            if (orderId) {
                 full_Order_table = await Order.find({ Order_id: orderId }).sort({ "order_date": type_sort })
-            }else{
+            } else {
                 full_Order_table = await Order.find({ status: req_status }).sort({ "order_date": type_sort })
             }
         }
@@ -1353,7 +1361,7 @@ const createTransaction = async (order_id, amount, user_id, email) => {
 };
 
 const deleteTransaction = async (order_id) => {
-    const transaction = await Transaction.findOne({ order_id, price_pay: { $gt : 0 } });
+    const transaction = await Transaction.findOne({ order_id, price_pay: { $gt: 0 } });
     if (transaction) {
         await transaction.deleteOne();
     }

@@ -13,6 +13,9 @@ const voucherSchema = new mongoose.Schema({
     type:  { type: String,trim: true },
     createdAt: Number,
     expiredAt: Number,
+    userId: [
+        {type: String, trim: true, default: []}
+    ]
 });
 
 const Voucher = mongoose.model('Voucher', voucherSchema, "Voucher");
