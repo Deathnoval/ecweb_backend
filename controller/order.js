@@ -593,7 +593,7 @@ const add_order = async (req, res) => {
 
                 await cart_items.save();
                  // === CẬP NHẬT USER_ID VÀO VOUCHER ===
-                 if (list_voucher && Array.isArray(list_voucher)) {
+                if (list_voucher && Array.isArray(list_voucher)) {
                     for (let code of list_voucher) {
                         await Voucher.findOneAndUpdate(
                             { code },
