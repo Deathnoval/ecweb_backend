@@ -78,7 +78,7 @@ const getVouchers = async (req, res) => {
 const getReleasedVouchers = async (req, res) => {
     const { userId } = req.query;
     try {
-        const projection = { _id: 0, code: 1, name: 1 };
+        const projection = { _id: 0, code: 1, name: 1, expiredAt: 1 };
         const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
         const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
         res.status(200).json({ success: true, dicountVouchers, shippingVouchers });

@@ -9,6 +9,7 @@ const { createPayment, check_status_momo_payment, refund_money_momo } = require(
 const Transaction = require("../models/transaction");
 const moment = require('moment-timezone');
 const { v4: uuidv4 } = require('uuid');
+const Voucher = require('../models/voucher');
 
 let order_id_list_momo = []
 
@@ -503,12 +504,12 @@ const add_order = async (req, res) => {
                 user_id: req.user.id,
                 email: email,
                 items: order.items,
-                total_price: order.total_price,
+                total_price: checkout_price,
                 address: address,
                 shipping_code: shipping_code,
                 phone: phone,
                 name: name,
-                price_pay: order.total_price + shipping_code,
+                price_pay: checkout_price + shipping_code,
                 type_pay: type_pay,
                 status: order_status,
                 order_date: Date.now(),
@@ -562,12 +563,12 @@ const add_order = async (req, res) => {
                 user_id: req.user.id,
                 email: email,
                 items: order.items,
-                total_price: order.total_price,
+                total_price: checkout_price,
                 address: address,
                 shipping_code: shipping_code,
                 phone: phone,
                 name: name,
-                price_pay: order.total_price + shipping_code,
+                price_pay: checkout_price + shipping_code,
                 type_pay: type_pay,
                 status: order_status,
                 order_date: Date.now()
