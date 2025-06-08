@@ -417,6 +417,7 @@ const add_order = async (req, res) => {
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
+    const list_voucher= req.body.list_voucher
     let checkout_price = req.body.checkout_price;
 
     let shipping_code = req.body.shipping_code;
@@ -540,6 +541,15 @@ const add_order = async (req, res) => {
                 );
 
                 await cart_items.save();
+                // === CẬP NHẬT USER_ID VÀO VOUCHER ===
+                if (list_voucher && Array.isArray(list_voucher)) {
+                    for (let code of list_voucher) {
+                        await Voucher.findOneAndUpdate(
+                            { code },
+                            { $addToSet: { userId: user_id.toString() } }
+                        );
+                    }
+                }
                 order_id_list_momo.push(new_order_id)
                 console.log(order_id_list_momo)
                 return res.status(200).json({ success: true, paymentUrl: paymentResult.payUrl });
@@ -582,6 +592,15 @@ const add_order = async (req, res) => {
                 );
 
                 await cart_items.save();
+                 // === CẬP NHẬT USER_ID VÀO VOUCHER ===
+                 if (list_voucher && Array.isArray(list_voucher)) {
+                    for (let code of list_voucher) {
+                        await Voucher.findOneAndUpdate(
+                            { code },
+                            { $addToSet: { userId: user_id.toString() } }
+                        );
+                    }
+                }
 
                 return res.status(200).json({ success: true, message: "Thanh toán Thành công", color: "text-green-500" });
             } else {
