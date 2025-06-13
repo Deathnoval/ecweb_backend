@@ -17,7 +17,7 @@ const createPayment = async (orderId, amount, orderInfo, deliveryInfo) => {
     const orderType = 'momo_wallet';
     const requestType = 'captureWallet';
     amount = amount.toString()
-    const redirectUrl = 'https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b';
+    const redirectUrl = process.env.URLFRONTEND+ '/successpayment';
     const ipnUrl = process.env.IPNURL.toString() + '/api/V1/order/callback';
     console.log(ipnUrl)
     const rawData = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + '' + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType;
@@ -62,7 +62,7 @@ const check_status_momo_payment = async (orderId) => {
         signature: signature,
         lang: 'vi',
     }
-    // console.log(body)
+    console.log(body)
     const url = 'https://test-payment.momo.vn/v2/gateway/api/query'
 
     try {

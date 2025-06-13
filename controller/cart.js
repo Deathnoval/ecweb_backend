@@ -228,14 +228,14 @@ const add_to_cart = async (req, res) => {
       0
     );
     await cart.save();
-    return res.json({
+    return res.status(200).json({
       success: true,
       message: "Thêm vào giỏ hàng thành công",
       color: "text-green-500",
     });
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
@@ -329,7 +329,7 @@ const cart_show = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",

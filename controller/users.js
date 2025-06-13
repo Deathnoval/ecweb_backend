@@ -624,7 +624,7 @@ const insert_address = async function (req, res) {
     }
   } catch (err) {
     console.log(err);
-    res.json({
+    res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
@@ -642,7 +642,7 @@ const delete_address = async function (req, res) {
     try {
       const address = user.address.id(id_address);
       if (address == null) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           message: "Địa chỉ không tồn tại",
           color: "text-red-500",
@@ -653,7 +653,7 @@ const delete_address = async function (req, res) {
       user
         .save()
         .then(
-          res.json({
+          res.status(200).json({
             success: true,
             message: "Địa chỉ đã xóa thành công",
             color: "text-red-500",
@@ -664,7 +664,7 @@ const delete_address = async function (req, res) {
     }
   } catch (err) {
     console.log(err);
-    res.json({
+    res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
@@ -733,7 +733,7 @@ const update_address = async function (req, res) {
     }
   } catch (err) {
     console.error(err);
-    res.json({
+    res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",

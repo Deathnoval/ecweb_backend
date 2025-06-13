@@ -58,29 +58,35 @@ const getVouchers = async (req, res) => {
     const status = req.query.status;
 
     try {
-        let vouchers;
-        if (type && status) {
-            vouchers = await Voucher.find({ type, status });
-        } else if (type) {
-            vouchers = await Voucher.find({ type });
-        } else if (status) {
-            vouchers = await Voucher.find({ status });
-        } else {
-            vouchers = await Voucher.find();
-        }
+        // let vouchers;
+        // if (type && status) {
+        //     vouchers = await Voucher.find({ type, status });
+        // } else if (type) {
+        //     vouchers = await Voucher.find({ type });
+        // } else if (status) {
+        //     vouchers = await Voucher.find({ status });
+        // } else {
+        //     vouchers = await Voucher.find();
+        // }
+
+        const query = {};
+        if (type) query.type = type;
+        if (status) query.status = status;
+
+        const vouchers = await Voucher.find(query).sort({ createdAt: -1 }); // 1: tăng dần, gần nhất trước
 
         res.status(200).json({ success: true, vouchers });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        res.status(500).json({ message: error.message });
     }
 }
 
 const getReleasedVouchers = async (req, res) => {
-    const { userId } = req.query;
+    const user_id = req.user.id;
     try {
         const projection = { _id: 0, code: 1, name: 1, expiredAt: 1 };
-        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
-        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, userId: { $ne: userId } }).select(projection);
+        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, userId: { $ne: user_id } }).select(projection);
+        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, userId: { $ne: user_id } }).select(projection);
         res.status(200).json({ success: true, dicountVouchers, shippingVouchers });
     } catch (error) {
         res.status(400).json({ message: error.message });
@@ -168,6 +174,18 @@ const applyVoucher = async (req, res) => {
     }
 }
 
+const updateExpiredVouchers = async () => {
+    const vouchers = await Voucher.find({ status: voucherStatus.RELEASED, expiredAt: { $lte:  new Date().getTime() } });
+    console.log(new Date().getTime());
+    console.log(vouchers);
+    for (const voucher of vouchers) {
+        voucher.status = voucherStatus.EXPIRED;
+        await voucher.save();
+    }
+}
+
+setInterval(updateExpiredVouchers, 600000)
+
 module.exports = {
     createVoucher,
     getVouchers,
@@ -177,4 +195,5 @@ module.exports = {
     updateStatus,
     applyVoucher,
     getDetail,
+    updateExpiredVouchers,
 }

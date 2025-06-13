@@ -262,7 +262,7 @@ const add_primary_category = async (req, res) => {
     let new_name_category = req.body.name;
     console.log("new_name_category:" + new_name_category);
     if (new_name_category.length == 0) {
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
         message: "Tên của danh mục không được để trống",
         color: "text-red-500",
@@ -302,7 +302,7 @@ const add_primary_category = async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
@@ -323,7 +323,7 @@ const add_sub_category = async (req, res) => {
     } else {
       const category = await Category.findOne({ category_id: id });
       if (!category) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           message: "Category_id không tồn tại",
           color: "text-red-500",
@@ -347,7 +347,7 @@ const add_sub_category = async (req, res) => {
           route: new_route,
         });
         await category.save();
-        res.json({
+        res.status(200).json({
           success: true,
           message: "Thêm danh mục phụ thành công",
           color: "text-green-500",
@@ -356,7 +356,7 @@ const add_sub_category = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.json({
+    res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       colo: "text-red-500",
@@ -373,13 +373,13 @@ const update_Catergory = async (req, res) => {
     });
     console.log(is_not_exists_category);
     if (!is_not_exists_category) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
         message: "Không tìm thấy danh mục",
         colo: "text-red-500",
       });
     } else if (new_name_category.length == 0) {
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
         message: "Tên danh mục không được để trống",
         color: "text-red-500",
@@ -397,13 +397,13 @@ const update_Catergory = async (req, res) => {
         { new: true }
       );
       if (!updateCategory) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           message: "Cập nhật tên danh mục không thành công",
           color: "text-red-500",
         });
       } else {
-        return res.json({
+        return res.status(200).json({
           success: true,
           message: "Cập nhật tên danh mục thành công",
           color: "text-green-500",
@@ -412,7 +412,7 @@ const update_Catergory = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    res.json({
+    res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       colo: "text-red-500",
@@ -435,7 +435,7 @@ const update_sub_category = async (req, res) => {
         );
         console.log(is_exit_sub_category);
         if (is_exit_sub_category === -1) {
-          return res.json({
+          return res.status(500).json({
             success: false,
             message: "Không tìm thấy danh mục phụ",
             color: "text-red-500",
@@ -448,21 +448,21 @@ const update_sub_category = async (req, res) => {
           is_exit_category.sub_category[is_exit_sub_category].route =
             new_sub_route;
           await is_exit_category.save();
-          return res.json({
+          return res.status(200).json({
             success: true,
             message: "Cập nhật tên danh mục phụ thành công",
             color: "text-green-500",
           });
         }
       } else {
-        return res.json({
+        return res.status(500).json({
           success: false,
           message: "Không tìm thấy danh mục chính",
           color: "text-red-500",
         });
       }
     } else {
-      return res.status(400).json({
+      return res.status(500).json({
         success: false,
         message: "Tên danh mục phụ không được để  trống",
         color: "text-red-500",
@@ -470,7 +470,7 @@ const update_sub_category = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",
@@ -485,7 +485,7 @@ const deleteCategory = async (req, res) => {
       category_id: category_id,
     });
     if (!is_exit_category) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
         message: "Không tìm thấy danh mục cần xóa",
         color: "text-red-500",
@@ -508,20 +508,20 @@ const deleteCategory = async (req, res) => {
             category_id: category_id,
           });
           if (check_success) {
-            return res.json({
+            return res.status(200).json({
               success: true,
               message: "Xóa danh mục thành công",
               color: "text-green-500",
             });
           } else {
-            return res.json({
+            return res.status(500).json({
               success: false,
               message: "Xóa danh mục thất bại",
               color: "text-red-500",
             });
           }
         } else {
-          return res.json({
+          return res.status(500).json({
             success: false,
             message:
               "Xóa danh mục thất bại do không thể thay đổi id của sản phẩm",
@@ -533,13 +533,13 @@ const deleteCategory = async (req, res) => {
           category_id: category_id,
         });
         if (check_success) {
-          return res.json({
+          return res.status(200).json({
             success: true,
             message: "Xóa danh mục thành công",
             color: "text-green-500",
           });
         } else {
-          return res.json({
+          return res.status(500).json({
             success: false,
             message: "Xóa danh mục thất bại",
             color: "text-red-500",
@@ -549,7 +549,7 @@ const deleteCategory = async (req, res) => {
     }
   } catch (err) {
     console.error(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       colo: "text-red-500",
@@ -564,7 +564,7 @@ const delete_sub_category = async (req, res) => {
       category_id: category_id,
     });
     if (!is_exit_category) {
-      return res.status(404).json({
+      return res.status(500).json({
         success: false,
         message: "Không tìm thấy danh mục chính",
         color: "text-red-500",
@@ -574,7 +574,7 @@ const delete_sub_category = async (req, res) => {
         (sub) => sub.sub_category_id === sub_category_id
       );
       if (is_exit_sub_category === -1) {
-        return res.json({
+        return res.status(500).json({
           success: false,
           message: "Không tìm thấy danh mục phụ",
           color: "text-red-500",
@@ -602,13 +602,13 @@ const delete_sub_category = async (req, res) => {
           check_deletion_success = false;
         });
         if (check_deletion_success) {
-          return res.json({
+          return res.status(200).json({
             success: true,
             message: "Xoá danh mục phụ thành công",
             color: "text-green-500",
           });
         } else {
-          return res.json({
+          return res.status(500).json({
             success: false,
             message: "Xoá danh mục phụ không thành công",
             color: "text-red-500",
@@ -618,7 +618,7 @@ const delete_sub_category = async (req, res) => {
     }
   } catch (err) {
     console.log(err);
-    return res.json({
+    return res.status(500).json({
       success: false,
       message: "Lỗi truy xuất dữ liệu",
       color: "text-red-500",

@@ -458,13 +458,13 @@ const add_order = async (req, res) => {
             }
         }
 
-        // let check_order = await Order.findOne({ Order_id: order.order_id });
-        let new_order_id = uuidv4();
-        // if (check_order) {
-        //     do {
-        //         new_order_id = generateOrderId();
-        //     } while (await Order.findOne({ Order_id: new_order_id }));
-        // }
+        let check_order = await Order.findOne({ Order_id: order.order_id });
+        let new_order_id = order.order_id;
+        if (check_order) {
+            do {
+                new_order_id = generateOrderId();
+            } while (await Order.findOne({ Order_id: new_order_id }));
+        }
 
         let order_status = 1;
         if (type_pay == 0 || type_pay == 3) {

@@ -263,12 +263,12 @@ const add_product = async (req, res) => {
         let { name, total, price, array_color, array_image, imagePrimaryAndHover, category_id, sub_category_id, description, codeProduct } = req.body;
 
         if (!name || !price || !total || !array_image || !imagePrimaryAndHover || !category_id || !sub_category_id || !description || !codeProduct) {
-            return res.status(400).json({ success: false, message: "Missing required fields", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Missing required fields", color: "text-red-500" });
         }
 
         const checkProduct_code = await Product.findOne({ code: codeProduct });
         if (checkProduct_code) {
-            return res.status(400).json({ success: false, message: "Product code already exists", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Product code already exists", color: "text-red-500" });
         }
 
         let new_product_id;
@@ -303,12 +303,12 @@ const delete_product = async (req, res) => {
     try {
         const product_id = req.body.product_id;
         if (!product_id) {
-            return res.status(400).json({ success: false, message: "Không nhận được id của sản phẩm", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Không nhận được id của sản phẩm", color: "text-red-500" });
         }
 
         const product = await Product.findOne({ product_id: product_id });
         if (!product) {
-            return res.status(404).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Không tìm thấy sản phẩm", color: "text-red-500" });
         }
 
         const check_delete_success = await Product.deleteOne({ product_id: product_id });
@@ -329,29 +329,29 @@ const update_product = async (req, res) => {
         total = parseInt(total.trim(), 10);
 
         if (!name || !price || !total || !array_image || !imagePrimaryAndHover || !category_id || !sub_category_id || !description || !codeProduct || !product_id) {
-            return res.status(400).json({ success: false, message: "Missing required fields", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Missing required fields", color: "text-red-500" });
         }
 
         const check_product_id = await Product.findOne({ product_id });
         if (!check_product_id) {
-            return res.status(404).json({ success: false, message: "ID sản phẩm không tồn tại", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "ID sản phẩm không tồn tại", color: "text-red-500" });
         }
 
         if (check_product_id.code !== codeProduct) {
             const checkProduct_code = await Product.findOne({ code: codeProduct });
             if (checkProduct_code) {
-                return res.status(400).json({ success: false, message: "Mã sản phẩm đã tồn tại", color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Mã sản phẩm đã tồn tại", color: "text-red-500" });
             }
         }
 
         const checkProduct_category = await Category.findOne({ category_id });
         if (!checkProduct_category) {
-            return res.status(400).json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Mã danh mục chính sai", color: "text-red-500" });
         }
 
         const checkProduct_sub_category = checkProduct_category.sub_category.findIndex(sub => sub.sub_category_id === sub_category_id);
         if (checkProduct_sub_category === -1) {
-            return res.status(400).json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" });
+            return res.status(500).json({ success: false, message: "Mã danh mục phụ sai", color: "text-red-500" });
         }
 
         if (array_color && array_color.length > 0) {
@@ -376,11 +376,11 @@ const update_product = async (req, res) => {
             });
 
             if (hasMismatchError) {
-                return res.status(400).json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm", color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Tổng các size sản phẩm không bằng tổng số lượng màu sản phẩm", color: "text-red-500" });
             }
 
             if (total_number !== total) {
-                return res.status(400).json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm", color: "text-red-500" });
+                return res.status(500).json({ success: false, message: "Tổng các màu sản phẩm không bằng tổng số lượng sản phẩm", color: "text-red-500" });
             }
         }
         const updated_product = await Product.findOneAndUpdate(
