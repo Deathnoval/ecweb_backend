@@ -17,7 +17,7 @@ const calculateDiscountedPrice = (price, discount) => {
 }
 
 const createVoucher = async (req, res) => {
-    const { name, discount, type, expiredAt, minPrice } = req.body;
+    const { name, discount, type, expiredAt, minPrice, limit } = req.body;
     const code = voucherCode.generate({
         length: 8,
         count: 1
@@ -29,6 +29,7 @@ const createVoucher = async (req, res) => {
         discount,
         type,
         createdAt: Date.now(),
+        limit: limit,
         minPrice: minPrice || 0,
         expiredAt: expiredAt
     });
@@ -85,13 +86,37 @@ const getReleasedVouchers = async (req, res) => {
     const user_id = req.user.id;
     try {
         const projection = { _id: 0, code: 1, name: 1, expiredAt: 1 };
-        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, userId: { $ne: user_id } }).select(projection);
-        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, userId: { $ne: user_id } }).select(projection);
+        const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, limit: { $gt: 0 }, userId: { $ne: user_id } }).select(projection);
+        const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, limit: { $gt: 0 }, userId: { $ne: user_id } }).select(projection);
         res.status(200).json({ success: true, dicountVouchers, shippingVouchers });
     } catch (error) {
         res.status(400).json({ message: error.message });
     }
 }
+
+const decreaseVoucherLimit = async (req, res) => {
+    const { codes } = req.body; // codes là mảng các mã voucher
+
+    try {
+        if (!Array.isArray(codes) || codes.length === 0) {
+            return res.status(400).json({ success: false, message: "Mã voucher không hợp lệ" });
+        }
+
+        await Voucher.updateMany(
+            { code: { $in: codes }, limit: { $gt: 0 } },
+            { $inc: { limit: -1 } }
+        );
+
+        res.status(200).json({
+            success: true,
+            message: "Đã giảm limit cho các voucher hợp lệ",
+        });
+
+    } catch (error) {
+        console.error("decreaseVoucherLimit error:", error);
+        res.status(500).json({ success: false, message: "Có lỗi xảy ra khi giảm limit" });
+    }
+};
 
 const updateStatus = async (req, res) => {
     const { id, status } = req.body;
@@ -108,7 +133,7 @@ const updateStatus = async (req, res) => {
 }
 
 const updateVoucher = async (req, res) => {
-    const { id, name, discount, type, expiredAt, minPrice } = req.body;
+    const { id, name, discount, type, expiredAt, minPrice, limit } = req.body;
 
     try {
         const voucher = await Voucher.findById(id);
@@ -117,6 +142,7 @@ const updateVoucher = async (req, res) => {
         if (type) voucher.type = type;
         if (expiredAt) voucher.expiredAt = expiredAt;
         if (minPrice) voucher.minPrice = minPrice;
+        if (limit !== undefined) voucher.limit = limit;
 
         await voucher.save();
         res.status(200).json({ success: true, voucher });
@@ -146,14 +172,18 @@ const applyVoucher = async (req, res) => {
         for (let item of code) {
             const voucher = await Voucher.findOne({ code: item });
             if (!voucher) {
-                continue;
+                 res.status(500).json({ success: true, message: "Không tìm thấy voucher" });
+            }
+
+            if (voucher.limit <= 0) {
+                return res.status(500).json({ success: false, message: `${voucher.name} đã hết lượt sử dụng` });
             }
 
             if (voucher.status !== voucherStatus.RELEASED) {
-                continue;
+                 res.status(500).json({ success: true, message: voucher?.name + " không đủ điều kiện áp dụng" });
             }
             if (price < voucher.minPrice) {
-                continue;
+                res.status(500).json({ success: true, message: voucher?.name + " không đủ điều kiện áp dụng" });
             }
 
             if (voucher.expiredAt && voucher.expiredAt < Date.now()) {
@@ -175,7 +205,7 @@ const applyVoucher = async (req, res) => {
 }
 
 const updateExpiredVouchers = async () => {
-    const vouchers = await Voucher.find({ status: voucherStatus.RELEASED, expiredAt: { $lte:  new Date().getTime() } });
+    const vouchers = await Voucher.find({ status: voucherStatus.RELEASED, expiredAt: { $lte: new Date().getTime() } });
     console.log(new Date().getTime());
     console.log(vouchers);
     for (const voucher of vouchers) {
@@ -196,4 +226,5 @@ module.exports = {
     applyVoucher,
     getDetail,
     updateExpiredVouchers,
+    decreaseVoucherLimit,
 }

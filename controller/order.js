@@ -73,7 +73,7 @@ const check_quantity = async (product_id, color, quantity, size) => {
         }
         else {
             if (product.total_number < quantity) {
-                return { success: false, message: "Sản phẩm " + nameProduct +  " đã hết hàng", color: "text-red-500" }
+                return { success: false, message: "Sản phẩm " + nameProduct + " đã hết hàng", color: "text-red-500" }
 
             }
         }
@@ -418,7 +418,7 @@ const add_order = async (req, res) => {
     const phone = req.body.phone;
     const name = req.body.name;
     const type_pay = req.body.type_pay;
-    const list_voucher= req.body.list_voucher
+    const list_voucher = req.body.list_voucher
     let checkout_price = req.body.checkout_price;
 
     let shipping_code = req.body.shipping_code;
@@ -546,8 +546,15 @@ const add_order = async (req, res) => {
                 if (list_voucher && Array.isArray(list_voucher)) {
                     for (let code of list_voucher) {
                         await Voucher.findOneAndUpdate(
-                            { code },
-                            { $addToSet: { userId: user_id.toString() } }
+                            {
+                                code,
+                                limit: { $gt: 0 },
+                                userId: { $ne: user_id.toString() }
+                            },
+                            {
+                                $addToSet: { userId: user_id.toString() },
+                                $inc: { limit: -1 }
+                            }
                         );
                     }
                 }
@@ -593,12 +600,19 @@ const add_order = async (req, res) => {
                 );
 
                 await cart_items.save();
-                 // === CẬP NHẬT USER_ID VÀO VOUCHER ===
+                // === CẬP NHẬT USER_ID VÀO VOUCHER ===
                 if (list_voucher && Array.isArray(list_voucher)) {
                     for (let code of list_voucher) {
                         await Voucher.findOneAndUpdate(
-                            { code },
-                            { $addToSet: { userId: user_id.toString() } }
+                            {
+                                code,
+                                limit: { $gt: 0 },
+                                userId: { $ne: user_id.toString() }
+                            },
+                            {
+                                $addToSet: { userId: user_id.toString() },
+                                $inc: { limit: -1 }
+                            }
                         );
                     }
                 }
@@ -731,9 +745,18 @@ const get_list_detail_user = async (req, res) => {
     const user_id = req.user.id;
     const req_status = req.query.status
     const req_sort = req.query.sort
+    const search = req.query.search?.trim();
 
     try {
         let type_sort
+        const filter = { user_id };
+        if (req_status != -1) filter.status = req_status;
+        if (search) {
+            filter.$or = [
+                { Order_id: { $regex: search, $options: "i" } },
+                { "items.product_name": { $regex: search, $options: "i" } }
+            ];
+        }
         if (req_sort != -1) { type_sort = 1 }
         else {
             type_sort = parseInt(req_sort)
@@ -742,18 +765,36 @@ const get_list_detail_user = async (req, res) => {
             return res.status(400).json({ success: false, message: "Vui lòng chọn người dùng để xem hóa đơn mua hàng của họ ", color: "text-red-500" })
         }
         let order_list
-        if (req_status == -1) { order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort }); }
-        else {
-            order_list = await Order.find({ user_id: user_id, status: req_status }).sort({ "order_date": type_sort });
-        }
+
+        // if (req_status == -1) { order_list = await Order.find({ user_id: user_id }).sort({ "order_date": type_sort }); }
+        // else {
+        //     order_list = await Order.find({ user_id: user_id, status: req_status }).sort({ "order_date": type_sort });
+        // }
+
+        order_list = await Order.find(filter).sort({ "order_date": type_sort });
         console.log(order_list)
         if (!order_list) {
             return res.status(404).json({ success: false, message: "Bạn chưa có đơn hàng nào để xem ", color: "text-red-500" })
         }
-        let format_order_list = []
-        for (let order of order_list) {
-            format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay, paymentUrl: order.paymentUrl })
-        }
+        // let format_order_list = []
+        // for (let order of order_list) {
+        //     format_order_list.push({ Order_id: order.Order_id, status: order.status, order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"), price_pay: order.price_pay, paymentUrl: order.paymentUrl })
+        // }
+        const format_order_list = order_list.map(order => ({
+            Order_id: order.Order_id,
+            status: order.status,
+            order_date: moment(order.order_date).tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY HH:mm:ss"),
+            price_pay: order.price_pay,
+            paymentUrl: order.paymentUrl,
+            items: order.items.map(item => ({
+                product_id: item.product_id,
+                product_name: item.product_name,
+                quantity: item.quantity,
+                color: item.color,
+                size: item.size,
+                image_hover: item.image_hover
+            }))
+        }));
 
         return res.status(200).json({ success: true, format_order_list, color: "text-green-500" })
     }

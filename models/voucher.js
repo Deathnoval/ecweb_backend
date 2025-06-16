@@ -11,10 +11,11 @@ const voucherSchema = new mongoose.Schema({
     discount: Number,
     minPrice: Number,
     type:  { type: String,trim: true },
+    limit: {type: Number},
     createdAt: Number,
     expiredAt: Number,
     userId: [
-        {type: String, trim: true, default: []}
+        {type: String, default: []}
     ]
 });
 
