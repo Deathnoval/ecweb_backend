@@ -36,9 +36,9 @@ const createVoucher = async (req, res) => {
 
     try {
         const voucher = await newVoucher.save();
-        res.status(201).json({ success: true, voucher });
+        return res.status(201).json({ success: true, voucher });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 
 }
@@ -48,9 +48,9 @@ const getDetail = async (req, res) => {
 
     try {
         const voucher = await Voucher.findById(id);
-        res.status(200).json({ success: true, voucher });
+        return res.status(200).json({ success: true, voucher });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
@@ -76,9 +76,9 @@ const getVouchers = async (req, res) => {
 
         const vouchers = await Voucher.find(query).sort({ createdAt: -1 }); // 1: tăng dần, gần nhất trước
 
-        res.status(200).json({ success: true, vouchers });
+        return res.status(200).json({ success: true, vouchers });
     } catch (error) {
-        res.status(500).json({ message: error.message });
+        return res.status(500).json({ message: error.message });
     }
 }
 
@@ -88,9 +88,9 @@ const getReleasedVouchers = async (req, res) => {
         const projection = { _id: 0, code: 1, name: 1, expiredAt: 1 };
         const dicountVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'discount', expiredAt: { $gte: Date.now() }, limit: { $gt: 0 }, userId: { $ne: user_id } }).select(projection);
         const shippingVouchers = await Voucher.find({ status: voucherStatus.RELEASED, type: 'shipping', expiredAt: { $gte: Date.now() }, limit: { $gt: 0 }, userId: { $ne: user_id } }).select(projection);
-        res.status(200).json({ success: true, dicountVouchers, shippingVouchers });
+        return res.status(200).json({ success: true, dicountVouchers, shippingVouchers });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
@@ -107,14 +107,14 @@ const decreaseVoucherLimit = async (req, res) => {
             { $inc: { limit: -1 } }
         );
 
-        res.status(200).json({
+        return res.status(200).json({
             success: true,
             message: "Đã giảm limit cho các voucher hợp lệ",
         });
 
     } catch (error) {
         console.error("decreaseVoucherLimit error:", error);
-        res.status(500).json({ success: false, message: "Có lỗi xảy ra khi giảm limit" });
+        return res.status(500).json({ success: false, message: "Có lỗi xảy ra khi giảm limit" });
     }
 };
 
@@ -125,10 +125,10 @@ const updateStatus = async (req, res) => {
         const voucher = await Voucher.findById(id);
         voucher.status = status;
         await voucher.save();
-        res.status(200).json({ success: true, voucher });
+        return res.status(200).json({ success: true, voucher });
     }
     catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
@@ -145,9 +145,9 @@ const updateVoucher = async (req, res) => {
         if (limit !== undefined) voucher.limit = limit;
 
         await voucher.save();
-        res.status(200).json({ success: true, voucher });
+        return res.status(200).json({ success: true, voucher });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
@@ -156,9 +156,9 @@ const deleteVoucher = async (req, res) => {
 
     try {
         await Voucher.findByIdAndDelete(id);
-        res.status(200).json({ success: true });
+        return res.status(200).json({ success: true });
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
@@ -172,7 +172,7 @@ const applyVoucher = async (req, res) => {
         for (let item of code) {
             const voucher = await Voucher.findOne({ code: item });
             if (!voucher) {
-                 res.status(500).json({ success: true, message: "Không tìm thấy voucher" });
+                return res.status(500).json({ success: false, message: "Không tìm thấy voucher" });
             }
 
             if (voucher.limit <= 0) {
@@ -180,14 +180,14 @@ const applyVoucher = async (req, res) => {
             }
 
             if (voucher.status !== voucherStatus.RELEASED) {
-                 res.status(500).json({ success: true, message: voucher?.name + " không đủ điều kiện áp dụng" });
+                return res.status(500).json({ success: false, message: voucher?.name + " không đủ điều kiện áp dụng" });
             }
             if (price < voucher.minPrice) {
-                res.status(500).json({ success: true, message: voucher?.name + " không đủ điều kiện áp dụng" });
+                return res.status(500).json({ success: false, message: voucher?.name + " không đủ điều kiện áp dụng" });
             }
 
             if (voucher.expiredAt && voucher.expiredAt < Date.now()) {
-                res.status(500).json({ success: true, message: voucher?.name + " đã hết hạn" });
+                return res.status(500).json({ success: false, message: voucher?.name + " đã hết hạn" });
             }
 
             if (voucher.type === 'discount') {
@@ -197,10 +197,10 @@ const applyVoucher = async (req, res) => {
             }
         }
 
-        res.status(200).json({ success: true, discountedPrice, discountedShippingFee });
+        return res.status(200).json({ success: true, discountedPrice, discountedShippingFee });
 
     } catch (error) {
-        res.status(400).json({ message: error.message });
+        return res.status(400).json({ message: error.message });
     }
 }
 
